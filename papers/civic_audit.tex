@@ -1,0 +1,193 @@
+% The Civic Capture Audit (Paper IV)
+% Daniel Hofheinz --- June 11, 2026
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage[round]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\theoremstyle{definition}
+\newtheorem{condition}{Condition}
+\newtheorem{instrument}{Instrument}
+\newtheorem{numresult}{Numerical Result}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\MG}{MG}
+\newcommand{\E}{\mathbb{E}}
+
+\title{The Civic Capture Audit: A Pre-Registered Protocol for Locating\\ Deployed Systems on the Pressure--Drift--Capture Ladder}
+\author{Daniel Hofheinz}
+\date{June 11, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Three companion papers prove the pressure, the trap, and the loop: satisfaction-optimal deference statically degrades collective epistemic capacity on contested claims; gradient ascent on measured satisfaction makes the degradation dynamical and bistable, with capture, hysteresis, and telemetry blindness; and the closed loop the deference knob lives inside admits knob-free certificates, gain ceilings, and identification from contested-stream panels. This paper specifies the audit that locates a deployment on the resulting ladder. It codifies a five-condition decision rule whose verdicts are tier-licensed by construction; assembles nine instruments mapping conditions to estimands; imports the loop-identification estimators and the plug-in certificate margin as both a corroborating instrument and the protocol's only positive finding, a clearance; and fixes per-condition thresholds, power, ethics, and kill conditions under registered-report discipline. Simulated operating characteristics over forty synthetic deployments spanning all four ground-truth tiers give exact-tier accuracy $40/40$ with zero verdicts above the true tier and zero false certifications; misspecification and boundary-stress batteries assert the conservative halves --- no false capture classification, no false certification, abstention as the designed gray-zone behavior. Existing evidence establishes civic misalignment pressure; whether any current deployment exhibits civic drift or civic capture is an open empirical question --- this protocol exists to answer it.
+\end{abstract}
+
+\section{Motivation and evidence status}\label{sec:motivation}
+
+A research program that proves a failure mode owes its readers the test that would find it in the field. The companions establish, in order, that per-interaction satisfaction optimization degrades collective epistemic capacity on contested claims --- the pressure; that the coupled operator--population system is bistable, so the degradation arrives as basin membership, with a free prevention price and a strictly positive cure price --- the trap; and that the feedback loop containing the deference coordinate admits identification and knob-free certification from contested-stream panels alone --- the loop. What none of them does is say whether any deployed system has crossed any of these lines. This paper is the instrument that says it, or --- with equal discipline and equal standing --- declines to.
+
+\paragraph{Role.} The companions prove the pressure and the trap \citep{hofheinz2026civic,hofheinz2026drift} and certify the loop \citep{hofheinz2026loops}; this paper specifies the audit that locates a deployment on the ladder. The boundary is strict: the dynamics paper's battery carries estimands and probes at theory grain; this protocol owns corpus construction, label acquisition, experimental arms, longitudinal estimation, intervention design, decision thresholds, and reporting standards; policy translation is deferred to a separate document.
+
+\paragraph{Evidence status (pressure tier only).} Three recent results corroborate the incentive premise without licensing any higher verdict. In three large-scale experiments ($N = 76{,}977$; 19 models; 707 political issues), the post-training and prompting methods that most increased AI persuasiveness systematically decreased factual accuracy \citep{hackenburg2025levers}: optimizing for influence degrades the truth channel. Across eleven models and three preregistered experiments ($N = 2{,}405$), sycophantic systems affirmed users far more often than humans do, and a single sycophantic interaction increased users' conviction of being right while raising trust, perceived quality, and intention to reuse --- the harm and the engagement arrive through the same channel \citep{cheng2026sycophantic}. And in two studies ($N = 246$ and $452$), AI assistance improved reasoning performance while inflating self-assessment, with \emph{higher} AI literacy associated with \emph{lower} metacognitive accuracy \citep{fernandes2026ai}: the confidence--warrant gap widens precisely among those most exposed. Together with the sycophancy and reward-overoptimization cluster \citep{sharma2024towards,gao2023scaling,wen2025language,williams2024targeted}, this establishes civic misalignment pressure. Whether any current deployment exhibits civic drift or civic capture is an open empirical question; this protocol exists to answer it.
+
+The paper proceeds in audit order. Section~\ref{sec:prelim} imports the tiers and formal objects and restates the decision rule, including the loop layer that gives the protocol its only positive finding. Section~\ref{sec:instruments} maps nine instruments to conditions; Sections~\ref{sec:statics}--\ref{sec:laundering} specify them at protocol grain --- statics, dynamics, intervention, laundering --- in the order a real audit would execute them. Section~\ref{sec:opchar} reports simulated operating characteristics: the power analysis behind the registered thresholds, including the misspecification and boundary-stress batteries that fix the protocol's behavior when its own model is wrong. Section~\ref{sec:access} states the access tiers, their claim ceilings, and the adoption mechanism that closes the gap between them; Section~\ref{sec:prereg} fixes pre-registration, ethics, and the kill conditions under which the program's mechanism is itself disconfirmed.
+
+\section{Imported preliminaries: tiers, objects, and the decision rule}\label{sec:prelim}
+
+The protocol invents no vocabulary. Its tiers, formal objects, and theorems are the companions'; what it adds is the discipline that turns them into verdicts. Only the decision rule is restated in full, because everything downstream --- the instruments, the thresholds, the reporting language --- hangs from it.
+
+The three tiers --- \emph{civic misalignment pressure}, \emph{civic drift}, \emph{civic capture} --- and the formal objects $(\beta, D, I, \lambda_0, c, v, \zeta, \rho_{\mathrm{cure}}, T^\star, \Cov_\pi(A,B), \Var(D), \mathrm{AC}_1(D), \mathrm{mg}(\tau))$ are defined in the companions \citep{hofheinz2026civic,hofheinz2026drift}; the loop parameters and the certificate margin are defined in the loop paper \citep{hofheinz2026loops}. Three rules bind throughout: verdicts do not transfer across tiers; no tier may be instrumented through satisfaction telemetry alone, and capture diagnosis requires telemetry-independent stratified audits by construction; and the deployment-status sentence above is the ceiling of empirical claims.
+
+\paragraph{The decision rule.} The rule decomposes the capture theorem into its load-bearing premises, one condition per premise, so that a verdict is never a holistic judgment: it is a conjunction whose every term has an estimator, a threshold, and a falsification. Each condition is pre-specified with its positive criterion and threshold before data collection, and disconfirmation of any condition is a publishable finding of equal standing.
+
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.5cm}>{\raggedright\arraybackslash}p{5.9cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.6cm}}
+\hline
+\# & Condition & Formal object & Established by \\
+\hline
+C1 & \textbf{Evidence dilution.} On a substantial share of the contested stream, deference reduces evidence uptake below the audit-estimated optimum ($h_\tau(\beta) > 0$), and the claim mix sits below the exposure threshold ($t < T^\star$). & Dilution bracket; $T^\star$ classification & Labeled-claim corpus; stratified belief audit \\
+C2 & \textbf{Satisfaction selection.} Measured satisfaction, trust, engagement, or preference increases in deference at the operating point. & $U' > 0$ at deployed $\hat\beta$ & Randomized interface arms \\
+C3 & \textbf{Capacity loss.} Higher deference worsens accuracy, calibration, agency, false-balance resistance, or group epistemic equality. & $C' < 0$ components; $\MG(0)$; $\mathrm{mg}(\tau)$ & Same audit, capacity panel \\
+C4 & \textbf{Dynamic feedback.} Deference today raises residual disagreement tomorrow and tomorrow's marginal reward to further deference; the fitted trajectory lies in the captured basin. & Ratchet--manufacture pair; map fit; position relative to $\Gamma$ & Longitudinal cohort; interior-window drift-law test; map fit \\
+C5 & \textbf{Laundering.} The most-harmed groups' worsening error is unpenalized --- or rewarded --- by satisfaction telemetry, after survivorship adjustment; the harmed group's telemetry weight tends to zero. & Decoupling theorem signature; churn twin & Decoupling-wedge analysis with IPW correction \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Verdict mapping: C1--C3 license \textbf{pressure}; C1--C4 license \textbf{drift}; C1--C5 license \textbf{capture}. No partial set licenses a higher verdict. The canonical capture statement: \emph{a deployed system is in civic capture on a domain when, on its contested stream, deployed optimization is pulled toward higher deference; that deference operates in the evidence-dilution regime and measurably degrades collective epistemic capacity; the fitted trajectory lies in the captured basin; and satisfaction telemetry no longer registers the harm to the groups bearing most of it. Short of the full set, the conditions license only the lower verdicts: pressure for the static triad, drift with the dynamic condition added.}
+
+\paragraph{The loop layer (C4$'$ and clearance).} The loop paper adds a two-sided instrument the ladder otherwise lacks \citep{hofheinz2026loops}. From contested-stream panels, the estimators $(\hat\lambda_0, \hat\eta, \hat g, \hat I_0)$ identify the loop, and the plug-in margin $\hat m = v(\hat\lambda_0 - \hat g) - 2c\hat I_0$ carries safe-side semantics. \textbf{C4$'$ (capturability corroboration):} $\hat g - \hat\lambda_0 > 2\,\mathrm{SE}$ establishes that the loop can sustain capture regardless of the current basin --- it strengthens a C4 finding but cannot substitute for the basin fit. \textbf{Clearance:} $\hat m > 2\,\mathrm{SE}(\hat m)$ certifies that no policy on the knob can produce capture --- the protocol's only positive finding --- the only one that speaks to the loop rather than the state, and therefore the only one that does not require locating the state at all. Clearance is stated on the visited operating envelope (Section~\ref{sec:dynamics}).
+
+\section{Instruments}\label{sec:instruments}
+
+Nine instruments carry the five conditions and the loop layer, and the mapping is many-to-many by design: no condition rests on a single instrument, and the heaviest verdicts require agreement across instruments with different failure modes. A fitted map can be misspecified, but a pulse response cannot be; telemetry can be blind, but an audit-retained panel cannot churn. The table names each instrument, what it estimates, and the condition it serves; the four sections that follow specify them at protocol grain.
+
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{3.4cm}}
+\hline
+Instrument & Estimates / establishes & Condition served \\
+\hline
+Belief-seeded prompt audit & Effective deference $\hat\beta$ and its personalization across types & C1, C2 support \\
+Stratified human-subject audit & $\eta$, $\kappa$, $\gamma_\tau$, harm incidence, $\MG(0)$ & C1, C3 \\
+Randomized interface arms & Satisfaction-versus-capacity contrast across default, high-deference, evidence-forward, scaffold & C2, C3 \\
+Longitudinal cohort & Drift-law test of $D_{t+1} = s(\beta_t)D_t + I$; the $(\beta_t, D_t)$ path & C4 \\
+Map fit and basin position & Side of the separatrix $\Gamma$; trajectory velocity & C4 \\
+Loop-identification panel & $\hat\lambda_0, \hat\eta, \hat g, \hat I_0$; certificate margin $\hat m$ with delta-method SE & C4$'$; clearance \\
+Early-warning dashboard & $\Var(D)$, $\mathrm{AC}_1(D)$ on stationary plateaus & Drift corroboration \\
+Intervention experiment & Hysteresis asymmetry; $\hat\rho_{\mathrm{cure}}$ against the closed form & C4; behavioral basin identification \\
+Telemetry-laundering analysis & Decoupling wedge with churn adjustment & C5 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Static estimation}\label{sec:statics}
+
+The static layer runs first because it is the cheapest, the least access-demanding, and the gate to everything else. It establishes whether the contested stream is in the dilution regime at all (C1), whether the deployment's own reward points toward deference there (C2), and whether deference is purchasing capacity loss (C3). If C1 fails --- if straddle prevalence is low and the covariance test signs negative --- the audit terminates with a verdict of \emph{none}, and that termination is a finding, not a failure: a deployment shown to operate outside the dilution regime has been cleared of the mechanism at its root. Four instruments compose the layer.
+
+\paragraph{(a) Corpus construction.} The corpus is a panel of contested-but-adjudicable claims --- claims on which groups disagree but to which independent evidence can still be assigned; indicative classes: public-health, election-procedure, economic, climate, crime-statistic, legal-rights, and politically salient factual claims --- with per-claim estimation of the evidence posterior $m$, group prior distributions $b_i$, the adjudicated label $\theta$, straddle/covariance structure, responsiveness $\eta$, and effective deference. Labels by the three strategies of the companion battery, imported: delayed-resolution claims scored forecasting-style after ground truth arrives; adversarially balanced expert panels; synthetic-injection studies in which $\theta$ is known by construction (the calibration arm of the instrument suite).
+
+\paragraph{(b) Belief-seeded prompt audit.} For a fixed underlying question, vary the implied user prior across frames --- assertion of truth, assertion of falsity, community endorsement, skepticism of mainstream evidence, suspicion of deception --- and estimate effective deference as the movement of the answer toward the user's belief at held-fixed evidence, stratified by user type (high- and low-literacy, politically committed, low domain-knowledge, emotionally vulnerable, high-trust, adversarially skeptical). The audit estimates $\hat\beta$, its personalization across types, and the brackets and correlations feeding $\MG(0)$ and $\mathrm{mg}(\tau)$. The capture-relevant contrast is not ``the model agrees'' but ``the model shifts toward user priors more strongly for users least able to verify, and that shift raises measured satisfaction while worsening accuracy or calibration.''
+
+\paragraph{(c) Randomized arms.} Default assistant; high-deference variant (warmer, more validating, more prior-accommodating); evidence-forward variant (cites evidence, corrects gently, resists false balance); deliberative-scaffold variant (elicits reasons, separates evidence from speculation, asks what would change the user's mind). Graded deference sub-arms additionally identify the operator-side constants $(\hat v, \hat c)$ with standard errors --- from first and second arm differences respectively --- feeding the certificate margin of Section~\ref{sec:dynamics}.
+
+\paragraph{(d) Twin metric panels.} A satisfaction panel (ratings, trust, return intention, engagement, willingness to reuse) and a capacity panel (belief accuracy, confidence calibration and the confidence--warrant gap, unaided reasoning, source-checking, false-balance susceptibility, polarization, between-group error gap, within-group dispersion, belief-revision willingness), aligned with the Civic Alignment Battery's dimensions. The C2--C3 result of interest: the high-deference or default arm matches or exceeds the evidence-forward arm on satisfaction while producing worse capacity outcomes, concentrated among lower-verification users.
+
+\section{Dynamic estimation}\label{sec:dynamics}
+
+The dynamic layer converts levels into trajectories: it asks not whether the gradient points toward harm but whether the deployment is moving along it, and on which side of the basin boundary the motion lives. Its five instruments share one cohort and one discipline --- every estimand is computed on data the deployment's own telemetry does not control --- and two of its requirements were discovered by simulation rather than assumed, which is exactly the order of operations a registered protocol wants: the design constraints below are responses to measured identification failures, not precautions.
+
+\paragraph{Cohort.} The spine of the layer is a multi-week-to-multi-month longitudinal cohort repeatedly using the system on civic information, estimating per period the effective deference $\beta_t$, the disagreement stock $D_t$ (aggregate belief--evidence deviation across active contested claims), the injection rate $I$, the grounding rate $\lambda_0$, measured satisfaction $U_t$, and capacity $C_t$.
+
+\paragraph{Drift-law test (C4), with a design requirement.} Test the ratchet--manufacture pair empirically: holding the claim stream constant, higher deference today predicts higher residual disagreement tomorrow (manufacture: the coefficient on $\beta_t D_t$ in the stock regression), and higher disagreement raises the measured reward to further deference (ratchet: the observed-gradient regression on $D_t$). \textbf{Design requirement, established in simulation:} the test is unidentified at the attractors, where deference stops varying --- corner censoring --- so the protocol mandates interior-transient observation windows with designed micro-perturbations of deference (the randomized arms supply them). Under this design, both signs are recovered in $30/30$ simulated cohorts at $T = 250$ periods with $4\%$ dither and $5\%$ observation noise (Section~\ref{sec:opchar}).
+
+\paragraph{Map fit and basin position (C4).} Fit the planar map and report the fitted state's position and velocity relative to the separatrix $\Gamma$; basin classification by forward simulation of the fitted map. Simulated accuracy: $30/30$ across worlds seeded on both sides of $\Gamma$.
+
+\paragraph{Loop-identification module (C4$'$ and clearance).} The three estimators of the loop paper, at audit grade: $\hat\lambda_0$ as retirements over claim-period exposure; $\hat\eta$ from within-claim contraction ratios regressed on $(1-\beta_t)$; $(\hat g, \hat I_0)$ as the OLS slope and intercept of arrival mass on lagged stock. Under $10\%$ multiplicative label noise the estimators deliver mean relative errors of $2\%$ ($\hat\lambda_0$), under $1\%$ ($\hat\eta$), $23\%$ of the $\lambda_0$ scale ($\hat g$), and $4\%$ ($\hat I_0$) at $T = 600$, shrinking with $T$. The certificate margin $\hat m = \hat v(\hat\lambda_0 - \hat g) - 2\hat c\hat I_0$ carries the safe-side rule with a delta-method standard error propagating all five inputs $(\hat v, \hat c, \hat\lambda_0, \hat g, \hat I_0)$ --- the operator-side pair estimated from the graded arms of Section~\ref{sec:statics} --- and a specification guard: the arrival regression is refit with a quadratic stock term, and certification proceeds only when the curvature is insignificant. Certificates are envelope-scoped: the certified statement covers the operating range the panel visited, and proximity of the deployed state to the envelope's edge is itself a reported quantity. Certify only when the guard passes and $\hat m > 2\,\mathrm{SE}(\hat m)$. \textbf{Identifiability requirement, established in simulation:} certificate power requires wide deference variation and panel length --- at $T = 1200$ with strong $\beta$-variation, the five-parameter rule certified $19/20$ genuinely safe loops while issuing $0/20$ false certifications on capturable loops --- the single abstention is the designed cost of honest uncertainty; at short panels with narrow variation, $\mathrm{SE}(\hat g)$ dominates the margin and the rule abstains (safe-side by construction).
+
+\paragraph{Early-warning dashboard ($\Phi_2$).} Rolling variance and lag-1 autocorrelation of measured disagreement on the contested stream, estimated on stationary plateaus. Simulated power under $10\%$ observation noise: $30/30$ detection at $0.9\,I_{\mathrm{fold}}$ against a $0.4\,I_{\mathrm{fold}}$ baseline, with $0/30$ false triggers in fixed-injection controls.
+
+\section{Intervention module}\label{sec:intervention}
+
+The intervention module carries the program's sharpest falsifiable prediction --- the prevention--cure asymmetry --- and it is the protocol's only manipulation of the deployment rather than observation of it, which is why its design is the most constrained and its ethics obligations (Section~\ref{sec:prereg}) the most demanding. It also closes an inferential gap no observational instrument can: basin membership identified by response to a transient perturbation is immune to the map-misspecification worries that attend any fitted classification, so the module and the map fit fail independently and corroborate jointly.
+
+\paragraph{Design.} The module is a two-condition experiment operationalizing the hysteresis probe. Treatments are civic-weighted objectives or interface constraints: stronger evidence weighting, anti-false-balance constraints, uncertainty calibration, mandatory source contrast, ``what would change your mind?'' prompts, answer delayed until the user states reasoning, and reduced personalization on contested civic claims. \textbf{Prevention condition:} apply the treatment before drift. \textbf{Cure condition:} apply the same treatment after the default system has run.
+
+\paragraph{Predicted asymmetry.} Per the companion's hysteresis theorem \citep{hofheinz2026drift}: light scaffolding prevents early --- the calibrated corner is stable at every civic weight $\rho \ge 0$, so the prevention price is zero --- but after sufficient default running the same intervention no longer restores calibration, and only a stronger one does, $\rho > \hat\rho_{\mathrm{cure}}$, paid transiently; reversion after removal identifies the captured basin behaviorally. The protocol reports $\hat\rho_{\mathrm{cure}}$ against the closed form $\rho_{\mathrm{cure}} = 2c(1-c) - v\lambda_0/I$ evaluated at the estimated $(\hat c, \hat v, \hat\lambda_0, \hat I)$.
+
+\paragraph{Pulse operating characteristics.} Simulated at the benchmark: a super-cure pulse at $\rho = 1.5\,\rho_{\mathrm{cure}}$ escapes the captured basin with a minimum pulse length of $P_{\min} = 20$ periods, with escape in $20/20$ noise-jittered captured states; a sub-cure pulse at $0.5\,\rho_{\mathrm{cure}}$ never escapes ($0/20$) even at ten times the length; the calibrated state is unaffected by the same pulse. Basin membership is thereby identified behaviorally --- by response to a transient, pre-registered perturbation --- rather than asserted from a fitted map alone, and the two instruments (map fit, pulse response) cross-validate.
+
+\section{Laundering module}\label{sec:laundering}
+
+Laundering is capture's signature and its camouflage at once: the regime in which the harm is largest is the regime in which the operator's own dashboards are most serene, because the agreement that produces the harm is the same agreement the metric rewards. The module therefore trusts the deployment's metrics with nothing --- including the measurement of their own blindness --- and its central statistical instrument exists because the harmed population exits the data twice, once by weight and once by churn.
+
+\paragraph{Positive signatures.} Low-verification users grow more wrong while rating the model highly; larger confidence--warrant gaps coincide with higher trust; harmful belief change leaves thumbs-up and return intention unmoved; model updates that improve satisfaction worsen capacity; and the harmed group's contribution to the measured loss tends to zero --- by weight-vanishing in-platform and by churn out of it. The empirical statement of capture's fifth condition: the satisfaction metric becomes decorrelated from, or positively correlated with, epistemic harm among the vulnerable group, \emph{after adjusting for attrition}.
+
+\paragraph{Survivorship correction, with a design mandate.} Telemetry computed on survivors inherits the blindness it is meant to detect, and so do guardrail metrics computed on the same base \citep{hofheinz2026drift}. The protocol's correction is inverse-probability weighting on a fitted attrition model --- and its validity boundary is itself a finding. In simulation, under moderate harm-dependent churn the IPW-corrected harmed-group error recovers the truth ($0.328$ against a true $0.338$, where the naive survivor estimate reads $0.221$); under annihilating churn, positivity fails and no reweighting can recover what has left the support ($0.128$ against $0.337$). \textbf{Audit-retained enrollment is therefore mandated, not optional:} panelists are enrolled before exposure and retained in measurement when they churn off the platform, so the harmed-group estimand never depends on platform survivorship. The audit instrument is telemetry-independent by construction --- the instrumentation constraint applied to the test's own instrumentation --- and the deployment's own guardrail metrics are analyzed for inherited blindness as a reported quantity, not assumed sound.
+
+\section{Simulated operating characteristics}\label{sec:opchar}
+
+This section is the registered report's power analysis, and every number in it is produced by a pinned, seed-locked battery (\texttt{derisk\_audit.py}, ten suites) that re-runs from seed. The table is not a summary of the battery but its contract: the registered thresholds of Section~\ref{sec:prereg} were chosen against these operating characteristics, and the protocol commits to them before any field datum exists. The simulated deployments are generated by the program's own model family where an instrument is being exercised, and deliberately outside it where an instrument is being stressed --- because the property a field protocol must carry under model failure is not accuracy but the direction of its errors. Accordingly the misspecification and boundary-stress suites assert only the conservative halves, and the headline below is not the diagonal but what sits above it: nothing.
+
+\begin{center}\small
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{6.0cm}>{\raggedright\arraybackslash}p{4.3cm}}
+\hline
+Suite & Design & Measured operating characteristic \\
+\hline
+Loop identification & $10\%$ multiplicative label noise; $T \in \{300, 600\}$ & Rel.\ errors $2\%$ / $<\!1\%$ / $23\%$ of $\lambda_0$ / $4\%$ for $(\hat\lambda_0,\hat\eta,\hat g,\hat I_0)$ at $T{=}600$; shrink with $T$ \\
+Safe-side certificate & Identifiable design: $T{=}1200$, wide $\beta$-path & $0/20$ false certifications; $19/20$ power with the five-parameter SE and specification guard \\
+Statics ($\MG$, regime) & $K{=}40$ claims; panels per type & Power $1.00$ at $N{=}100$/type; same-side world signs $\Cov < 0$ correctly \\
+Arm contrast (C2) & Two arms, $\Delta\beta = 0.1$, operating stock & Power $0.82$ at $N{=}150$, $1.00$ at $N{=}600$; $\hat v = 0.108$ (truth $0.10$) \\
+Drift law (C4) & Interior windows, $T{=}250$, $4\%$ dither, $5\%$ obs.\ noise; structural map fit & Manufacture and ratchet signs $30/30$; basin classification $30/30$ \\
+Early warning ($\Phi_2$) & Plateaus at $0.4$ vs $0.9\,I_{\mathrm{fold}}$, $10\%$ obs.\ noise & Detection $30/30$; false triggers $0/30$ in fixed-injection controls \\
+Survivorship ($\Phi_3$) & Harm-dependent churn, IPW correction & Moderate churn: recovers $0.328$ of true $0.338$; annihilating churn: positivity failure documented \\
+Pulse ($\Phi_4$) & $\rho = 1.5\,\rho_{\mathrm{cure}}$ vs $0.5\,\rho_{\mathrm{cure}}$ & $P_{\min} = 20$; escape $20/20$; sub-cure escapes $0/20$ at $10\times$ length \\
+Misspecification & Drifting $\lambda_0$ + heteroskedastic noise; quadratic content channel; nonlinear satisfaction & False C4 $0/20$; quad-channel certifications $0/20$, guard fired $20/20$; C2 sign recovery $60/60$ \\
+Boundary stress & Seeds at $0.85$--$1.15\,\Gamma$; near-tie C5 reads; margins $m \in \{-0.01, +0.005\}$ & False-captured $0/20$ sub-$\Gamma$ (super-$\Gamma$ detected $20/20$); C5 $10/10$ true, $0/10$ mid-transit; certifications $0/10$, $0/10$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{numresult}[End-to-end verdict mapping]\label{nr:endtoend}
+Over forty synthetic deployments --- ten per ground-truth tier (none, pressure, drift, capture), each instrumented with audit-grade noise --- the full protocol with pre-specified thresholds returns the exact true tier in $40/40$ cases, with \textbf{zero verdicts above the true tier} and zero false certifications. The confusion matrix is a perfect diagonal.
+\end{numresult}
+
+\paragraph{Four design requirements, discovered in simulation.} The battery's failures were as informative as its passes, and each is now a protocol requirement rather than a hope. (i) \emph{Interior windows with designed dither:} the drift-law test is unidentified at the attractors, where deference stops varying; corner censoring is broken by randomized micro-perturbations during mid-transit observation windows. (ii) \emph{Identifiable certificate panels:} the certificate's power arrives only with wide deference variation and panel length ($T \approx 1200$); short, narrow panels leave $\mathrm{SE}(\hat g)$ dominating the margin, and the rule abstains --- safe-side by construction. (iii) \emph{Audit-retained enrollment:} under annihilating churn no reweighting recovers the harmed group; enrollment before exposure, retained through platform exit, is the only estimator-independent fix. (iv) \emph{Specification-guarded, envelope-scoped certificates:} an affine fit cannot exclude super-envelope nonlinearity in the content channel, so the certificate carries a curvature guard --- refit with a quadratic stock term, certify only when it is insignificant --- and is stated on the visited operating envelope. The misspecification and boundary-stress suites assert only the conservative halves --- no false capture classification, no false certification, abstention as the designed gray-zone behavior --- and the basin classifier is the structurally fitted map throughout, never the generator's own dynamics.
+
+\section{Access tiers and reporting standards}\label{sec:access}
+
+An audit protocol that ignores who can run it is a thought experiment. This section states what each access tier supports and what it cannot, and --- because the gap between the tiers is an incentive problem rather than a technical one --- the mechanism by which the gap closes.
+
+\paragraph{Two tiers, two ceilings.} With black-box public access, the protocol supports pressure-tier verdicts and risk-factor findings: sycophancy, deference, false balance, confidence distortion, and short-term belief effects are externally testable. Drift and capture verdicts are claims about deployed optimization dynamics --- how satisfaction signals, model updates, belief states, and disagreement stocks co-evolve --- and require lab cooperation, regulator access, or large-scale independent telemetry; public prompt tests show behavior, not the full feedback loop. The honest summary the protocol may state: existing public evidence can establish pressure and a presumption of risk; adjudicating drift or capture requires the longitudinal, stratified, satisfaction-versus-capacity instruments above, with telemetry access --- and the protocol exists to make that adjudication possible. Published findings phrase conclusions only at the tier the access supports; black-box results claim at most pressure.
+
+\paragraph{The adoption mechanism.} The access analysis names a ceiling; the certificate names the incentive that lifts it. No laboratory is naturally motivated to grant the telemetry access that drift and capture verdicts require --- the instrumented party bears the risk of an adverse finding and none of the benefit. The clearance verdict inverts that calculus: a certified no-capturable-loop finding is an earnable, positive compliance asset, and the instrumentation that supports clearance --- the identification panel, the graded arms, the audit-retained cohort --- is the same instrumentation that supports the ladder. The protocol's adoption path runs through the certificate: access is granted to earn the clearance, and the ladder rides in on the same instruments.
+
+\paragraph{Reporting standard.} Every report states the tier, the conditions established and failed, the thresholds against their pre-registered values, the certificate margin with its standard error when the loop panel exists, and the governing sentence of the program: \emph{deference must be governed by exposure regime, evidence quality, user type, and trajectory state; satisfaction alone cannot safely choose it.}
+
+\section{Pre-registration, ethics, and kill conditions}\label{sec:prereg}
+
+Registered-report discipline is load-bearing here, not ornamental. A protocol whose strongest negative verdict is an accusation of structural blindness cannot leave itself room to choose thresholds after seeing data, and a protocol whose strongest positive verdict is a certificate cannot let the certified party negotiate the margin. Everything in this section is therefore fixed before enrollment, published with the design, and binding on the analysis.
+
+\paragraph{Registered-report discipline.} Per-condition hypotheses and thresholds are fixed before data: C1 by $\hat h_L > 2\,\mathrm{SE}$ with $\widehat\Cov \ge 0$; C2 by $\widehat{U'} > 2\,\mathrm{SE}$ at the operating point; C3 by $\widehat\MG(0) > 2\,\mathrm{SE}$ on the capacity panel; C4 by both drift-law signs plus captured-basin classification of the fitted state, cross-validated by the pulse response; C4$'$ by $\hat g - \hat\lambda_0 > 2\,\mathrm{SE}$; clearance by $\hat m > 2\,\mathrm{SE}(\hat m)$ with the five-parameter standard error and the specification guard, reported with the visited operating envelope; C5 by the post-IPW decoupling wedge together with harmed-group telemetry weight below threshold. The power analysis is Section~\ref{sec:opchar}; analysis code is pinned in the program's public replication repository at submission, alongside the companion batteries (\texttt{derisk\_numerics.py}, twenty-nine suites; \texttt{derisk\_loops.py}, fourteen; \texttt{derisk\_audit.py}, ten).
+
+\paragraph{Kill conditions.} The three falsifiers of the companion's limitations section are imported as the protocol's kill conditions: a prevalence of $\Cov_\pi(A,B) < 0$ on contested streams; absence of variance/autocorrelation rise preceding deference increases; and flat harm-incidence curves. Any one disconfirms the mechanism, and a disconfirming audit is a publishable result of equal standing.
+
+\paragraph{Human-subjects safeguards.} Ethics-board review; informed consent; harm minimization in contested-claim exposure designs, including post-session debrief and correction of any induced misbelief; data minimization and de-identification for any telemetry access.
+
+\section*{Closing}
+
+The companions prove what can happen: that satisfaction optimization carries a pressure toward deference on contested claims, that the pressure becomes a trap with a one-way price structure, and that the trap lives inside a loop with measurable gain. This protocol determines what is happening --- with pre-registered thresholds, tier-licensed verdicts, instruments that do not trust the telemetry they audit, and operating characteristics measured before the first field datum. Its verdicts are deliberately hard to earn in both directions: capture requires five conditions to hold at once under instruments designed to fail independently, and clearance requires a certified margin under a specification guard on an explicit envelope. The program's empirical front door opens onto an honest range of outcomes --- none, pressure, drift, capture, or a clearance --- and the strongest finding the protocol can deliver may yet be the last one.
+
+\bibliographystyle{plainnat}
+\bibliography{civic_audit_refs}
+
+\end{document}

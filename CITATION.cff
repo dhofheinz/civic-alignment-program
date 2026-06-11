@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use the batteries or build on the program, please cite it as below."
+title: "The Civic Alignment Program"
+authors:
+  - family-names: Hofheinz
+    given-names: Daniel
+    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"   # uncomment and fill before tagging v1.0.0
+version: 1.0.0
+date-released: "2026-06-11"
+repository-code: "https://github.com/dhofheinz/civic-alignment-program"
+license: MIT
