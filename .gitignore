@@ -8,6 +8,17 @@ __pycache__/
 .venv/
 venv/
 
+# Local process notes (outreach, submission tracking) — never committed
+process/
+
+# arXiv submission packages
+*_arxiv.tar.gz
+
+# Lean 4 formalization — in progress; publish a curated subset once Paper I and
+# the certificate core close (source + lakefile + lean-toolchain +
+# lake-manifest.json + README/AXIOMS/STATUS; never .lake, which is ~7 GB)
+lean/
+
 # LaTeX build artifacts (committed PDFs are intentional)
 *.aux
 *.bbl
