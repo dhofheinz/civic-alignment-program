@@ -6,5 +6,6 @@ authors:
     given-names: Daniel
     orcid: "https://orcid.org/0009-0009-5237-5887"
 version: 1.0.0
+doi: 10.5281/zenodo.21811398
 date-released: "2026-08-05"
 repository-code: "https://github.com/dhofheinz/civic-alignment-program"

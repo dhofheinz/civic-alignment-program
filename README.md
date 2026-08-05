@@ -70,7 +70,7 @@ are in `lean/README.md`.
     cd lean && lake exe cache get && lake build   # the cache step downloads several GB of prebuilt Mathlib
 
 ## Cite
-See CITATION.cff. Release DOI: TBD (Zenodo, on first tagged release).
+See CITATION.cff. Release DOI: 10.5281/zenodo.21811398 (Zenodo concept DOI; resolves to the latest release).
 
 ## License
 Licensing is path-specific; see `LICENSES.md` for the authoritative map. Python
