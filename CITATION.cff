@@ -4,8 +4,7 @@ title: "The Civic Alignment Program"
 authors:
   - family-names: Hofheinz
     given-names: Daniel
-    # orcid: "https://orcid.org/XXXX-XXXX-XXXX-XXXX"   # uncomment and fill before tagging v1.0.0
+    orcid: "https://orcid.org/0009-0009-5237-5887"
 version: 1.0.0
-date-released: "2026-06-11"
+date-released: "2026-08-05"
 repository-code: "https://github.com/dhofheinz/civic-alignment-program"
-license: MIT

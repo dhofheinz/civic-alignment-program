@@ -14,10 +14,15 @@ process/
 # arXiv submission packages
 *_arxiv.tar.gz
 
-# Lean 4 formalization — in progress; publish a curated subset once Paper I and
-# the certificate core close (source + lakefile + lean-toolchain +
-# lake-manifest.json + README/AXIOMS/STATUS; never .lake, which is ~7 GB)
-lean/
+# Lean 4 formalization: track only what accompanies the papers publicly —
+# source, toolchain/manifest pins, LICENSE, README. Internal working ledgers
+# stay local, as do the build dir (~7.5 GB; also excluded by lean/.gitignore)
+# and session/CI scaffolding.
+lean/.lake/
+lean/.github/
+lean/AXIOMS.md
+lean/GAPS.md
+lean/STATUS.md
 
 # LaTeX build artifacts (committed PDFs are intentional)
 *.aux

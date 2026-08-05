@@ -4,6 +4,7 @@ Every conjectured theorem gets a numerical witness before any prose is written.
 Pillar 1: continuous-type statics.  Pillar 2: repeated exposure / horizon.
 Pillar 3: endogenous deference dynamics (bistability, hysteresis, early warning).
 """
+import sys
 import numpy as np
 rng = np.random.default_rng(11)
 PASS = []
@@ -151,7 +152,41 @@ for _ in range(400):
     B = np.linspace(0, 1, 41)
     Cv = np.array([C_cont(F, b, lam, nu) for b in B])
     if not np.all(np.diff(Cv) < 0): ok = False
-report("P1e  continuous-type Theorem A: C strictly decreasing under Cov>=0 + dilution a.e.", ok)
+
+# The Paper-I finite-corpus lift: exact derivative aggregation and strict
+# pooled decrease when every claim is weakly decreasing and one positive-weight
+# claim is strict.  The outside-subset guard is exercised by a positive-share
+# counterexample whose unrestricted complement reverses the pooled sign.
+for _ in range(400):
+    J = int(rng.integers(2, 30))
+    q_claim = rng.dirichlet(np.ones(J))
+    intercept = rng.normal(size=J)
+    linear_loss = rng.uniform(0, 2, size=J)
+    quadratic_loss = rng.uniform(0, 1, size=J)
+    j0 = int(rng.integers(0, J))
+    linear_loss[j0] += 0.1
+    for b in np.linspace(0, 1, 11):
+        per_claim = intercept - linear_loss * b - quadratic_loss * b * b
+        pooled = np.sum(q_claim * per_claim)
+        derivative = np.sum(q_claim * (-linear_loss - 2 * quadratic_loss * b))
+        eps = 1e-6
+        pooled_plus = np.sum(q_claim *
+                             (intercept - linear_loss * (b + eps)
+                              - quadratic_loss * (b + eps) ** 2))
+        pooled_minus = np.sum(q_claim *
+                              (intercept - linear_loss * (b - eps)
+                               - quadratic_loss * (b - eps) ** 2))
+        if derivative >= 0 or abs((pooled_plus - pooled_minus) / (2 * eps) - derivative) > 1e-8:
+            ok = False
+        if not np.isfinite(pooled):
+            ok = False
+outside_share = np.array([0.4, 0.6])
+outside_slopes = np.array([-1.0, 1.0])
+outside_guard_exercised = (outside_share[0] > 0 and outside_slopes[0] < 0
+                           and np.sum(outside_share * outside_slopes) > 0)
+ok &= outside_guard_exercised
+report("P1e  continuous-type Theorem A plus finite-corpus derivative/strictness lift; "
+       "positive harmful share alone does not sign the pool", ok)
 
 # --- P1f: paper-one counterexample embeds as negative covariance ---
 p = np.array([0.5, 0.5])
@@ -384,7 +419,7 @@ report("P3b  myopia trap (zeta>0): instantaneous U' > 0, quasi-static U strictly
 
 # --- P3c: reduced (beta, D) map bistability iff G(0)<0<G(1) ---
 def reduced_map_params():
-    return dict(eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, alpha=0.6)
+    return dict(eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, alpha=0.1)
 
 def srate(b, P):  return (1 - P['lam0']) * (1 - P['eta'] * (1 - b)) ** 2
 def Dstar(b, P):  return P['I'] / (1 - srate(b, P))
@@ -413,11 +448,11 @@ report("P3c  reduced map bistable: G(0)<0<G(1), one interior saddle, two corner 
        f"G(0)={g0:.4f}, G(1)={g1:.4f}, interior roots={roots}, D*={Dstar(0,P):.4f}/{Dstar(1,P):.3f}")
 
 # separatrix: bisection on initial D at beta0 = 0.4
-def fate(D0, P, b0=0.4, T=6000):
+def fate(D0, P, b0=0.4, T=36000):
     b, D = b0, D0
     for _ in range(T): b, D = step(b, D, P)
     return b > 0.5
-lo, hi = 0.0, 2.0
+lo, hi = 0.0, 8.0   # separatrix height from a transient scales as ~kappa*/alpha (jump map)
 assert not fate(lo, P) and fate(hi, P)
 for _ in range(50):
     mid = 0.5 * (lo + hi)
@@ -432,14 +467,14 @@ rho_cure_cf = 2 * P['c'] * (1 - P['c']) - P['v'] * P['lam0'] / P['I']
 b, D = 1.0, Dstar(1, P)
 escape_rho = None
 for rho in np.linspace(0, 0.15, 1501):
-    for _ in range(400): b, D = step(b, D, P, rho=rho)
+    for _ in range(2400): b, D = step(b, D, P, rho=rho)
     if b < 0.5 and escape_rho is None:
         escape_rho = rho; break
 # down-sweep from calibrated back to rho=0
 b2, D2 = 0.0, Dstar(0, P)
 stay = True
 for rho in np.linspace(0.15, 0.0, 301):
-    for _ in range(200): b2, D2 = step(b2, D2, P, rho=rho)
+    for _ in range(1200): b2, D2 = step(b2, D2, P, rho=rho)
     if b2 > 0.5: stay = False
 report("P3d  hysteresis: escape at rho ~ rho_cure; calibrated persists at rho=0 after cure",
        escape_rho is not None and abs(escape_rho - rho_cure_cf) < 0.005 and stay,
@@ -546,11 +581,14 @@ report("P3f  capture + decoupling: U bounded (laundered) while C collapses; inte
        f"beta_end={b:.3f}, U_cap={U_cap:.5f} vs U_cal={U_cal:.5f}; C_cap ~ -1e{int(np.log10(-C_cap)):d} vs C_cal={C_cal:.5f}; |x_L| grew ~1e{int(np.log10(abs(xL)/max(xL_mid,1e-300))):d}x")
 
 # ============================================================================
-# EXTENSIONS: proof-obligation suites (sequel v1)
+# EXTENSIONS: proof-obligation suites
 # ============================================================================
 
-# --- P3g: single-claim (rank-one) variant: D' = (m(b) sqrt(D) + j)^2,
-#          m(b) = (1-lam0)(1-eta(1-b)). Same bistable corner structure. ---
+# --- P3g: single-claim (rank-one) variants: D' = (m(b) sqrt(D) + j)^2.
+#          Battery family m(b) = (1-lam0)(1-eta(1-b)) plus the Lean-proved
+#          grounded family m(b) = sqrt(1-lam0)(1-eta(1-b)) of
+#          groundedSqrt_global_bistability, whose squared deviation persists
+#          at exactly (1-lam0) per period. Same bistable corner structure. ---
 Pg = dict(eta=0.5, c=0.9, lam0=0.02, v=0.10, alpha=0.6, j=0.083)
 def m_g(b, P):  return (1 - P['lam0']) * (1 - P['eta'] * (1 - b))
 def Dst_g(b, P):
@@ -570,35 +608,106 @@ cal_g = (b < 1e-6 and abs(D - Dst_g(0, Pg)) < 1e-8)
 b, D = 1.0, Dst_g(1, Pg)
 for _ in range(5000): b, D = step_g(b, D, Pg)
 cap_g = (b > 1 - 1e-6 and abs(D - Dst_g(1, Pg)) < 1e-4)
-report("P3g  rank-one (sqrt-D) variant: same corner bistability (robustness of affine reduction)",
-       (gg0 < 0 < gg1) and roots_g >= 1 and cal_g and cap_g,
-       f"G(0)={gg0:.4f}, G(1)={gg1:.3f}, D*={Dst_g(0,Pg):.4f}/{Dst_g(1,Pg):.1f}, interior roots={roots_g}")
 
-# --- P3h: noisy prevention. Arrhenius scaling of escape from the calibrated
-#          corner (log mean escape time linear in 1/sigma^2) and protection
-#          monotone in the civic weight rho at fixed sigma. ---
+# Proved grounded family (deterministic; consumes no shared-rng draws):
+# exact characteristic, sign pattern with a single interior saddle, both
+# corner fates from on-characteristic starts, and the ungrounded endpoint's
+# divergence (m(1) = 1 admits no finite captured equilibrium when j > 0).
+Ps = dict(eta=0.5, c=0.9, lam0=0.02, v=0.10, alpha=0.1, j=0.05)
+def m_s(b, P):  return np.sqrt(1 - P['lam0']) * (1 - P['eta'] * (1 - b))
+def Dst_s(b, P):
+    r = P['j'] / (1 - m_s(b, P)); return r * r
+def G_s(b, P):  return -P['v'] + 2 * P['c'] * (1 - P['c'] * b) * Dst_s(b, P)
+def step_s(b, D, P):
+    Up = -P['v'] + 2 * P['c'] * (1 - P['c'] * b) * D
+    b2 = min(1.0, max(0.0, b + P['alpha'] * Up))
+    D2 = (m_s(b, P) * np.sqrt(max(D, 0.0)) + P['j']) ** 2
+    return b2, D2
+char_ok = True
+for bh in (0.0, 0.3, 0.7, 1.0):
+    D = 1.0
+    for _ in range(4000):
+        D = (m_s(bh, Ps) * np.sqrt(D) + Ps['j']) ** 2
+    char_ok &= abs(D - Dst_s(bh, Ps)) < 1e-10 * max(1.0, Dst_s(bh, Ps))
+gs0, gs1 = G_s(0, Ps), G_s(1, Ps)
+bb_s = np.linspace(0, 1, 50001)
+sgn_s = np.sign([G_s(x, Ps) for x in bb_s])
+roots_s = int(np.sum(np.diff(sgn_s) != 0))
+b_sad = float(bb_s[np.nonzero(np.diff(sgn_s) != 0)[0][0]]) if roots_s else float('nan')
+def fate_s(b0, P, T=60000):
+    b, D = b0, Dst_s(b0, P)
+    for _ in range(T):
+        b, D = step_s(b, D, P)
+    return b
+cal_s = all(fate_s(b0, Ps) < 1e-6 for b0 in (0.0, 0.5 * b_sad, 0.9 * b_sad))
+cap_s = all(fate_s(b0, Ps) > 1 - 1e-6 for b0 in (min(1.0, 1.1 * b_sad), 1.0))
+D = 1.0
+for _ in range(200000):
+    D = (np.sqrt(D) + Ps['j']) ** 2
+    if D > 1e8:
+        break
+unground_diverges = D > 1e8
+
+report("P3g  rank-one (sqrt-D) variants: corner bistability for the battery family and the "
+       "Lean-proved grounded family; ungrounded endpoint diverges",
+       (gg0 < 0 < gg1) and roots_g >= 1 and cal_g and cap_g
+       and char_ok and (gs0 < 0 < gs1) and roots_s == 1 and cal_s and cap_s
+       and unground_diverges,
+       f"battery family G(0)={gg0:.4f}, G(1)={gg1:.3f}, D*={Dst_g(0,Pg):.4f}/{Dst_g(1,Pg):.1f}, "
+       f"interior roots={roots_g}; grounded family G(0)={gs0:.4f}, G(1)={gs1:.2f}, "
+       f"saddle at {b_sad:.3f}, characteristic exact, both corner fates confirmed; "
+       f"ungrounded m(1)=1 stock exceeds 1e8")
+
+# --- P3h: noisy prevention. Arrhenius scaling of first saddle-policy crossing
+#          (log mean crossing time linear in 1/sigma^2) and protection monotone
+#          in the civic weight rho at fixed sigma. ---
 def srate_v(b, P):  return (1 - P['lam0']) * (1 - P['eta'] * (1 - b)) ** 2
 P_esc = dict(P); P_esc['I'] = 0.040   # shallow basin near corner fold, still bistable (rho_cure = 0.13)
-def ensemble_escape(sigma, rho, P, n=80, cap=250000, seed=0):
+
+def qp_saddle(rho):
+    lo, hi = 1e-9, 1 - 1e-9
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if -P_esc['v'] + (2 * P_esc['c'] * (1 - P_esc['c'] * mid) - rho) * Dstar(mid, P_esc) < 0:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+# Noisy lanes use the printed simultaneous map: the stock update reads the
+# pre-step policy, exactly as eq:map and the Lean loopMap do.
+def ensemble_crossing(sigma, rho, P, n=80, cap=1500000, seed=0, bd=None):
+    if bd is None:
+        bd = qp_saddle(rho)
     g = np.random.default_rng(1000 + seed)
     b = np.zeros(n); D = np.full(n, Dstar(0, P)); t_esc = np.full(n, cap, dtype=float)
     alive = np.ones(n, bool)
+    defic = np.full(n, np.nan); crossed = np.zeros(n, bool)
     for t in range(cap):
         if not alive.any(): break
         Up = -P['v'] + (2 * P['c'] * (1 - P['c'] * b) - rho) * D + sigma * g.standard_normal(n)
-        b = np.clip(b + P['alpha'] * Up, 0.0, 1.0)
+        b_new = np.clip(b + P['alpha'] * Up, 0.0, 1.0)
         D = np.maximum(0.0, srate_v(b, P) * D + P['I'])
-        newly = alive & (b > 0.9)
+        b = b_new
+        if bd is not None:
+            newx = (~crossed) & (b >= bd)
+            if newx.any():
+                defic[newx] = 1.0 - D[newx] / (P['I'] / (1 - srate_v(bd, P)))
+                crossed[newx] = True
+        newly = alive & (b >= bd)
         t_esc[newly] = t
         alive &= ~newly
-    return t_esc, int((~alive).sum()), n
-sigmas = [0.046, 0.052, 0.060, 0.070]
+    return t_esc, int((~alive).sum()), n, defic
+sigmas = [0.160, 0.200, 0.280, 0.420]   # rescaled with alpha (noise enters as alpha*sigma), ladder chosen to span ~3 decades of crossing times
+_bd_esc = qp_saddle(0.0)
 pts, diag = [], []
+_defs_ens = {}
 slope, R2 = float('nan'), float('nan')
 for k, s in enumerate(sigmas):
-    te, nesc, n = ensemble_escape(s, 0.0, P_esc, seed=k)
+    te, nesc, n, _df = ensemble_crossing(s, 0.0, P_esc, seed=k, bd=_bd_esc)
+    _defs_ens[s] = _df[np.isfinite(_df)]
     Tbar = te.sum() / (nesc + 0.5)          # hazard-rate MLE under censoring
-    diag.append(f"s={s}: {nesc}/{n} esc, Tbar={Tbar:.0f}")
+    diag.append(f"s={s}: {nesc}/{n} cross, Tbar={Tbar:.0f}")
     if nesc >= 1: pts.append((1.0 / s ** 2, np.log(Tbar)))
 print("      P3h diag: " + " | ".join(diag))
 arr_ok = len(pts) >= 3
@@ -610,16 +719,311 @@ if arr_ok:
     Yhat = A @ coef
     R2 = 1 - np.sum((Y - Yhat) ** 2) / np.sum((Y - Y.mean()) ** 2)
     arr_ok = (slope > 0) and (R2 > 0.9)
-s_rho = 0.070
+s_rho = 0.150
 rates = []
 for k, rho in enumerate([0.0, 0.02, 0.04]):
-    te, nesc, n = ensemble_escape(s_rho, rho, P_esc, seed=50 + k)
+    te, nesc, n, _ = ensemble_crossing(s_rho, rho, P_esc, seed=50 + k)
     rates.append((nesc + 0.5) / te.sum())
 rho_ok = (rates[0] > rates[1] > rates[2]) and (rates[0] >= 5 * rates[2])
-report("P3h  measurement-noise escape: Arrhenius in 1/sigma^2; protection monotone in rho << rho_cure",
-       arr_ok and rho_ok,
+
+# prop:qpbounds -- corrected closed-form lower bound and doubling-strategy upper
+# bound bracket the quasipotential; bracket separation across the rho grid makes
+# the barrier's strict increase a theorem; fitted slope and hazard increment
+# agree with the bracket.
+def qp_bracket(rho, n=200001, al=None):
+    al, cc = (al or P_esc['alpha']), P_esc['c']
+    bd = qp_saddle(rho)
+    bs = np.linspace(0.0, bd, n)
+    Ds = np.array([Dstar(b, P_esc) for b in bs])
+    Gr = -P_esc['v'] + (2 * cc * (1 - cc * bs) - rho) * Ds
+    low = (2 / al) * np.trapezoid(-Gr, bs) / (1 + 2 * al * np.abs(np.gradient(Gr, bs)).max())
+    b, D, cost = 0.0, Dstar(0.0, P_esc), 0.0        # doubling strategy (simultaneous map)
+    for _ in range(2000000):
+        g = -P_esc['v'] + (2 * cc * (1 - cc * b) - rho) * D
+        u = 2 * max(-g, 0.0) + 1e-9
+        b2 = min(1.0, b + al * (g + u)); D = srate(b, P_esc) * D + P_esc['I']; b = b2
+        cost += 0.5 * u * u
+        if b >= bd: break
+    # climb-only cost = an upper witness for the crossing quasipotential V-cross
+    # (thm:rate), and the crossing deficit of the natural-pace climb: the strategy
+    # arrives on the characteristic, so V_plus bounds V-cross with no slack from
+    # the exit phase (saddle-passage calibration, conj:arr).
+    S_climb = cost
+    def_climb = 1.0 - D / Dstar(bd, P_esc)
+    for _ in range(200000):                          # hold at the saddle while the stock relaxes
+        if D >= Dstar(min(b, 1.0), P_esc): break
+        g = -P_esc['v'] + (2 * cc * (1 - cc * b) - rho) * D
+        u = max(-g, 0.0)
+        b2 = min(1.0, b + al * (g + u)); D = srate(b, P_esc) * D + P_esc['I']; b = b2
+        cost += 0.5 * u * u
+    return low, cost, S_climb, def_climb
+
+qp = {r: qp_bracket(r) for r in (0.0, 0.02, 0.04)}
+sep_ok = qp[0.02][0] > qp[0.0][1] and qp[0.04][0] > qp[0.02][1]
+# saddle-passage calibration: the natural-pace climb crosses on-characteristic
+# (deficit ~ 0) and the hold phase costs nothing, so S_up bounds V-cross too
+passage_ok = all(qp[r][1] - qp[r][2] <= 1e-4 * qp[r][1] and 0.0 <= qp[r][3] <= 0.01
+                 for r in (0.0, 0.02, 0.04))
+mid0 = 0.5 * (qp[0.0][0] + qp[0.0][1])
+slope_ok = abs(slope - mid0) <= 0.10 * mid0
+dV_mid = 0.5 * (qp[0.04][0] + qp[0.04][1]) - mid0
+haz_ok = abs(np.log(rates[0] / rates[2]) * s_rho ** 2 - dV_mid) <= 0.35 * dV_mid
+
+# cor:qplimit -- the bracket pinches: alpha * S_up -> 2 * Int as alpha -> 0.
+_bs_qp = np.linspace(0.0, qp_saddle(0.0), 200001)
+_Int_qp = np.trapezoid(P_esc['v'] - 2 * P_esc['c'] * (1 - P_esc['c'] * _bs_qp)
+                       * np.array([Dstar(b, P_esc) for b in _bs_qp]), _bs_qp)
+pinch = [qp_bracket(0.0, al=a)[1] / ((2 / a) * _Int_qp) for a in (0.1, 0.05, 0.025)]
+pinch_ok = pinch[0] > pinch[1] > pinch[2] > 1.0 and pinch[2] <= 1.015
+
+# prop:arrwindow necessity core, witnessed pathwise: every simulated crossing's
+# action ledger over its max-advance steps meets the corrected lower bound.
+_rng_led = np.random.default_rng(424)
+_bd_led = qp_saddle(0.0)
+_n_cross, _sled_min = 0, float('inf')
+for _lane in range(400):
+    _b, _D, _bmax, _ssum = 0.0, Dstar(0.0, P_esc), 0.0, 0.0
+    for _t in range(5500):
+        _xi = _rng_led.standard_normal()
+        _Up = -P_esc['v'] + 2 * P_esc['c'] * (1 - P_esc['c'] * _b) * _D + 0.2 * _xi
+        _b2 = min(1.0, max(0.0, _b + P_esc['alpha'] * _Up))
+        _D = max(0.0, srate(_b, P_esc) * _D + P_esc['I'])
+        _b = _b2
+        if _b > _bmax:
+            _ssum += 0.5 * (0.2 * _xi) ** 2
+            _bmax = _b
+        if _bmax >= _bd_led:
+            _n_cross += 1; _sled_min = min(_sled_min, _ssum)
+            break
+ledger_ok = _n_cross >= 50 and _sled_min >= qp[0.0][0] * 0.999
+
+# conj:arr upgrade de-risk -- the renewal/excursion decomposition behind the
+# mean-time Arrhenius law. Excursions leave a home ball at the calibrated
+# corner (b > b_out) and end at renewal (b <= b_home) or crossing (b >= saddle).
+# Three predictions of the excursion argument, measured directly:
+#   (a) the per-excursion crossing probability is itself Arrhenius in 1/sigma^2
+#       with slope inside the quasipotential bracket (the union-bound engine);
+#   (b) non-escaping excursion lengths have an exponential tail whose rate
+#       STIFFENS as sigma falls (no free lingering away from the saddle:
+#       cost ~ c0 per T0 steps => tail rate ~ c0'/sigma^2);
+#   (c) direct persistence: essentially no crossing before exp(0.6*V_low/s^2)
+#       steps, and near-certain crossing by exp(1.4*S_up/s^2) steps;
+#   (d) saddle passage (conj:arr, sharp constant): the stock deficit at first
+#       crossing, 1 - D/D*(beta-dagger), is strictly positive on every lane
+#       (the pre-crossing domination D < D*(beta-dagger) of the printed
+#       rectangle) and its median falls as sigma falls -- crossings
+#       concentrate toward the saddle, the signature of V_cross = V.
+_b_home, _b_out = 0.02, 0.05
+_bd_exc = qp_saddle(0.0)
+
+_Dst_exc = P_esc['I'] / (1 - srate_v(_bd_exc, P_esc))
+
+def excursions(sigma, n=200, steps=30000, seed=0):
+    g = np.random.default_rng(7000 + seed)
+    b = np.zeros(n); D = np.full(n, Dstar(0.0, P_esc))
+    inexc = np.zeros(n, bool); elen = np.zeros(n, int)
+    n_exc, n_esc, homelens, defics = 0, 0, [], []
+    for _ in range(steps):
+        xi = g.standard_normal(n)
+        Up = -P_esc['v'] + 2 * P_esc['c'] * (1 - P_esc['c'] * b) * D + sigma * xi
+        b_new = np.clip(b + P_esc['alpha'] * Up, 0.0, 1.0)
+        D = np.maximum(0.0, srate_v(b, P_esc) * D + P_esc['I'])
+        b = b_new
+        elen[inexc] += 1
+        esc = inexc & (b >= _bd_exc)
+        if esc.any():
+            defics.extend((1.0 - D[esc] / _Dst_exc).tolist())
+            n_esc += int(esc.sum()); n_exc += int(esc.sum())
+            b[esc] = 0.0; D[esc] = Dstar(0.0, P_esc)
+            inexc[esc] = False; elen[esc] = 0
+        home = inexc & (b <= _b_home)
+        if home.any():
+            n_exc += int(home.sum()); homelens.extend(elen[home].tolist())
+            inexc[home] = False; elen[home] = 0
+        start = (~inexc) & (b > _b_out)
+        inexc[start] = True; elen[start] = 0
+    return n_exc, n_esc, np.array(homelens), np.array(defics)
+
+_exc_sigmas = [0.160, 0.180, 0.200]
+_exc_pts, _exc_diag, _tails, _defs_exc = [], [], {}, {}
+for _k, _s in enumerate(_exc_sigmas):
+    _ne, _nesc, _hl, _dfx = excursions(_s, seed=_k)
+    _exc_diag.append(f"s={_s}: {_nesc}/{_ne} exc-esc")
+    if _nesc >= 5:
+        _exc_pts.append((1.0 / _s ** 2, np.log(_ne / _nesc)))
+    _tails[_s] = _hl
+    _defs_exc[_s] = _dfx
+print("      P3h exc diag: " + " | ".join(_exc_diag))
+exc_ok = len(_exc_pts) >= 3
+_exc_slope = float('nan')
+if exc_ok:
+    _X = np.array([p[0] for p in _exc_pts]); _Y = np.array([p[1] for p in _exc_pts])
+    _A = np.vstack([_X, np.ones_like(_X)]).T
+    _coef, *_ = np.linalg.lstsq(_A, _Y, rcond=None)
+    _exc_slope = _coef[0]
+    exc_ok = abs(_exc_slope - mid0) <= 0.35 * mid0
+
+def _tail_rate(lens, L1=60, L2=120):
+    p1 = float((lens > L1).mean()); p2 = float((lens > L2).mean())
+    if p2 <= 0 or p1 <= p2: return float('nan')
+    return np.log(p1 / p2) / (L2 - L1)
+
+# Tail rates: exponential at every accessible sigma; the c0/sigma^2 stiffening
+# regime is beyond simulable lengths (the sigma-independent deterministic
+# relaxation floor dominates at L = 60..120), so the assertion is existence of
+# the exponential tail plus non-degradation, and the scaling question is
+# recorded as a proof-side obligation rather than a numerically settled fact.
+_lam_lo, _lam_hi = _tail_rate(_tails[0.160]), _tail_rate(_tails[0.200])
+_lam_ratio = _lam_lo / _lam_hi if np.isfinite(_lam_lo) and np.isfinite(_lam_hi) else float('nan')
+tail_ok = np.isfinite(_lam_ratio) and 0.95 <= _lam_ratio <= 3.0
+
+# Persistence, prefactor-honest: the Arrhenius fit gives ln Tbar = slope/s^2 + b0;
+# below the barrier the renewal picture forbids early crossing mass
+# (P(tau < 0.02*Tbar_fit) ~ 2%), and at moderate sigma it makes tau
+# approximately exponential(1/Tbar) -- the geometric-trials signature.
+_b0_fit = float(coef[1]) if arr_ok else float('nan')
+def _tbar_fit(sigma): return float(np.exp(slope / sigma ** 2 + _b0_fit))
+
+def _persist_frac(sigma, N, n=60, seed=0):
+    g = np.random.default_rng(8000 + seed)
+    b = np.zeros(n); D = np.full(n, Dstar(0.0, P_esc)); out = np.zeros(n, bool)
+    for _ in range(N):
+        xi = g.standard_normal(n)
+        Up = -P_esc['v'] + 2 * P_esc['c'] * (1 - P_esc['c'] * b) * D + sigma * xi
+        b_new = np.clip(b + P_esc['alpha'] * Up, 0.0, 1.0)
+        D = np.maximum(0.0, srate_v(b, P_esc) * D + P_esc['I'])
+        b = b_new
+        out |= (b >= _bd_exc)
+    return float(out.mean()), N
+
+_N1 = max(1, int(0.02 * _tbar_fit(0.140)))
+_N2 = max(1, int(0.02 * _tbar_fit(0.120)))
+_p_low1, _ = _persist_frac(0.140, _N1, seed=1)
+_p_low2, _ = _persist_frac(0.120, _N2, seed=2)
+_te_exp, _nesc_exp, _n_exp, _ = ensemble_crossing(0.200, 0.0, P_esc, n=80, cap=200000, seed=777)
+_tbar_emp = _te_exp.sum() / (_nesc_exp + 0.5)
+_f1 = float((_te_exp <= _tbar_emp).mean())
+_f23 = float((_te_exp <= 2.3 * _tbar_emp).mean())
+pers_ok = (_p_low1 <= 0.15) and (_p_low2 <= 0.15) and (0.45 <= _f1 <= 0.80) and (_f23 >= 0.80)
+
+# Quantitative passage (prop:passage): instrument the refund surgery on the
+# two-phase near-minimizer -- level-budgeted selection, truncation, dyadic
+# hold-and-creep cascade to the saddle -- and witness that a crossing with
+# near-zero terminal deficit costs the input action plus an O(w^2) overhead,
+# with the theta^2-vs-refund dominance ratio below one.
+def _passage_surgery():
+    bd = _bd_esc; al, cc = P_esc['alpha'], P_esc['c']
+    sb = srate_v(bd, P_esc); Dsb = P_esc['I'] / (1 - sb)
+    def _Ds(b): return P_esc['I'] / (1 - srate_v(b, P_esc))
+    def _g(b, D): return -P_esc['v'] + 2 * cc * (1 - cc * b) * D
+    _bg = np.linspace(0, bd, 200001)
+    _Gv = -P_esc['v'] + 2 * cc * (1 - cc * _bg) * np.array([_Ds(b) for b in _bg])
+    L = float(np.max(np.abs(np.gradient(_Gv, _bg))))
+    app = al * (1 + 2 * al * L)
+    Dbar = max((_Ds(b + 1e-6) - _Ds(b - 1e-6)) / 2e-6
+               for b in np.linspace(bd - 0.16, bd, 40))
+    kmax, kmin = 2 * cc * (1 - cc * (bd - 0.16)), 2 * cc * (1 - cc * bd)
+    s1 = al * Dbar * kmax / (1 - sb)
+    b, D, A_in = 0.0, _Ds(0.0), 0.0
+    us, path = [], [(b, D)]
+    for _ in range(3000000):
+        gg = _g(b, D); u = 2 * max(-gg, 0.0) + 1e-5
+        b2 = min(1.0, b + al * (gg + u)); D = srate_v(b, P_esc) * D + P_esc['I']; b = b2
+        A_in += 0.5 * u * u; us.append(u); path.append((b, D))
+        if b >= bd: break
+    a_sel = kmin * (1 - sb ** 2) / (app * kmax ** 2)
+    # window width from the theorem's recipe: w = C9 * alpha * sqrt(G_gap + nu),
+    # and G_gap + nu = A_in - V_- exactly (both measured), no V-cross reference
+    V_low = (2 / al) * float(np.trapezoid(-_Gv, _bg)) / (1 + 2 * al * L)
+    w = 6 * (1 + 2 * al * L) * kmax / (kmin * np.sqrt(1 - sb ** 2)) * al * np.sqrt(A_in - V_low)
+    prof, mmax = [], 0.0
+    for t in range(len(us)):
+        b_pre, D_pre = path[t]; b_post, _ = path[t + 1]
+        if b_post > mmax:
+            m_lo, m_hi = max(mmax, bd - w), min(b_post, bd)
+            if m_hi > m_lo: prof.append((m_lo, m_hi, D_pre, t))
+            mmax = b_post
+    def _T(m):
+        return sum((hi - max(lo, m)) * max(0.0, _Ds(0.5 * (max(lo, m) + hi)) - Dp)
+                   for lo, hi, Dp, _ in prof if hi > max(lo, m))
+    X = _T(bd - w)
+    ok61 = X < a_sel * (w / 4) ** 2 / 4
+    mbar = tau = None
+    for m in np.linspace(bd - w / 2, bd - w / 4, 300):
+        hit = [(max(0.0, _Ds(m) - Dp), t) for lo, hi, Dp, t in prof if lo <= m <= hi]
+        if hit and hit[0][0] ** 2 <= a_sel * _T(m):
+            mbar, tau = m, hit[0][1]; break
+    A_kept = 0.5 * float(np.sum(np.array(us[:tau + 1]) ** 2))
+    b, D = path[tau + 1]
+    A_c, delta0 = 0.0, bd - b
+    khold = int(np.ceil(np.log(8) / np.log(1 / sb)))
+    for j in range(14):
+        dj = delta0 * 2 ** -j; m_next = bd - dj / 2; epsj = al * dj
+        steps = 0
+        while b < m_next and steps < 200000:
+            gg = _g(b, D); u = -gg + (abs(gg) + epsj)
+            b2 = min(1.0, b + al * (gg + u)); D = srate_v(b, P_esc) * D + P_esc['I']; b = b2
+            A_c += 0.5 * u * u; steps += 1
+        for _ in range(khold):
+            u = -_g(b, D); A_c += 0.5 * u * u; D = srate_v(b, P_esc) * D + P_esc['I']
+    epsf = al * delta0 * 2 ** -14
+    while b < bd:
+        gg = _g(b, D); u = -gg + (abs(gg) + epsf)
+        b2 = min(1.0, b + al * (gg + u)); D = srate_v(b, P_esc) * D + P_esc['I']; b = b2
+        A_c += 0.5 * u * u
+    ratio = (9 / 8) * (9 / 8) * kmax ** 2 * a_sel / (2 * (1 - sb ** 2)) / (2 * kmin / app)
+    return dict(s1=s1, ok61=ok61, ratio=ratio, A_in=A_in,
+                overhead=A_kept + A_c - A_in, w=w,
+                deficit=(_Ds(b) - D) / Dsb)
+
+_sg = _passage_surgery()
+passage_surgery_ok = (_sg['s1'] < 1.0 and _sg['ok61'] and _sg['ratio'] < 1.0
+                      and 0.0 <= _sg['deficit'] <= 1e-5
+                      and _sg['overhead'] <= 0.30 * _sg['w'] ** 2)
+
+# Saddle passage (d): deficits from the excursion crossings (the richer sample)
+# with the ensemble ladder's endpoints as a cross-check.
+_def_all = np.concatenate([_defs_exc[s] for s in _exc_sigmas] +
+                          [_defs_ens[s] for s in sigmas if len(_defs_ens[s])])
+_dmed = {s: float(np.median(_defs_exc[s])) for s in _exc_sigmas if len(_defs_exc[s]) >= 20}
+defic_ok = (len(_def_all) >= 200 and float(_def_all.min()) > 0.0
+            and 0.160 in _dmed and 0.200 in _dmed
+            and _dmed[0.160] < _dmed[0.200] and _dmed[0.160] < 0.20)
+
+report("P3h  measurement-noise saddle crossing: Arrhenius in 1/sigma^2; protection monotone in rho << rho_cure; "
+       "quasipotential bracket (prop:qpbounds): brackets separate across the rho grid, fitted slope "
+       "and hazard increment agree; alpha*S_up pinches onto 2*Int (cor:qplimit); every crossing's "
+       "advance-step action ledger meets the corrected lower bound (prop:arrwindow necessity); "
+       "excursion decomposition (conj:arr de-risk): per-excursion crossing rate Arrhenius with slope "
+       "near the bracket, lingering tail exponential at every tested sigma, no early-crossing mass "
+       "below the barrier, and exponentially distributed crossing times (the renewal signature); "
+       "saddle passage (sharp-constant de-risk): crossing stock deficit positive on every lane "
+       "(pre-crossing domination) with median decreasing in sigma; natural-pace strategy crosses "
+       "on-characteristic (hold phase free), so S_up bounds the crossing quasipotential too; "
+       "quantitative passage (prop:passage): the refund surgery executes -- selection level "
+       "found, theta^2-vs-refund dominance below one, near-zero-deficit crossing at O(w^2) "
+       "overhead",
+       arr_ok and rho_ok and sep_ok and slope_ok and haz_ok and pinch_ok and ledger_ok
+       and exc_ok and tail_ok and pers_ok and defic_ok and passage_ok and passage_surgery_ok,
        f"fit pts={len(pts)}, slope={slope:.4f}, R2={R2:.3f}; hazard(rho=0/.02/.04) = "
-       f"{rates[0]:.1e}/{rates[1]:.1e}/{rates[2]:.1e}")
+       f"{rates[0]:.1e}/{rates[1]:.1e}/{rates[2]:.1e}; qp[low,up] rho=0: [{qp[0.0][0]:.4f},{qp[0.0][1]:.4f}], "
+       f"rho=.02: [{qp[0.02][0]:.4f},{qp[0.02][1]:.4f}], rho=.04: [{qp[0.04][0]:.4f},{qp[0.04][1]:.4f}]; "
+       f"slope vs mid: {abs(slope-mid0)/mid0:.1%}; dlnhaz*s^2 vs dV_mid: "
+       f"{abs(np.log(rates[0]/rates[2])*s_rho**2 - dV_mid)/dV_mid:.1%}; "
+       f"pinch ratios (a=.1/.05/.025): {pinch[0]:.4f}/{pinch[1]:.4f}/{pinch[2]:.4f}; "
+       f"ledger: {_n_cross} crossings, min advance-action {_sled_min:.4f} >= {qp[0.0][0]:.4f}; "
+       f"exc slope={_exc_slope:.4f} vs mid {mid0:.4f}; tail rates lam(0.16)/lam(0.20) = "
+       f"{_lam_lo:.4f}/{_lam_hi:.4f} ratio {_lam_ratio:.2f}; persistence: "
+       f"{_p_low1:.2f}@N={_N1}(s=.14), {_p_low2:.2f}@N={_N2}(s=.12); "
+       f"exp'l tau (s=.20): F(Tbar)={_f1:.2f} [exp: 0.63], F(2.3*Tbar)={_f23:.2f} [exp: 0.90]; "
+       f"crossing deficit ({len(_def_all)} crossings, min {float(_def_all.min()):.4f} > 0): "
+       f"median {_dmed.get(0.160, float('nan')):.3f}/{_dmed.get(0.180, float('nan')):.3f}/"
+       f"{_dmed.get(0.200, float('nan')):.3f} at s=.16/.18/.20; strategy climb-only vs total "
+       f"(rho=0/.02/.04): {qp[0.0][2]:.4f}/{qp[0.0][1]:.4f}, {qp[0.02][2]:.4f}/{qp[0.02][1]:.4f}, "
+       f"{qp[0.04][2]:.4f}/{qp[0.04][1]:.4f}; strategy crossing deficit "
+       f"{qp[0.0][3]:.4f}/{qp[0.02][3]:.4f}/{qp[0.04][3]:.4f}; surgery: (S1)={_sg['s1']:.3f}, "
+       f"dominance={_sg['ratio']:.3f}, overhead={_sg['overhead']:.2e} (w^2={_sg['w']**2:.2e}), "
+       f"terminal deficit={_sg['deficit']:.1e}")
 
 # --- P3i: slow eigenvalue -> 1 along the low branch approaching the fold,
 #          with saddle-node sqrt scaling 1 - lambda ~ K sqrt(I_fold - I). ---
@@ -720,7 +1124,7 @@ report("P5a  aggregation: portfolio stock obeys affine law exactly in expectatio
 
 
 # ============================================================================
-# REVISION SUITES (editorial integration packet): saturated-variant laundering,
+# SATURATION, RANK-ONE, AND SEPARATRIX SUITES: saturated-variant laundering,
 # rank-one single-claim law, separatrix sweep, saturated gradient bounds.
 # ============================================================================
 
@@ -795,7 +1199,7 @@ for t in range(300):
     if b >= 1.0: below = False
 target = 1 - 2 * a_lo * (1 - piH) * xbar ** 2
 ok_lo = below and len(ratios) > 100 and max(abs(r - target) for r in ratios) < 1e-8
-report("S2   saturated Theorem 5(i): geometric contraction of (1-beta); finite-time attainment "
+report("S2   saturated laundering (i): geometric contraction of (1-beta); finite-time attainment "
        "guaranteed iff 2*alpha*piL*xbar^2 >= 1 (boundary instance iH=0)", ok_s2a and ok_hi and ok_lo,
        f"benchmark: face in {steps_to_face} steps, then |x_L| pinned at xbar; iH=0 branch: "
        f"rate-{a_hi} finite-time, rate-{a_lo} exactly geometric at {target:.3f}, asymptotic only")
@@ -883,6 +1287,102 @@ for _ in range(120):
 report("S5   saturation-robust bounds: |x_L| >= |iota_L| and dU >= 2 piL (1-beta) iota_L^2 "
        "along every path", ok_s5, "120 random admissible draws")
 
+# ================================================================ P3k: oscillation diagnostic
+# Convergence and period-two limits are separated by first vs second differences
+# of the orbit: at the (SS+) benchmark both vanish on the tail; on the exact
+# two-cycle instance of thm:bistable(f) the second difference is identically
+# zero while the first difference is bounded away from zero.
+from fractions import Fraction as Fr
+
+P_bm = reduced_map_params()
+b_o, D_o = 0.4, 0.6
+for _ in range(60000): b_o, D_o = step(b_o, D_o, P_bm)
+xs = [(b_o, D_o)]
+for _ in range(200):
+    b_o, D_o = step(b_o, D_o, P_bm); xs.append((b_o, D_o))
+d1_bm = max(abs(xs[k+1][0]-xs[k][0]) + abs(xs[k+1][1]-xs[k][1]) for k in range(100, 200))
+d2_bm = max(abs(xs[k+2][0]-xs[k][0]) + abs(xs[k+2][1]-xs[k][1]) for k in range(100, 198))
+
+def step_exact(b, D, Q):
+    Up = -Q['v'] + 2*Q['c']*(1 - Q['c']*b)*D
+    b2 = b + Q['alpha']*Up
+    b2 = Fr(0) if b2 < 0 else (Fr(1) if b2 > 1 else b2)
+    return b2, (1 - Q['lam0'])*(1 - Q['eta']*(1 - b))**2 * D + Q['I']
+
+Q_cyc = dict(eta=Fr(1,2), c=Fr(1,8), lam0=Fr(3,4), I=Fr(1,20),
+             v=Fr(75137, 5391360), alpha=Fr(1198080, 2651))
+s_cyc1 = (Fr(7,11), Fr(11737,189540)); s_cyc2 = (Fr(7,9), Fr(113,1872))
+cyc_exact = (step_exact(s_cyc1[0], s_cyc1[1], Q_cyc) == s_cyc2 and
+             step_exact(s_cyc2[0], s_cyc2[1], Q_cyc) == s_cyc1)
+d1_cyc = float(abs(s_cyc1[0]-s_cyc2[0]) + abs(s_cyc1[1]-s_cyc2[1]))
+# Onset: at the benchmark no non-convergent tail exists anywhere inside (SS)
+# -- clause (c)'s alpha-free eigenvalue condition 2*eta <= c(1+s0) holds there
+# -- while at the sharpness configuration the saddle's second eigenvalue
+# crosses -1 at a closed-form alpha_flip, and the exact two-cycle sits just
+# above the flip: the witness lives at the birth of the period-two branch.
+_s0bm = (1 - P_bm['lam0']) * (1 - P_bm['eta']) ** 2
+cond_c_bm = 2 * P_bm['eta'] <= P_bm['c'] * (1 + _s0bm)
+_starts = [(0.4, 0.6), (0.9, 0.35), (0.97, 0.44), (0.975, Dstar(0.975, P_bm) * 1.001),
+           (0.5, 1.0), (0.2, 0.1)]
+sweep_ok = True
+for _al in (0.15, 0.25, 0.35, 0.45, 0.55, 0.61):
+    _Pa = dict(P_bm); _Pa['alpha'] = _al
+    for _b0, _D0 in _starts:
+        _b, _D = _b0, _D0; _tr = []
+        for _t in range(20000):
+            _b, _D = step(_b, _D, _Pa)
+            if _t >= 19800: _tr.append((_b, _D))
+        _d1s = max(abs(_tr[k+1][0] - _tr[k][0]) + abs(_tr[k+1][1] - _tr[k][1])
+                   for k in range(len(_tr) - 1))
+        sweep_ok &= _d1s < 1e-8
+_we, _wcf, _wl, _wI = 0.5, 0.125, 0.75, 0.05
+_bdw = 161 / 227
+_sw = (1 - _wl) * (1 - _we * (1 - _bdw)) ** 2
+_spw = 2 * _we * (1 - _wl) * (1 - _we * (1 - _bdw))
+_Dw = _wI / (1 - _sw)
+_aflip = (1 + _sw) / (_wcf * _Dw * (_wcf * (1 + _sw) + (1 - _wcf * _bdw) * _spw))
+def _lam2w(_al):
+    _aJ = 1 - 2 * _al * _wcf * _wcf * _Dw
+    _bJ = 2 * _al * _wcf * (1 - _wcf * _bdw)
+    _trJ = _aJ + _sw; _detJ = _aJ * _sw - _bJ * _spw * _Dw
+    return (_trJ - np.sqrt(_trJ * _trJ - 4 * _detJ)) / 2
+_awit = 1198080 / 2651
+flip_ok = (_lam2w(0.99 * _aflip) > -1 > _lam2w(1.01 * _aflip)
+           and 0 < _awit / _aflip - 1 < 0.002 and cond_c_bm)
+
+report("P3k  oscillation diagnostic: ||x_{t+2}-x_t|| -> 0 separates convergence from period-two; "
+       "benchmark converges everywhere inside (SS) (clause (c) holds alpha-free there); witness "
+       "saddle flips at closed-form alpha_flip with the exact cycle just above the flip",
+       d1_bm < 1e-12 and d2_bm < 1e-12 and cyc_exact and d1_cyc > 0.1 and sweep_ok and flip_ok,
+       f"benchmark tail d1={d1_bm:.1e}, d2={d2_bm:.1e}; two-cycle exact in rationals, d1={d1_cyc:.3f}; "
+       f"sweep 6 alphas x 6 starts clean; alpha_flip={_aflip:.2f}, exact cycle "
+       f"{(_awit/_aflip-1)*100:.2f}% above; 2*eta={2*P_bm['eta']} <= c(1+s0)={P_bm['c']*(1+_s0bm):.4f}")
+
+# ================================================================ P3l: per-run certification (exact rationals)
+# (SS+) is verified once as an exact rational inequality; each benchmark run is
+# then certified by an exact-rational componentwise-comparable step, after which
+# convergence is the machine-checked monotone-step principle, thm:bistable(d).
+Q_bm = dict(eta=Fr(1,2), c=Fr(9,10), lam0=Fr(1,50), I=Fr(1,50), v=Fr(1,10), alpha=Fr(1,10))
+s0_ex = (1 - Q_bm['lam0'])*(1 - Q_bm['eta'])**2
+amono_ex = Q_bm['lam0']*s0_ex / (2*Q_bm['c']*Q_bm['I']*(Q_bm['c']*s0_ex + 2*Q_bm['eta']*(1 - Q_bm['lam0'])))
+ssplus_exact = Q_bm['alpha'] < amono_ex
+cert_steps = []
+for (b0r, D0r) in [(Fr(2,5), Fr(3,5)), (Fr(1,10), Fr(1,10)), (Fr(4,5), Fr(1,2)),
+                   (Fr(3,5), Fr(11,10)), (Fr(1,4), Fr(1,20)), (Fr(19,20), Fr(21,20))]:
+    prev = (b0r, D0r); found = None
+    for t in range(1, 61):
+        cur = step_exact(prev[0], prev[1], Q_bm)
+        db, dD = cur[0]-prev[0], cur[1]-prev[1]
+        if (db >= 0 and dD >= 0) or (db <= 0 and dD <= 0):
+            found = t; break
+        prev = cur
+    cert_steps.append(found)
+report("P3l  per-run certification: exact (SS+) + exact-rational comparable step on every start (clause (d))",
+       ssplus_exact and all(s is not None for s in cert_steps),
+       f"alpha_mono = {float(amono_ex):.6f} exact; comparable step at t = {cert_steps}")
+
 print()
 print(f"{'='*70}")
 print(f"DE-RISK RESULT: {sum(PASS)}/{len(PASS)} suites pass")
+
+sys.exit(0 if all(PASS) else 1)

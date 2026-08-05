@@ -5,10 +5,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 rng = np.random.default_rng(3)
-plt.rcParams.update({"font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["cmr10"],
+    "mathtext.fontset": "cm",
+    "axes.formatter.use_mathtext": True,
+    "font.size": 9,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "pdf.fonttype": 42,
+})
+PDF_METADATA = {"CreationDate": None, "ModDate": None}
 
 # ---------- shared reduced model (linear-cost corner variant) ----------
-P = dict(eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, alpha=0.6)
+P = dict(eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, alpha=0.1)
 def srate(b, P):  return (1 - P['lam0']) * (1 - P['eta'] * (1 - b)) ** 2
 def Dstar(b, P):  return P['I'] / (1 - srate(b, P))
 def step(b, D, P, rho=0.0, noise=0.0):
@@ -19,16 +29,17 @@ def step(b, D, P, rho=0.0, noise=0.0):
 # ============ Figure 1: phase portrait, nullclines, basins ============
 fig, ax = plt.subplots(figsize=(4.6, 3.4))
 Dmax = 1.15
-# basin classification on a grid
+# basin classification on a grid (vectorized; iteration count scaled with 1/alpha)
 nb, nd = 160, 140
 bb = np.linspace(0, 1, nb); dd = np.linspace(0, Dmax, nd)
-basin = np.zeros((nd, nb))
-for i, D0 in enumerate(dd):
-    for j, b0 in enumerate(bb):
-        b, D = b0, D0
-        for _ in range(900):
-            b, D = step(b, D, P)
-        basin[i, j] = 1.0 if b > 0.5 else 0.0
+Bg, Dg = np.meshgrid(bb, dd)
+b_arr, D_arr = Bg.copy(), Dg.copy()
+for _ in range(5400):
+    Up = -P['v'] + 2 * P['c'] * (1 - P['c'] * b_arr) * D_arr
+    D_new = np.maximum(0.0, srate(b_arr, P) * D_arr + P['I'])
+    b_arr = np.clip(b_arr + P['alpha'] * Up, 0.0, 1.0)
+    D_arr = D_new
+basin = (b_arr > 0.5).astype(float)
 ax.contourf(bb, dd, basin, levels=[-0.5, 0.5, 1.5],
             colors=["#dce8f5", "#f5ddd6"], alpha=0.9)
 # nullclines
@@ -41,17 +52,19 @@ ax.plot(bg, [Dstar(b, P) for b in bg], 'k-', lw=1.2,
 for (b0, D0) in [(0.15, 0.55), (0.55, 0.25), (0.35, 0.95), (0.8, 0.6), (0.6, 1.05), (0.05, 0.05)]:
     b, D = b0, D0
     tb, td = [b], [D]
-    for _ in range(260):
+    for _ in range(1560):
         b, D = step(b, D, P)
         tb.append(b); td.append(D)
     ax.plot(tb, td, lw=0.8, color="#444444", alpha=0.8)
     ax.plot(b0, D0, '.', ms=4, color="#444444")
-ax.plot(0, Dstar(0, P), 'o', ms=7, mfc="#1f5fa8", mec='k', zorder=5, label="calibrated attractor")
-ax.plot(1, Dstar(1, P), 's', ms=7, mfc="#c0392b", mec='k', zorder=5, label="captured attractor")
+ax.plot(0, Dstar(0, P), 'o', ms=7, mfc="#1f5fa8", mec='k', zorder=5,
+        clip_on=False, label="calibrated attractor")
+ax.plot(1, Dstar(1, P), 's', ms=7, mfc="#c0392b", mec='k', zorder=5,
+        clip_on=False, label="captured attractor")
 ax.set_xlabel(r"deference $\beta$"); ax.set_ylabel(r"disagreement stock $D$")
 ax.set_xlim(0, 1); ax.set_ylim(0, Dmax)
 ax.legend(loc="upper left", fontsize=7, frameon=False)
-fig.tight_layout(); fig.savefig("fig_phase.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_phase.pdf", metadata=PDF_METADATA); plt.close(fig)
 
 # ============ Figure 2: hysteresis loop ============
 rho_cure = 2 * P['c'] * (1 - P['c']) - P['v'] * P['lam0'] / P['I']
@@ -60,12 +73,12 @@ fig, ax = plt.subplots(figsize=(4.6, 3.0))
 b, D = 1.0, Dstar(1, P)
 rs_up = np.linspace(0, 0.15, 400); bu = []
 for rho in rs_up:
-    for _ in range(400): b, D = step(b, D, P, rho=rho)
+    for _ in range(2400): b, D = step(b, D, P, rho=rho)
     bu.append(b)
 # down-sweep from wherever the up-sweep ended
 rs_dn = rs_up[::-1]; bd = []
 for rho in rs_dn:
-    for _ in range(400): b, D = step(b, D, P, rho=rho)
+    for _ in range(2400): b, D = step(b, D, P, rho=rho)
     bd.append(b)
 ax.plot(rs_up, bu, color="#c0392b", lw=1.8, label="up-sweep (start captured)")
 ax.plot(rs_dn, bd, color="#1f5fa8", lw=1.8, ls="--", label="down-sweep (after cure)")
@@ -76,7 +89,7 @@ ax.annotate("prevention threshold = 0\n(deterministic)", (0.002, 0.06), fontsize
 ax.set_xlabel(r"civic weight $\rho$"); ax.set_ylabel(r"deference $\beta$")
 ax.set_ylim(-0.05, 1.05)
 ax.legend(loc="center right", fontsize=7, frameon=False)
-fig.tight_layout(); fig.savefig("fig_hysteresis.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_hysteresis.pdf", metadata=PDF_METADATA); plt.close(fig)
 
 # ============ Figure 3: early-warning indicators near the fold ============
 P3 = dict(eta=0.5, c=0.9, lam0=0.02, v=0.16, alpha=0.8)
@@ -124,41 +137,54 @@ ax.set_ylabel("relative variance"); ax2.set_ylabel("autocorrelation")
 ax.set_xlim(min(xx) - 0.02, 1.02)
 h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
 ax.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=7, frameon=False)
-fig.tight_layout(); fig.savefig("fig_warning.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_warning.pdf", metadata=PDF_METADATA); plt.close(fig)
 
-# ============ Figure 4: Arrhenius escape scaling + civic-weight protection ============
+# ============ Figure 4: Arrhenius crossing scaling + civic-weight protection ============
 P_e = dict(P); P_e['I'] = 0.040
-def esc(sigma, rho, n=48, cap=250000, seed=0):
+def saddle_policy(rho):
+    lo, hi = 0.0, 1.0
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        grad = -P_e['v'] + (2 * P_e['c'] * (1 - P_e['c'] * mid) - rho) * Dstar(mid, P_e)
+        if grad < 0:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+def crossing_times(sigma, rho, n=48, cap=1500000, seed=0):
     g = np.random.default_rng(2000 + seed)
     b = np.zeros(n); D = np.full(n, Dstar(0, P_e)); te = np.full(n, cap, float)
     alive = np.ones(n, bool)
+    bd = saddle_policy(rho)
     for t in range(cap):
         if not alive.any(): break
         Up = -P_e['v'] + (2 * P_e['c'] * (1 - P_e['c'] * b) - rho) * D + sigma * g.standard_normal(n)
-        b = np.clip(b + P_e['alpha'] * Up, 0, 1)
+        b_new = np.clip(b + P_e['alpha'] * Up, 0, 1)
         D = np.maximum(0.0, srate(b, P_e) * D + P_e['I'])
-        newly = alive & (b > 0.9); te[newly] = t; alive &= ~newly
+        b = b_new
+        newly = alive & (b >= bd); te[newly] = t; alive &= ~newly
     return te, int((~alive).sum())
-sig_list = [0.046, 0.052, 0.060, 0.070]
+sig_list = [0.160, 0.200, 0.280, 0.420]   # rescaled with alpha (noise enters as alpha*sigma), spanning the crossing-time range
 X, Y = [], []
 for k, s in enumerate(sig_list):
-    te, ne = esc(s, 0.0, seed=k)
+    te, ne = crossing_times(s, 0.0, seed=k)
     X.append(1 / s ** 2); Y.append(np.log10(te.sum() / (ne + 0.5)))
 rhos = [0.0, 0.02, 0.04]; HZ = []
 for k, r in enumerate(rhos):
-    te, ne = esc(0.070, r, seed=60 + k)
+    te, ne = crossing_times(0.150, r, seed=60 + k)
     HZ.append((ne + 0.5) / te.sum())
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(6.4, 2.7), gridspec_kw={"width_ratios": [3, 2]})
 cf = np.polyfit(X, Y, 1)
 axA.plot(X, np.polyval(cf, X), '-', color="#999999", lw=1)
 axA.plot(X, Y, 'o', color="#1f5fa8", ms=5)
-axA.set_xlabel(r"$1/\sigma^2$"); axA.set_ylabel(r"$\log_{10}$ mean escape time")
+axA.set_xlabel(r"$1/\sigma^2$"); axA.set_ylabel(r"$\log_{10}$ mean crossing time")
 axA.set_title("Arrhenius scaling", fontsize=9)
 axB.bar([str(r) for r in rhos], HZ, color=["#c0392b", "#b07aa1", "#1f5fa8"], width=0.6)
 axB.set_yscale("log"); axB.set_xlabel(r"civic weight $\rho$")
-axB.set_ylabel("escape hazard (per step)")
+axB.set_ylabel("crossing hazard (per step)")
 axB.set_title(r"protection at $\rho \ll \rho_{\mathrm{cure}}$", fontsize=9)
-fig.tight_layout(); fig.savefig("fig_arrhenius.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_arrhenius.pdf", metadata=PDF_METADATA); plt.close(fig)
 
-print("figures written:", "fig_phase.png fig_hysteresis.png fig_warning.png fig_arrhenius.png")
+print("figures written:", "fig_phase.pdf fig_hysteresis.pdf fig_warning.pdf fig_arrhenius.pdf")
 print(f"rho_cure={rho_cure:.4f}, I_fold={I_fold:.4f}, warning: var x{V[-1]/V[0]:.1f}, AC1 {A[0]:.2f}->{A[-1]:.2f}")

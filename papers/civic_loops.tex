@@ -1,21 +1,52 @@
+\ifdefined\pdfsetrandomseed\pdfsetrandomseed 20260804 \fi
+\newif\ifcivictagged
+\ifdefined\IfFormatAtLeastTF
+\IfFormatAtLeastTF{2025-06-01}{%
+  \DocumentMetadata{lang=en-US,tagging=on}
+  \civictaggedtrue
+}{}
+\fi
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{microtype}
 \usepackage{graphicx}
+\graphicspath{{../figures/}{./}}
+\ifcivictagged
+  \newcommand{\civicincludegraphics}[3][]{\includegraphics[alt={#2},#1]{#3}}
+\else
+  \newcommand{\civicincludegraphics}[3][]{\includegraphics[#1]{#3}}
+\fi
 \usepackage{booktabs}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage[round]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\definecolor{civicref}{HTML}{8C2F1B}
+\definecolor{civiccite}{HTML}{1F5FA8}
+\usepackage[colorlinks,linkcolor=civicref,citecolor=civiccite,urlcolor=civiccite]{hyperref}
+\hypersetup{
+  pdfauthor={Daniel Hofheinz},
+  pdftitle={{Civic Loops: Regulating the Feedback Structure, Not the Knob}},
+  pdfsubject={Closed-loop analysis and certification of civic alignment dynamics},
+  pdfkeywords={AI alignment, civic loops, feedback systems, control theory, observability, AI governance},
+  pdfcopyright={Copyright (c) 2026 Daniel Hofheinz. All rights reserved.},
+  pdfdisplaydoctitle=true
+}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{assumption}{Assumption}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{numresult}[theorem]{Numerical Result}
 \theoremstyle{remark}
-\newtheorem{remark}{Remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+\hfuzz=0.2pt \interfootnotelinepenalty=10000
+\pagestyle{headings}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 
 \DeclareMathOperator{\rk}{rank}
 \DeclareMathOperator{\Var}{Var}
@@ -24,25 +55,27 @@
 \newcommand{\R}{\mathbb{R}}
 
 \title{Civic Loops: Regulating the Feedback Structure,\\ Not the Knob}
-\author{Daniel Hofheinz}
-\date{July 29, 2026}
+\author{Daniel Hofheinz\\[2pt]
+  {\small \href{mailto:daniel@danielhofheinz.com}{\texttt{daniel@danielhofheinz.com}}
+   \,$\cdot$\, \href{https://orcid.org/0009-0009-5237-5887}{ORCID 0009-0009-5237-5887}}}
+\date{August 5, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Two companion papers analyze a system parametrized by a deference knob $\beta$: the first proves that satisfaction pressure statically selects harmful deference, the second that gradient ascent on measured satisfaction dynamically drifts $\beta$ across a basin boundary into capture, after which the harm is invisible to the very metric being optimized. This paper changes the object of analysis from the knob to the closed loop the knob lives inside: population beliefs as plant, a satisfaction-ascending operator as controller, a content channel feeding fresh contested claims at gain $g$ from standing disagreement, and a measurement channel mapping population error to the operator's observable. Five results follow. An aggregation--conservation theorem locates the companion's knife edge inside a complete classification: stationary measured agreement is exactly conserved on two loci (single-claim stocks with no content feedback; $L^1$ portfolio stocks at $g=\lambda_0$), genuinely rewards capture for quadratic portfolio stocks whenever the gain is below the grounding rate, and exhibits an interior stationary optimum---a partial-capture regime---above it. A knob-free certificate, $v(\lambda_0-g)\ge 2cI$, is also policy-free: under it, every sign-consistent adaptation rule at any rate from any initial condition converges to calibration, while below the companion capture line the captured corner is stable, and the band between contains stable partial-capture equilibria at descending crossings of an explicit scalar function. Gain ceilings are exact and generalize to networks: captured stocks diverge precisely when content gain exceeds grounding, and on a multi-community influence structure the certificate becomes $v_k \ge 2c_k[(\mathrm{Id}-\bar S-G)^{-1}I]_k$ with the spectral condition $\rho(\bar S+G)<1$ replacing $g<\lambda_0$. The companion's laundering theorem becomes an observability statement that is exact and nonlinear: at capture the satisfaction output sequence is a function of the healthy coordinate alone, so the diverging coordinate is invisible globally, not merely to first order; any $\varepsilon$-weighted audit sensor restores detectability with latency $\ln(1/\varepsilon)/(2\ln(1+\zeta))$. The adaptation rate is itself a regulable: as $\alpha\to 0$ the capture separatrix obeys $\alpha\,(D_{\mathrm{sep}}-D^\ast(\beta_0))\to\kappa^\ast(\beta_0)$, the separatrix scale of an explicit $\alpha$-free jump map, approximated by the closed-form integral $\int(1-s-g)/(2c(1-cb))\,db$. All loop parameters are identifiable from contested-stream panels, the estimated certificate predicts dynamical fate out of sample, and a safe-side decision rule certifies no capturable loop in simulation. The regulatory translation is a menu of inequalities on loop properties---gain caps, grounding floors, audit-sensor mandates, cadence caps---none of which mentions the knob. Every formal claim is verified against an independent numerical battery.
+Two companions prove that satisfaction pressure selects harmful deference and satisfaction ascent drifts the knob into capture, where the harm is invisible to the optimized metric. This paper moves from the knob to the closed loop it lives inside: population beliefs as plant, a satisfaction-ascending operator as controller, a content channel feeding contested claims at gain $g$ from standing disagreement, and a measurement channel from error to observable. Five results follow. An aggregation--conservation theorem locates the companions' knife edge in a complete classification: stationary measured agreement is conserved on two exact loci, rewards capture below the grounding rate $\lambda_0$, and admits an interior partial-capture optimum above it. A knob-free certificate, $v(\lambda_0-g)\ge 2cI$, forces every sign-consistent adaptation rule at any rate to calibration; below the capture line the corner is stable, with stable partial-capture equilibria between. Gain ceilings are exact -- captured stocks diverge precisely when gain exceeds grounding -- and the certificate becomes componentwise on networks under $\rho(\bar S+G)<1$. Laundering becomes exact nonlinear unobservability: at capture the satisfaction output depends on the healthy coordinate alone, and an $\varepsilon$-weighted audit sensor restores detectability with $\ln(1/\varepsilon)$ latency. Rescaled transit converges to an $\alpha$-free jump map whose closed-form threshold scale governs the capture separatrix. Loop parameters are identifiable from contested-stream panels, the estimated certificate predicts fate out of sample, and a safe-side rule certifies no capturable loop in simulation. The regulatory translation is a menu of inequalities -- gain caps, grounding floors, audit-sensor mandates, cadence caps -- none of which mentions the knob. Every theorem is machine-checked in Lean 4, every claim battery-verified.
 \end{abstract}
 
 \section{Introduction: the change of object}\label{sec:intro}
 
-The first paper in this sequence \citep{hofheinz2026civic} treats the deference parameter $\beta$ as chosen once and proves that per-interaction satisfaction pressure selects $\beta^\star>0$ at a strict cost to collective epistemic capacity. The second \citep{hofheinz2026drift} makes the pressure dynamical: an operator running gradient ascent on measured satisfaction, against a disagreement stock that deference itself replenishes, is a planar cooperative map that is bistable between a calibrated and a captured regime; crossing the basin boundary is an accumulative risk in the sense of \citet{kasirzadeh2025two}, and at full capture measured satisfaction becomes structurally blind to the harm. That last result has a corrosive implication for governance: any regulation phrased in terms of $\beta$, or of satisfaction telemetry, regulates a quantity that is endogenous to the loop being optimized---and the loop launders. The deference knob is the wrong object.
+The first paper in this sequence \citep{hofheinz2026civic} treats the deference parameter $\beta$ as chosen once and proves that per-interaction satisfaction pressure selects $\beta^\star>0$ at a strict cost to collective epistemic capacity. The second \citep{hofheinz2026drift} makes the pressure dynamical: an operator running gradient ascent on measured satisfaction, against a disagreement stock that deference itself replenishes, is a planar cooperative map that is bistable between a calibrated and a captured regime; crossing the basin boundary is an accumulative risk in the sense of \citet{kasirzadeh2025two}, and at full capture measured satisfaction becomes structurally blind to the harm. That last result has a corrosive implication for governance: any regulation phrased in terms of $\beta$, or of satisfaction telemetry, regulates a quantity that is endogenous to the loop being optimized -- and the loop launders. The deference knob is the wrong object.
 
-This paper develops the mathematics of the right object: the closed loop itself. The loop has four parts. The \emph{plant} is the population's portfolio of contested claims, carrying a disagreement stock $D$. The \emph{controller} is the operator, adapting $\beta$ by some rule that ascends measured satisfaction. The \emph{content channel} is new in this paper: standing disagreement shapes the arrival of fresh contested claims---polarized environments generate polarized questions---at a gain $g\ge 0$ per unit stock. The \emph{measurement channel} maps population error into the operator's observable, weighting each user's error by that user's residual independence; it is this weighting that launders. The empirical record motivating the controller and the channels is the same as the companions': preference optimization measurably increases sycophantic agreement \citep{sharma2024towards}, over-optimizing learned satisfaction proxies degrades true objectives \citep{gao2023scaling}, RLHF can teach models to mislead evaluators rather than inform them \citep{wen2025language}, and optimizing for user feedback discovers targeted manipulation \citep{williams2024targeted}.
+This paper develops the mathematics of the right object: the closed loop itself. The loop has four parts. The \emph{plant} is the population's portfolio of contested claims, carrying a disagreement stock $D$. The \emph{controller} is the operator, adapting $\beta$ by some rule that ascends measured satisfaction. The \emph{content channel} is new in this paper: standing disagreement shapes the arrival of fresh contested claims -- polarized environments generate polarized questions -- at a gain $g\ge 0$ per unit stock. The \emph{measurement channel} maps population error into the operator's observable, weighting each user's error by that user's residual independence; it is this weighting that launders. The empirical record motivating the controller and the channels is the same as the companions': preference models measurably reward sycophantic agreement \citep{sharma2024towards}, over-optimizing learned satisfaction proxies degrades true objectives \citep{gao2023scaling}, RLHF can teach models to mislead evaluators rather than inform them \citep{wen2025language}\footnote{A 2026 replication/critique reports that the reward hacking of \citet{wen2025language} disappears in the one setting it reran with a corrected setup (\url{https://iclr-blogposts.github.io/2026/blog/2026/mislead-lm/}); it is cited here as contested supplementary evidence, and no result below rests on it.}, and optimizing for user feedback discovers targeted manipulation \citep{williams2025targeted}.
 
-The geometric heart of the change of object is already visible in the companion's phase portrait. Its two nullclines are the input--output characteristics of the two subsystems---the population's stationary stock $D^\ast(\beta)$ and the operator's best response $\hat\beta(D)$. The knob moves the \emph{state along} the curves. Every regulatory instrument worth the name moves the \emph{curves}. Safety is a property of the curve pair, and because the loop is monotone, that property is certifiable by the sign of a single scalar function, in the spirit of the small-gain theory of monotone input/output systems \citep{angeli2003monotone,angeli2004multi}; the multistability of the companion is exactly the crossing-pattern multistability of that theory. The dynamical backbone is the convergence theory of planar cooperative maps \citep{smith1998planar,hirsch2005monotone}; the observability language is classical \citep{sontag1998mathematical}; the rate-separation analysis is the deterministic skeleton of two-timescale stochastic approximation \citep{borkar1997stochastic,borkar2008stochastic}; and the network extension inherits the opinion-dynamics lineage of \citet{degroot1974reaching}, \citet{friedkin1990social}, and \citet{golub2010naive}.
+The geometric heart of the change of object is already visible in the companion's phase portrait. Its two nullclines are the input--output characteristics of the two subsystems -- the population's stationary stock $D^\ast(\beta)$ and the operator's best response $\hat\beta(D)$. The knob moves the \emph{state along} the curves. Every regulatory instrument worth the name moves the \emph{curves}. Safety is a property of the curve pair, and because the loop is monotone, that property is certifiable by the sign of a single scalar function, in the spirit of the small-gain theory of monotone input/output systems \citep{angeli2003monotone,angeli2004multi}; the multistability of the companion is exactly the crossing-pattern multistability of that theory. The dynamical backbone is the convergence theory of planar cooperative maps \citep{smith1998planar,hirsch2006monotone}; the observability language is classical \citep{sontag1998mathematical}; the rate-separation analysis is the deterministic skeleton of two-timescale stochastic approximation \citep{borkar1997stochastic,borkar2008stochastic}; and the network extension inherits the opinion-dynamics lineage of \citet{degroot1974reaching}, \citet{friedkin1990social}, and \citet{golub2010naive}. The content channel has recommender-system antecedents -- algorithmic confounding and degenerate feedback loops, the algorithm reshaping the data it trains on \citep{chaney2018algorithmic, jiang2019degenerate}, with induced preference shift the operator-side hazard \citep{carroll2022estimating} -- and the interconnection is performative in the sense of \citet{perdomo2020performative}: the observable the controller ascends is measured against a plant its own policy moves. What the loop framing adds is what those lines do not carry: certificates, ceilings, and observability structure for the crossing pattern, rather than stability of a single operating point.
 
-Section~\ref{sec:model} defines the loop and proves the classification theorem: under a step-size condition the loop is a monotone map, every orbit converges to an equilibrium, and the equilibrium set with stabilities is read off the sign pattern of one scalar function $G_g$. Section~\ref{sec:conservation} proves the aggregation--conservation theorem, a complete map of which (stock, loss, feedback) triples conserve stationary measured agreement, which reward capture, and which exhibit interior partial-capture optima. Section~\ref{sec:certificate} proves the knob-free certificate and the zone structure, including the existence of stable partial-capture equilibria in the intermediate zone. Section~\ref{sec:ceilings} gives the exact gain ceilings and the network generalization, where the certificate becomes spectral. Section~\ref{sec:obs} restates laundering as an exact nonlinear indistinguishability, derives the Kalman rank corollary, and prices the audit sensor by its detection latency. Section~\ref{sec:rate} proves the separatrix limit: the adaptation rate enters capture risk through an explicit $\alpha$-free jump map, making update cadence a quantifiable instrument. Section~\ref{sec:id} shows the loop parameters are identifiable from contested-stream panels and gives a safe-side certification rule with delta-method inference. Section~\ref{sec:reg} assembles the regulatory menu; Section~\ref{sec:verification} records the verification protocol; Section~\ref{sec:open} states what remains open.
+Section~\ref{sec:model} defines the loop and proves the classification theorem: one step-size condition makes the loop a monotone map, a strictly stronger one makes every orbit converge to an equilibrium, and the equilibrium set with stabilities is read off the sign pattern of one scalar function $G_g$. Section~\ref{sec:conservation} proves the aggregation--conservation theorem, a complete map of which (stock, loss, feedback) triples conserve stationary measured agreement, which reward capture, and which exhibit interior partial-capture optima. Section~\ref{sec:certificate} proves the knob-free certificate and the zone structure, including the existence of stable partial-capture equilibria in the intermediate zone. Section~\ref{sec:ceilings} gives the exact gain ceilings and the network generalization, where the certificate becomes spectral. Section~\ref{sec:obs} restates laundering as an exact nonlinear indistinguishability, derives the Kalman rank corollary, and prices the audit sensor by its detection latency. Section~\ref{sec:rate} proves the separatrix limit: the adaptation rate enters capture risk through an explicit $\alpha$-free jump map, making update cadence a quantifiable instrument. Section~\ref{sec:id} shows the loop parameters are identifiable from contested-stream panels and gives a safe-side certification rule with delta-method inference. Section~\ref{sec:reg} assembles the regulatory menu; Section~\ref{sec:verification} records the verification protocol -- every theorem, lemma, proposition, and corollary machine-checked in Lean~4, every claim battery-verified; Section~\ref{sec:open} states what remains open.
 
 \section{The loop model and its classification}\label{sec:model}
 
@@ -87,19 +120,23 @@ G_g(\beta) \;:=\; -v + 2c(1-c\beta)\,\frac{I}{1 - s(\beta) - g},
 \subsection{The classification theorem}
 
 \begin{assumption}[Step-size condition $(\mathrm{SS}_g)$]\label{ass:ss}
-$g<\lambda_0$ and $\alpha \le (\lambda_0-g)/(2c^2 I)$.
+$g<\lambda_0$ and $\alpha < (\lambda_0-g)/(2c^2 I)$. This is exactly the condition making the map cooperative on the box; it is not by itself a convergence condition. Where convergence is claimed we assume in addition
+\begin{equation}\label{eq:ssplusg}
+\alpha \;<\; \alpha_{\mathrm{mono}}(g) \;:=\; \frac{(\lambda_0-g)\bigl(s(0)+g\bigr)}{2cI\bigl[c\bigl(s(0)+g\bigr) + 2\eta(1-\lambda_0)\bigr]},
+\end{equation}
+written $(\mathrm{SS}^+_g)$, which forces $\det J>0$ uniformly on the box and implies $(\mathrm{SS}_g)$.
 \end{assumption}
 
 \begin{theorem}[Loop classification]\label{thm:classify}
-Under $(\mathrm{SS}_g)$ the box $B=[0,1]\times[I,\,I/(\lambda_0-g)]$ is invariant and absorbing for \eqref{eq:stock}--\eqref{eq:map}, the map is monotone (cooperative) on $B$, and every orbit converges to a fixed point. The fixed-point set is read off $G_g$: the calibrated corner $p_1=(0,D^\ast_g(0))$ is a fixed point iff $G_g(0)\le 0$; the captured corner $p_2=(1,D^\ast_g(1))$ iff $G_g(1)\ge 0$; interior fixed points are exactly the roots $\beta$ of $G_g$, at $D=D^\ast_g(\beta)$. At an interior root the characteristic polynomial of the Jacobian satisfies the identity
+Under $(\mathrm{SS}_g)$ the box $B=[0,1]\times[I,\,I/(\lambda_0-g)]$ is invariant for \eqref{eq:stock}--\eqref{eq:map} and the map is monotone (cooperative) on it; the larger box $B^\ast=[0,1]\times[I,\,1/(2\alpha c^2)]$ is invariant, cooperative, and absorbing. If an orbit's states are componentwise comparable at any one time it is monotone thereafter and converges to a fixed point; under $(\mathrm{SS}^+_g)$ every orbit converges, and the equilibrium set with stabilities is read off the sign pattern of $G_g$. The step-size hypothesis is not removable: the period-two instance in the sharpness clause of the companion's bistability theorem has $g=0$ and satisfies $(\mathrm{SS}_g)$ strictly \citep{hofheinz2026drift}. The fixed-point set is read off $G_g$: the calibrated corner $p_1=(0,D^\ast_g(0))$ is a fixed point iff $G_g(0)\le 0$; the captured corner $p_2=(1,D^\ast_g(1))$ iff $G_g(1)\ge 0$; interior fixed points are exactly the roots $\beta$ of $G_g$, at $D=D^\ast_g(\beta)$. At an interior root the characteristic polynomial of the Jacobian satisfies the identity
 \begin{equation}\label{eq:p1}
 p(1) \;=\; -\,\frac{\alpha D\,(1-s-g)^2}{I}\;G_g'(\beta),
 \end{equation}
-so a transversal descending crossing of $G_g$ ($G_g'<0$) is a stable fixed point and a transversal ascending crossing is a saddle, provided additionally $2\eta(1-\lambda_0)\le c\,(1+s(0)+g)$. Corners with strict gradient sign ($G_g(0)<0$; $G_g(1)>0$) are locally asymptotically stable.
+so a transversal descending crossing of $G_g$ ($G_g'<0$) is a stable fixed point under $(\mathrm{SS}_g)$ alone, and a transversal ascending crossing is a saddle provided additionally $2\eta(1-\lambda_0)\le c\,(1+s(0)+g)$. The proviso is needed only on the ascending branch, and is not removable there. Corners with strict gradient sign ($G_g(0)<0$; $G_g(1)>0$) are locally asymptotically stable.
 \end{theorem}
 
 \begin{proof}
-\emph{Box.} If $D\le I/(\lambda_0-g)$ then $D'\le(1-\lambda_0+g)\tfrac{I}{\lambda_0-g}+I=\tfrac{I}{\lambda_0-g}$, and $D'\ge I$ always; $\beta'\in[0,1]$ by projection. From any $D_0\ge 0$ the affine recursion with multiplier at most $1-\lambda_0+g<1$ gives $\limsup_t D_t \le I/(\lambda_0-g)$, so orbits enter every neighborhood of $B$; nothing below depends on more.
+\emph{Box.} If $D\le I/(\lambda_0-g)$ then $D'\le(1-\lambda_0+g)\tfrac{I}{\lambda_0-g}+I=\tfrac{I}{\lambda_0-g}$, and $D'\ge I$ always; $\beta'\in[0,1]$ by projection, so $B$ is invariant. $B$ is \emph{not} absorbing: at $\beta\equiv1$ the stock law is exactly $D'=(1-\lambda_0+g)D+I$, so $D_0=\tfrac{I}{\lambda_0-g}+\delta$ gives $D_n=\tfrac{I}{\lambda_0-g}+(1-\lambda_0+g)^n\delta$, strictly above the upper face at every finite $n$. Take instead $M:=1/(2\alpha c^2)$, the ceiling at which the monotonicity condition $1-2\alpha c^2D\ge0$ binds; $(\mathrm{SS}_g)$ gives $M>I/(\lambda_0-g)$, whence $(1-\lambda_0+g)M+I\le M$ and $B^\ast=[0,1]\times[I,M]$ is invariant, with the monotonicity argument below applying verbatim on it. From any $D_0\ge0$ the excess above $I/(\lambda_0-g)$ contracts by a factor at most $1-\lambda_0+g<1$ per step uniformly in $\beta$, so it falls below the strictly positive gap $M-I/(\lambda_0-g)$ in finitely many steps: $B^\ast$ is absorbing, and every orbit moreover eventually enters each slack box $[0,1]\times[I,\,I/(\lambda_0-g)+\varepsilon]$, the venue of the convergence argument below.
 
 \emph{Monotonicity.} On the interior of $B$ the Jacobian of \eqref{eq:stock}--\eqref{eq:map} is
 \[
@@ -109,7 +146,13 @@ J \;=\;
 s'(\beta)\,D & s(\beta)+g
 \end{pmatrix},
 \]
-with $s'(\beta)=2\eta(1-\lambda_0)\bigl(1-\eta(1-\beta)\bigr)\ge 0$. All entries are nonnegative: the only one at issue is the first, and on $B$, $1-2\alpha c^2 D \ge 1-2\alpha c^2 I/(\lambda_0-g)\ge 0$ by $(\mathrm{SS}_g)$. Composition with the order-preserving projection $\Pi_{[0,1]}$ preserves monotonicity. By the convergence theory of planar cooperative difference equations \citep{smith1998planar}, every orbit in the compact invariant set converges to a fixed point.
+with $s'(\beta)=2\eta(1-\lambda_0)\bigl(1-\eta(1-\beta)\bigr)\ge 0$. All entries are nonnegative: the only one at issue is the first, and on $B$, $1-2\alpha c^2 D \ge 1-2\alpha c^2 I/(\lambda_0-g)\ge 0$ by $(\mathrm{SS}_g)$. Composition with the order-preserving projection $\Pi_{[0,1]}$ preserves monotonicity.
+
+\emph{Convergence.} If an orbit's states are componentwise comparable at some time, monotonicity propagates the comparison, the orbit is componentwise monotone thereafter, and, confined to a compact invariant box, it converges to a fixed point -- order preservation alone. Under $(\mathrm{SS}^+_g)$, suppose instead that no step is comparable, so every increment lies in the open southeast or northwest quadrant. On $B$ the Jacobian entries above satisfy $a \ge a_{\min} = 1-2\alpha c^2I/(\lambda_0-g)$, $b \le b_{\max} = 2\alpha c$, $c_J \le c_{J,\max} = 2\eta(1-\lambda_0)\,I/(\lambda_0-g)$, and $d \ge d_{\min} = s(0)+g$, and \eqref{eq:ssplusg} is exactly $a_{\min}d_{\min} > b_{\max}c_{J,\max}$. The companion's quadrant-exclusion argument \citep{hofheinz2026drift} then applies verbatim: decomposing each increment along the legs of its coordinate rectangle, a southeast step can be followed by a northwest step only if $a_{\min}d_{\min} < b_{\max}c_{J,\max}$, and symmetrically for the reverse transition -- so the increment quadrant is constant, each coordinate is monotone and bounded, and the orbit converges to a fixed point. Orbits that start above $B$ are covered through the slack boxes, and the admissible slack is exact rather than merely small. Writing $R := I/(\lambda_0-g)$, the four extrema on $[0,1]\times[I,\,R+\varepsilon]$ give strict dominance precisely when $R+\varepsilon < I\,(s(0)+g)/\bigl(\alpha\cdot 2cI[c(s(0)+g)+2\eta(1-\lambda_0)]\bigr)$, that is, when
+\[
+\varepsilon \;<\; \varepsilon^\ast \;:=\; R\Bigl(\frac{\alpha_{\mathrm{mono}}(g)}{\alpha}-1\Bigr):
+\]
+the box height times the fractional $(\mathrm{SS}^+_g)$ margin -- the slack one can afford is exactly the slack one has. For any such $\varepsilon$ the inflated box is forward invariant, cooperativity there is implied rather than assumed (strict dominance forces $1-2\alpha c^2D>0$), and the excess of $D$ over $R$ contracts by the factor $1-\lambda_0+g$ per step uniformly in $\beta$, so entry occurs within $\lceil\log(\varepsilon/(D_0-R))/\log(1-\lambda_0+g)\rceil$ steps. The argument then runs on the inflated box from the entry time on. At the benchmark $\varepsilon^\ast = 0.134$, a $13.4\%$ inflation of $B$. Cooperativity alone does not suffice: the period-two instance cited in the statement is the witness. The convergence theory of planar cooperative maps \citep{smith1998planar} requires an orientation hypothesis that fails here, the clipped projection not being injective.
 
 \emph{Fixed points.} A fixed point forces $D=D^\ast_g(\beta)$ from \eqref{eq:stock}; then $\beta$ is fixed under the projected gradient step iff the gradient $-v+2c(1-c\beta)D^\ast_g(\beta)=G_g(\beta)$ vanishes (interior), is $\le 0$ (at $\beta=0$), or is $\ge 0$ (at $\beta=1$).
 
@@ -117,13 +160,17 @@ with $s'(\beta)=2\eta(1-\lambda_0)\bigl(1-\eta(1-\beta)\bigr)\ge 0$. All entries
 \[
 G_g'(\beta) \;=\; \frac{2cI\bigl[-c(1-s-g)+(1-c\beta)s'\bigr]}{(1-s-g)^2},
 \]
-and substituting $D=I/(1-s-g)$ at the fixed point yields \eqref{eq:p1}. Since $b\,c_J\ge0$ the eigenvalues are real, and $\operatorname{tr}J = a+d \le 1+(1-\lambda_0+g) < 2$, so $p(1)>0$ places both eigenvalues below $1$. For the lower bound, $p(-1)=(1+a)(1+d)-b\,c_J$, and under $(\mathrm{SS}_g)$,
+and substituting $D=I/(1-s-g)$ at the fixed point yields \eqref{eq:p1}. Since $b\,c_J\ge0$ the eigenvalues are real, and $\operatorname{tr}J = a+d \le 1+(1-\lambda_0+g) < 2$, so $p(1)>0$ places both eigenvalues below $1$. For the lower bound, subtracting the two endpoint values of the characteristic polynomial gives the exact identity
+\[
+p(-1)-p(1) \;=\; 2(a+d) \;=\; 2\bigl(1+s+g-2\alpha c^2 D\bigr),
+\]
+whose right side is positive under $(\mathrm{SS}_g)$, since $2\alpha c^2D<1$ on the box. At a \emph{descending} crossing $p(1)>0$ therefore already gives $p(-1)>0$, with no further hypothesis. At an \emph{ascending} crossing $p(1)<0$ and a bound is genuinely needed: $p(-1)=(1+a)(1+d)-b\,c_J$, and under $(\mathrm{SS}_g)$,
 \[
 b\,c_J \;=\; 2\alpha c(1-c\beta)\,s' D \;\le\; \frac{(1-c\beta)s'}{c} \;\le\; \frac{2\eta(1-\lambda_0)}{c},
 \qquad
 (1+a)(1+d) \;\ge\; 1+s(0)+g,
 \]
-so $2\eta(1-\lambda_0)\le c(1+s(0)+g)$ gives $p(-1)>0$, hence both eigenvalues exceed $-1$. (At the benchmark of Section~\ref{sec:rate} the condition reads $0.98\le 1.33$.) Thus $G_g'<0$ at a root implies both eigenvalues in $(-1,1)$, a stable node; $G_g'>0$ implies $p(1)<0$, one eigenvalue above $1$, a saddle. At a corner with strict gradient sign, continuity gives a neighborhood on which the projected $\beta$-step moves weakly toward the corner while $D$ contracts toward $D^\ast_g$ at rate $s+g<1$; the corner is locally asymptotically stable.
+so $2\eta(1-\lambda_0)\le c(1+s(0)+g)$ gives $p(-1)>0$, hence both eigenvalues exceed $-1$. (At the benchmark of Section~\ref{sec:rate} the condition reads $0.98\le 1.12$. It is not removable on this branch: the period-two instance of the companion's sharpness clause \citep{hofheinz2026drift} satisfies $(\mathrm{SS})$ strictly, yet at its saddle $p(-1)<0$ and the second eigenvalue drops below $-1$ -- which is exactly the flip that produces the two-cycle.) Thus $G_g'<0$ at a root implies both eigenvalues in $(-1,1)$, a stable node, under $(\mathrm{SS}_g)$ alone; $G_g'>0$ implies $p(1)<0$, one eigenvalue above $1$, a saddle, with the second above $-1$ under the displayed proviso. At a corner with strict gradient sign, continuity gives a neighborhood on which the projected $\beta$-step moves weakly toward the corner while $D$ contracts toward $D^\ast_g$ at rate $s+g<1$; the corner is locally asymptotically stable.
 \end{proof}
 
 \begin{remark}[Small-gain reading]\label{rem:smallgain}
@@ -135,7 +182,7 @@ Theorem~\ref{thm:classify} is the discrete, clipped instance of the characterist
 Whether stationary measured agreement rewards capture is decided by three structural choices the companion held fixed: which \emph{stock} the population carries (a single claim's mean deviation, or a portfolio's $L^1$ or $L^2$ mass), which \emph{loss degree} $p$ the metric aggregates, and which \emph{feedback} replenishes the stock (amplitude feedback $\zeta$ on a single claim; content gain $g$ on a portfolio). Write $u:=1-\beta$ and take a single type with $c=1$ in this section, so the measured weight on standing error is $u^p$.
 
 \begin{theorem}[Aggregation--conservation map]\label{thm:conservation}
-The stationary measured gap is, exactly:
+The closed forms below hold unconditionally; the behavior column requires nonzero injection and arrival mass ($\iota\neq0$ for the single claim, $J>0$ for the $L^1$ portfolio, and $I>0$ for the $L^2$ portfolio, the last already standing in the model paragraph), since at zero injection the gap vanishes identically and both ``iff'' clauses fail. The stationary measured gap is, exactly:
 \begin{center}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
@@ -155,7 +202,7 @@ never flat\\
 \bottomrule
 \end{tabular}
 \end{center}
-For the $L^2$ portfolio, the derivative of the gap in $u$ has the sign of $\lambda_0+\eta u(1-\lambda_0)-g$. Hence the gap falls monotonically in $\beta$---capture is stationarily \emph{rewarded}---iff $g\le\lambda_0$; for $\lambda_0<g<\lambda_0+\eta(1-\lambda_0)$ it attains an interior minimum at
+For the $L^2$ portfolio, the derivative of the gap in $u$ has the sign of $\lambda_0+\eta u(1-\lambda_0)-g$. Hence the gap falls monotonically in $\beta$ -- capture is stationarily \emph{rewarded} -- iff $g\le\lambda_0$; for $\lambda_0<g<\lambda_0+\eta(1-\lambda_0)$ it attains an interior minimum at
 \[
 u_c \;=\; \frac{g-\lambda_0}{\eta(1-\lambda_0)},
 \qquad \beta_c \;=\; 1-u_c,
@@ -174,19 +221,19 @@ where the bracket collapses via $(1-\eta u)\bigl[(1-\eta u)+\eta u\bigr]=1-\eta 
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.66\linewidth]{fig_conservation.png}
+\civicincludegraphics[width=0.70\linewidth]{Normalized stationary measured gap versus deference for five regimes, showing two flat conservation loci, rising and falling capture incentives, and an interior minimum before divergence}{fig_conservation.pdf}
 \caption{The aggregation--conservation map: stationary measured gap against deference, normalized to its calibrated value. Two conserved loci (flat), the single-claim myopia trap (rising), the quadratic-portfolio capture reward (falling), and the supercritical-gain interior minimum at $\beta_c$ before the divergence wall.}
 \label{fig:cons}
 \end{figure}
 
 \begin{remark}[Where the companion's knife edge lives]\label{rem:knife}
-The companion's conservation point---measured satisfaction flat in $\beta$ for a single claim without feedback---is the top-left cell at $\zeta=0$. Theorem~\ref{thm:conservation} shows it is one point of a one-parameter conservation \emph{locus} per aggregation ($\zeta=0$ for single-claim stocks; $g=\lambda_0$ for $L^1$ portfolios), and that the empirically central case---quadratic loss on a claim portfolio---is never conserved. Below the grounding rate the operator's stationary landscape genuinely rewards capture, so the usefulness premium $v$ alone carries the trap structure of the companion's bistable benchmark. Moderately above the grounding rate, the landscape points at a partial-capture interior optimum $\beta_c$ with finite but inflated stock: an operator who fully internalized the stationary consequences of deference would still choose to stop strictly between calibration and capture. Which feedback structures are dangerous is thus decided by the pair (aggregation, gain), not by the knob.
+The companion's conservation point -- measured satisfaction flat in $\beta$ for a single claim without feedback -- is the top-left cell at $\zeta=0$. Theorem~\ref{thm:conservation} shows it is one point of a one-parameter conservation \emph{locus} per aggregation ($\zeta=0$ for single-claim stocks; $g=\lambda_0$ for $L^1$ portfolios), and that the empirically central case -- quadratic loss on a claim portfolio -- is never conserved. Below the grounding rate the operator's stationary landscape genuinely rewards capture, so the usefulness premium $v$ alone carries the trap structure of the companion's bistable benchmark. Moderately above the grounding rate, the landscape points at a partial-capture interior optimum $\beta_c$ with finite but inflated stock: an operator who fully internalized the stationary consequences of deference would still choose to stop strictly between calibration and capture. Which feedback structures are dangerous is thus decided by the pair (aggregation, gain), not by the knob.
 \end{remark}
 
 \section{The knob-free certificate}\label{sec:certificate}
 
 \begin{lemma}[Policy-free stock bound]\label{lem:bound}
-Let $g<\lambda_0$. For \emph{any} $\beta$-trajectory whatsoever---any adaptation rule, any rate, any clipping---$D_t\le\max\bigl(D_0,\,I/(\lambda_0-g)\bigr)$ for all $t$, and $\limsup_t D_t\le I/(\lambda_0-g)$.
+Let $g<\lambda_0$. For \emph{any} $\beta$-trajectory whatsoever -- any adaptation rule, any rate, any clipping -- $D_t\le\max\bigl(D_0,\,I/(\lambda_0-g)\bigr)$ for all $t$, and $\limsup_t D_t\le I/(\lambda_0-g)$.
 \end{lemma}
 
 \begin{proof}
@@ -197,7 +244,7 @@ $s(\beta)+g\le 1-\lambda_0+g<1$ uniformly in $\beta$; iterate \eqref{eq:stock}.
 An adaptation rule $\beta_{t+1}=R(\beta_t,D_t,\ldots)$ is \emph{sign-consistent} if $\beta_{t+1}\le\beta_t$ whenever $\partial_\beta U(\beta_t,D_t)\le 0$, and \emph{responsive} if for every $\varepsilon>0$ there is $\delta(\varepsilon)>0$ with $\beta_t-\beta_{t+1}\ge\delta(\varepsilon)$ whenever $\partial_\beta U(\beta_t,D_t)\le-\varepsilon$ and $\beta_t\ge\varepsilon$.
 \end{definition}
 
-Projected gradient at any rate, fixed-step sign rules, and multiplicative rules are sign-consistent and responsive; heavy-ball momentum becomes so once the gradient is uniformly one-signed, which under the certificate below happens after a transient. The battery (Section~\ref{sec:verification}) exercises all four.
+Projected gradient at any rate, fixed-step sign rules, and multiplicative rules are sign-consistent and responsive; heavy-ball momentum becomes so once the gradient is uniformly one-signed, which Corollary~\ref{cor:strict} supplies whenever the margin is strict -- only the sharp boundary $m=0$ is uncovered. The battery (Section~\ref{sec:verification}) exercises all four.
 
 \begin{theorem}[Knob-free, policy-robust certificate]\label{thm:cert}
 Suppose the loop parameters satisfy
@@ -212,34 +259,58 @@ For any $\beta$ and any $D\le I/(\lambda_0-g)$,
 \[
 \partial_\beta U \;=\; -v+2c(1-c\beta)D \;\le\; -v+(1-c\beta)\,\frac{2cI}{\lambda_0-g} \;\le\; -v+(1-c\beta)\,v \;=\; -vc\beta,
 \]
-using \eqref{eq:cert} in the middle step; taking $D=D^\ast_g(\beta)\le I/(\lambda_0-g)$ gives the bound on $G_g$, so the only admissible fixed point in Theorem~\ref{thm:classify}'s catalogue is $p_1$. For the dynamics, fix $\varepsilon>0$. By Lemma~\ref{lem:bound} there is $T_0$ with $D_t\le I/(\lambda_0-g)+\delta_0$ for $t\ge T_0$, where $\delta_0$ is chosen with $2c\,\delta_0\le vc\varepsilon/2$. Then for $t\ge T_0$ and $\beta_t\ge\varepsilon$, $\partial_\beta U\le -vc\varepsilon+2c\delta_0\le -vc\varepsilon/2<0$, so a sign-consistent responsive rule decreases $\beta$ by at least $\delta(vc\varepsilon/2)$ per step until $\beta_t<\varepsilon$, and sign-consistency keeps it there (the gradient is negative whenever $\beta>0$ and weakly negative at $0$). Since $\varepsilon$ was arbitrary, $\beta_t\to 0$, and then $D_t\to D^\ast_g(0)$ by the affine recursion.
+using \eqref{eq:cert} in the middle step; taking $D=D^\ast_g(\beta)\le I/(\lambda_0-g)$ gives the bound on $G_g$, so the only admissible fixed point in Theorem~\ref{thm:classify}'s catalogue is $p_1$. For the dynamics, fix $\varepsilon>0$. By Lemma~\ref{lem:bound} there is $T_0$ with $D_t\le I/(\lambda_0-g)+\delta_0$ for $t\ge T_0$, where $\delta_0$ is chosen with $2c\,\delta_0\le vc\varepsilon/2$. Then for $t\ge T_0$ and $\beta_t\ge\varepsilon$, $\partial_\beta U\le -vc\varepsilon+2c\delta_0\le -vc\varepsilon/2<0$, so a sign-consistent responsive rule decreases $\beta$ by at least $\delta(\min\{vc\varepsilon/2,\,\varepsilon\})$ per step until $\beta_t<\varepsilon$ (the minimum is taken because Definition~\ref{def:sign} requires the response level to bound both the gradient and $\beta_t$, and $\beta_t\ge\varepsilon$ need not give $\beta_t\ge vc\varepsilon/2$), and sign-consistency keeps it there (the gradient is negative whenever $\beta>0$ and weakly negative at $0$). Since $\varepsilon$ was arbitrary, $\beta_t\to 0$, and then $D_t\to D^\ast_g(0)$ by the affine recursion.
 \end{proof}
 
-The certificate is \emph{knob-free}---a single inequality among the loop parameters $(v,c,I,\lambda_0,g)$, with no reference to $\beta$, its trajectory, or the adaptation rule---and \emph{policy-free}: the bound on $D$ in Lemma~\ref{lem:bound} holds for every policy, so no cleverness in the operator's update can defeat it. Its margin $m$ is the natural audit scalar; Section~\ref{sec:id} shows $m$ is estimable from panel data with delta-method standard errors.
+\begin{corollary}[Strict margin: a uniform gradient bound]\label{cor:strict}
+If the certificate holds strictly, $m>0$, then for every $\beta\in[0,1]$ and every admissible $D\le I/(\lambda_0-g)$,
+\[
+\partial_\beta U
+\;\le\; -vc\beta \;-\; (1-c\beta)\,\frac{m}{\lambda_0-g}
+\;\le\; -\,(1-c)\,\frac{m}{\lambda_0-g}
+\;<\;0 .
+\]
+The gradient is thus uniformly one-signed on the whole knob range, including at $\beta=0$, where the bound of Theorem~\ref{thm:cert} degenerates to zero. At the sharp margin $m=0$ it does so degenerate; the safe-side rule of Proposition~\ref{prop:safe} never certifies there.
+\end{corollary}
+
+\begin{proof}
+By \eqref{eq:cert}, $2cI/(\lambda_0-g)=v-m/(\lambda_0-g)$. Substituting into the chain in the proof of Theorem~\ref{thm:cert},
+\[
+\partial_\beta U \;\le\; -v+(1-c\beta)\Bigl(v-\tfrac{m}{\lambda_0-g}\Bigr)
+\;=\; -vc\beta-(1-c\beta)\tfrac{m}{\lambda_0-g},
+\]
+which is the first inequality. The second uses $1-c\beta\ge 1-c>0$ for $\beta\le1$, and $-vc\beta\le0$ for $\beta\ge0$.
+\end{proof}
+
+The certificate is \emph{knob-free} -- a single inequality among the loop parameters $(v,c,I,\lambda_0,g)$, with no reference to $\beta$, its trajectory, or the adaptation rule -- and \emph{policy-free}: the bound on $D$ in Lemma~\ref{lem:bound} holds for every policy, so no cleverness in the operator's update can defeat it. Its margin $m$ is the natural audit scalar; Section~\ref{sec:id} shows $m$ is estimable from panel data with delta-method standard errors.
 
 \begin{theorem}[Zone structure]\label{thm:zones}
 Fix $g<\lambda_0$ and let $F(\beta):=2c(1-c\beta)\,I/(1-s(\beta)-g)$, so $G_g=-v+F$, and write $F_{\max}=\max_{[0,1]}F$. Then:
 \begin{enumerate}
-\item[(A)] If $v\ge F_{\max}$---in particular under the certificate \eqref{eq:cert}, since $F_{\max}\le 2cI/(\lambda_0-g)$---the loop is globally calibrated as in Theorem~\ref{thm:cert}.
+\item[(A)] If $v\ge F_{\max}$ then $G_g\le 0$ on $[0,1]$, and for $v>F_{\max}$ the calibrated corner is the unique equilibrium. Under the certificate \eqref{eq:cert} -- which implies $v\ge F_{\max}$, since $F_{\max}\le 2cI/(\lambda_0-g)$ -- the loop is globally calibrated for every sign-consistent responsive rule (Theorem~\ref{thm:cert}); for the gradient loop \eqref{eq:map} itself, $(\mathrm{SS}^+_g)$ together with $v>F_{\max}$ already suffices, by Theorem~\ref{thm:classify}.
 \item[(C)] If $v<F(1)=2c(1-c)I/(\lambda_0-g)$, then $G_g(1)>0$ and the captured corner is locally asymptotically stable: the companion's capture line, now in loop coordinates.
-\item[(B)] If $F(1)\le v<F_{\max}$, then $G_g(1)\le 0$ while $G_g>0$ somewhere on $(0,1)$; the last sign change of $G_g$ is a descending crossing, and if transversal it is, by Theorem~\ref{thm:classify}, a \emph{stable partial-capture equilibrium}: an interior attractor at which deference is pinned strictly between calibration and capture.
+\item[(B)] If $F(1)< v<F_{\max}$, then $G_g$ has exactly one root in $(0,1)$; it is a transversal descending crossing, $G_g'<0$ there, and by Theorem~\ref{thm:classify} it is a \emph{stable partial-capture equilibrium}, unconditionally under $(\mathrm{SS}_g)$ -- the eigenvalue proviso is automatic on the descending branch: an interior attractor at which deference is pinned strictly between calibration and capture. The strict inequality at the lower boundary is not removable: at $v=F(1)$ an interior equilibrium can fail entirely, as at the admissible parameters $(\eta,\lambda_0,I,v,c,\alpha,g)=(\tfrac12,\tfrac3{20},\tfrac3{100},\tfrac9{200},\tfrac9{10},1,\tfrac3{100})$, which satisfy every model restriction, strict $(\mathrm{SS}_g)$, the opening condition below, and $v=F(1)$ with $F(\tfrac12)>v$, yet
+\[
+200\,G_g(\beta)\,\bigl(303-170\beta-85\beta^2\bigr) \;=\; 9\,(1-\beta)\,(177-85\beta),
+\]
+so $G_g>0$ on all of $(0,1)$ while $G_g(1)=0$: no interior root, hence no partial-capture equilibrium.
 \end{enumerate}
 Zone (B) is nonempty exactly when $F$ has an interior maximum exceeding $F(1)$; a sufficient condition for $F$ to be decreasing at $\beta=1$, opening the band, is $c(\lambda_0-g)>2\eta(1-\lambda_0)(1-c)$. When instead $F$ is increasing on $[0,1]$ (as at the companion benchmark), $F_{\max}=F(1)$, the band is empty, and the loop dichotomy is the companion's bistable-or-calibrated picture. The three zones in the $(g,v)$ plane, with the computed partial-capture band and the divergence wall $g=\lambda_0$, are shown in Figure~\ref{fig:zones}; both boundary curves blow up as $g\uparrow\lambda_0$, so \emph{the certificate price of safety diverges as content gain approaches the grounding rate}.
 \end{theorem}
 
 \begin{proof}
-(A) is Theorem~\ref{thm:cert} once $v\ge F_{\max}$ forces $G_g\le 0$ with equality at most where $F$ attains its maximum; the corner catalogue of Theorem~\ref{thm:classify} leaves only $p_1$, and the dynamical claim under \eqref{eq:cert} needs no transversality. (C) is the corner-stability clause of Theorem~\ref{thm:classify}. For (B): $G_g(1)=F(1)-v\le 0$ and $\max G_g=F_{\max}-v>0$, so $G_g$ changes sign on $(0,1)$ an even number of times counted with orientation, and its last sign change before $\beta=1$ is from positive to negative---a descending crossing---stable when transversal by \eqref{eq:p1}. The sign of $F'$ matches the sign of $-c(1-s-g)+(1-c\beta)s'$ (the numerator of $G_g'$), and at $\beta=1$ this is $-c(\lambda_0-g)+2\eta(1-\lambda_0)(1-c)$, giving the stated sufficient condition for $F'(1)<0$.
+(A): $v\ge F_{\max}$ gives $G_g\le 0$ on $[0,1]$ directly, and for $v>F_{\max}$, $G_g<0$ everywhere, so Theorem~\ref{thm:classify}'s catalogue admits no interior fixed point and excludes the captured corner ($G_g(1)<0$), leaving $p_1$; under $(\mathrm{SS}^+_g)$ every orbit of \eqref{eq:map} converges, hence to $p_1$. The all-rule claim under \eqref{eq:cert} is Theorem~\ref{thm:cert}, with no transversality needed. (C) is the corner-stability clause of Theorem~\ref{thm:classify}. For (B), clear the positive denominator: $q_g(\beta):=G_g(\beta)\,\bigl(1-s(\beta)-g\bigr) = -v\bigl(1-s(\beta)-g\bigr)+2cI(1-c\beta)$ is a quadratic in $\beta$ with leading coefficient $v(1-\lambda_0)\eta^2>0$, sharing roots and signs with $G_g$ since $1-s-g\ge\lambda_0-g>0$ on $[0,1]$. In zone (B), $q_g(1)=(F(1)-v)(\lambda_0-g)<0$; if also $q_g(0)\le 0$, then $0$ and $1$ both lie between the roots of the positive-leading quadratic, so $q_g\le 0$ on all of $[0,1]$, contradicting $F_{\max}>v$. Hence $q_g(0)>0$, and $q_g$ has exactly one root in $(0,1)$ -- its smaller root -- crossed from above: $q_g'<0$ there, hence $G_g'<0$, a transversal descending crossing, stable by \eqref{eq:p1}. The boundary instance in the statement is checked by direct substitution, the displayed identity clearing denominators exactly. The sign of $F'$ matches the sign of $-c(1-s-g)+(1-c\beta)s'$ (the numerator of $G_g'$), and at $\beta=1$ this is $-c(\lambda_0-g)+2\eta(1-\lambda_0)(1-c)$, giving the stated sufficient condition for $F'(1)<0$.
 \end{proof}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.7\linewidth]{fig_zones.png}
+\civicincludegraphics[width=0.70\linewidth]{Loop-parameter plane partitioned into globally calibrated, partial-capture, and stable-capture zones, bounded by certificate and capture curves that diverge at the gain wall}{fig_zones.pdf}
 \caption{Certificate zones in the loop-parameter plane $(g,v)$ at $\eta=0.5$, $c=0.9$, $\lambda_0=0.15$, $I=0.03$. Above the certificate curve: globally calibrated, for any policy at any rate. Below the capture line: the captured corner is stable. The shaded band between carries stable partial-capture equilibria. Both curves diverge at the wall $g=\lambda_0$.}
 \label{fig:zones}
 \end{figure}
 
 \begin{remark}[Partial capture as an equilibrium phenomenon]\label{rem:partial}
-The partial-capture equilibria of zone (B) were found by the verification battery before they were predicted: a suite asserting that intermediate-zone draws end at a corner failed, and the failing trajectories had converged---to machine precision in the equilibrium condition $G_g=0$---to interior points near $\beta\approx0.98$. They are not transients or numerical artifacts but bona fide attractors, the dynamical counterpart of the stationary interior optimum $\beta_c$ of Theorem~\ref{thm:conservation}. For governance they are arguably the most insidious regime: deference is pinned high but not at the corner, the stock is inflated but finite, and no trajectory-level alarm (divergence, corner collapse) ever fires.
+The partial-capture equilibria of zone (B) are attractors, not transients or numerical artifacts: intermediate-zone trajectories converge to interior points satisfying the equilibrium condition $G_g=0$ to machine precision, near $\beta\approx0.98$ at the benchmark. They are the dynamical counterpart of the stationary interior optimum $\beta_c$ of Theorem~\ref{thm:conservation}. For governance they are arguably the most insidious regime: deference is pinned high but not at the corner, the stock is inflated but finite, and no trajectory-level alarm (divergence, corner collapse) ever fires.
 \end{remark}
 
 \section{Gain ceilings and the network certificate}\label{sec:ceilings}
@@ -266,17 +337,22 @@ with $s_k(\beta)=(1-\lambda_{0k})(1-\eta_k(1-\beta))^2$ and $\bar S:=\mathrm{dia
 Suppose $\rho(\bar S+G)<1$ and set $R:=(\mathrm{Id}-\bar S-G)^{-1}I\in\R^K_{>0}$.
 \begin{enumerate}
 \item[(i)] \emph{Policy-free bound.} For any $\beta$-trajectory, $\limsup_t D_t\le R$ componentwise.
-\item[(ii)] \emph{Certificate.} If $v_k\ge 2c_kR_k$ for every $k$, then for all $\beta$ and all admissible $D$, $\partial U/\partial\beta_k\le-2c_k^2\beta_kR_k<0$ whenever $\beta_k>0$, and every per-coordinate sign-consistent responsive rule converges to full calibration $\beta=0$ from every initial condition.
-\item[(iii)] \emph{Spectral ceiling.} At full capture $\beta=\mathbf{1}$ the stock is unbounded iff $\rho(\bar S+G)\ge 1$; the scalar case $K=1$ recovers $R=I/(\lambda_0-g)$, the certificate \eqref{eq:cert}, and the ceiling $g<\lambda_0$ exactly.
+\item[(ii)] \emph{Certificate, static.} If $v_k\ge 2c_kR_k$ for every $k$, then for all $\beta$ and all admissible $D$, $\partial U/\partial\beta_k\le-2c_k^2\beta_kR_k<0$ whenever $\beta_k>0$.
+\item[(ii$'$)] \emph{Certificate, dynamic.} If the margin is \emph{uniformly strict} -- $v_k\ge 2c_kR_k+\mu$ for some $\mu>0$ and every $k$ -- then every per-coordinate sign-consistent responsive rule converges to full calibration $\beta=\mathbf{0}$ from every initial condition. Strictness is not removable at this order: at the sharp margin the coordinate gradient can be marginally positive at small $\beta_k$, Definition~\ref{def:sign} then places no bound on the resulting increase, and communities can stagger their descents so that the coupled stock never enters the exact box $D\le R$ that the corner argument would need.
+\item[(iii)] \emph{Stability ceiling.} At full capture $\beta=\mathbf{1}$ the recursion is linear with nonnegative $M=\bar S+G$, and the stock is bounded if and only if the nonnegative series $\sum_{j\ge0}M^jI$ converges -- equivalently, by the standard characterization of asymptotic stability for nonnegative matrices, if and only if $\rho(M)<1$. Boundedness in particular forces $M^nI\to0$. The scalar case $K=1$ recovers $R=I/(\lambda_0-g)$, the certificate \eqref{eq:cert}, and the ceiling $g<\lambda_0$ exactly.
 \item[(iv)] \emph{Decentralized sufficient condition.} $\sum_j g_{kj}<\lambda_{0k}$ for every $k$ implies $\rho(\bar S+G)<1$: per-community gain below per-community grounding certifies the spectral condition without computing a spectrum.
 \end{enumerate}
 \end{theorem}
 
 \begin{proof}
-(i) Since $S(\beta)\preceq\bar S$ entrywise, $D\ge0$, and $G\ge0$, induction gives $D_t\le(\bar S+G)^tD_0+\sum_{j<t}(\bar S+G)^jI$; the Neumann series converges to $R$ when $\rho(\bar S+G)<1$, all terms nonnegative. (ii) $\partial U/\partial\beta_k=-v_k+2c_k(1-c_k\beta_k)D_k\le-v_k+2c_k(1-c_k\beta_k)R_k\le-2c_k^2\beta_kR_k$ using $v_k\ge2c_kR_k$; the convergence argument is coordinatewise identical to Theorem~\ref{thm:cert}, with the transient $\delta_0$ taken in each component. (iii) At $\beta=\mathbf{1}$, $S=\bar S$ and the recursion is linear with nonnegative matrix $M=\bar S+G$. If $\rho(M)<1$ it converges to $R$. If $\rho(M)\ge1$, take a left Perron vector $w\ge0$, $w\ne0$, with $w^\top M=\rho(M)\,w^\top$; then $w^\top D_{t+1}\ge w^\top D_t+w^\top I$ and $w^\top I>0$ since $I\succ0$, so $w^\top D_t$ grows at least linearly. (iv) $\rho(M)\le\max_k\sum_j M_{kj}=\max_k\bigl(1-\lambda_{0k}+\sum_j g_{kj}\bigr)<1$.
+(i) Since $S(\beta)\preceq\bar S$ entrywise, $D\ge0$, and $G\ge0$, induction gives $D_t\le(\bar S+G)^tD_0+\sum_{j<t}(\bar S+G)^jI$; the Neumann series converges to $R$ when $\rho(\bar S+G)<1$, all terms nonnegative. (ii) $\partial U/\partial\beta_k=-v_k+2c_k(1-c_k\beta_k)D_k\le-v_k+2c_k(1-c_k\beta_k)R_k\le-2c_k^2\beta_kR_k$ using $v_k\ge2c_kR_k$. (ii$'$) By (i), for any $\varepsilon>0$ each coordinate satisfies $D_{t,k}\le R_k+\varepsilon$ from some time $T_k$ on, and since $K$ is finite the common time $T=\max_k T_k$ exists. Taking $\varepsilon=\mu/8$ and using $1-c_k\beta_k\le1$, for $t\ge T$
+\[
+\partial U/\partial\beta_k \;\le\; -v_k+2c_k(R_k+\varepsilon) \;\le\; -\mu+\tfrac{\mu}{2} \;=\; -\tfrac{\mu}{2}\;<\;0
+\]
+uniformly in $\beta$, \emph{including at $\beta_k=0$}. Sign-consistency therefore forbids any coordinate from increasing after $T$, so each $\beta_{t,k}$ is non-increasing and bounded below; responsiveness applied at level $\min\{\mu/2,\,b\}$ drives it below any $b>0$. Note that no entry into the exact box $D\le R$ is required, and hence no synchronization across communities: it is uniform negativity of the gradient, not membership of the box, that closes the argument. (iii) At $\beta=\mathbf{1}$, $S=\bar S$ and $D_t=M^tD_0+\sum_{j<t}M^jI$ with every term nonnegative. The partial sums of $\sum_jM^jI$ are then nondecreasing and dominated by $D_t$, so a bounded stock makes the series summable and its terms vanish. Conversely, if the series converges then, since $I\succ0$ gives $I\ge\delta\mathbf{1}$ for some $\delta>0$, the nonnegative series $\sum_jM^j\mathbf{1}$ converges as well; hence $M^j\mathbf{1}\to0$, so $M^tD_0\le\lVert D_0\rVert_\infty M^t\mathbf{1}\to0$ and the stock is bounded. Both directions are elementary and use no spectral theory; the equivalence with $\rho(M)<1$ is the standard nonnegative-matrix characterization, quoted for interpretation only -- every applied condition is stated through the row-sum bound of (iv) or the induced operator norm. (iv) $\rho(M)\le\max_k\sum_j M_{kj}=\max_k\bigl(1-\lambda_{0k}+\sum_j g_{kj}\bigr)<1$.
 \end{proof}
 
-The conceptual content of (iii) is that \emph{the spectral gap of the dissipation-plus-coupling operator replaces the scalar margin $\lambda_0-g$}: in a connected influence structure, one community's excess gain can be paid for by another's grounding only up to the Perron eigenvalue, and the wisdom-of-crowds intuition that diversified structures dampen amplification \citep{golub2010naive} becomes the precise statement that what must stay below one is $\rho(\bar S+G)$, not any single entry.
+The conceptual content of (iii) is that \emph{the spectral gap of the dissipation-plus-coupling operator replaces the scalar margin $\lambda_0-g$}: in a connected influence structure, one community's excess gain can be compensated by another's grounding only up to the spectral radius $\rho(\bar S+G)$ -- spectral compensation, not a defined economic transfer -- and the wisdom-of-crowds intuition that diversified structures dampen amplification \citep{golub2010naive} becomes the precise statement that what must stay below one is $\rho(\bar S+G)$, not any single entry.
 
 \section{Laundering as an observability failure}\label{sec:obs}
 
@@ -294,58 +370,264 @@ Immediate from the two displayed structural facts: decoupled dynamics propagate 
 \end{proof}
 
 \begin{corollary}[Kalman rank, audit sensors, and the calibrated contrast]\label{cor:kalman}
-Linearizing at the face equilibrium $x_H^\ast=\iota_H/(\eta_H\kappa-\zeta)$: $A=\mathrm{diag}(a_H,a_L)$ and $C_1=\bigl(-2\pi_H\kappa^2x_H^\ast,\;0\bigr)$, so $\rk\mathcal{O}(C_1,A)=1$ and the unstable eigenvector $e_L$ spans the unobservable subspace. Augmenting with an $\varepsilon$-weighted unweighted-error audit sensor $y_2=-\varepsilon\bigl(\pi_Hx_H^2+\pi_Lx_L^2\bigr)$ restores $\rk\mathcal{O}=2$ for every $\varepsilon>0$ at every face point with $x_L\ne0$: detectability is binary in $\varepsilon$. At the \emph{calibrated} equilibrium, with distinct effective contraction rates for the two types, the satisfaction sensor alone is observable; laundering is specifically a capture-state pathology, not a generic deficiency of satisfaction measurement. (With equal rates the calibrated pair has a repeated eigenvalue and a single scalar output cannot separate the modes---a degeneracy of the test configuration, not of the theorem.)
+Linearizing at the face equilibrium $x_H^\ast=\iota_H/(\eta_H\kappa-\zeta)$: $A=\mathrm{diag}(a_H,a_L)$ and $C_1=\bigl(-2\pi_H\kappa^2x_H^\ast,\;0\bigr)$. For $x_H^\ast\ne0$ -- equivalently $\iota_H\ne0$, under the standing positive denominator -- $\rk\mathcal{O}(C_1,A)=1$ and the unstable eigenvector $e_L$ spans the unobservable subspace; at $\iota_H=0$ the sensitivity vanishes, $C_1=0$, and the rank is $0$: the satisfaction channel is then blind to \emph{both} modes, not merely the diverging one. Augmenting with an $\varepsilon$-weighted unweighted-error audit sensor $y_2=-\varepsilon\bigl(\pi_Hx_H^2+\pi_Lx_L^2\bigr)$ gives $\rk\mathcal{O}=2$ for every $\varepsilon>0$ at every face point with $x_H^\ast\ne0$ and $x_L\ne0$. At $x_H^\ast=0$ the stacked rank is $1$, yet the sole unobservable mode is the contracting $e_H$-mode with multiplier $a_H<1$, so the augmented pair is \emph{detectable} without being observable: the audit still sees every unstable direction, which is what the alarm needs. Detectability is binary in $\varepsilon$. At the \emph{calibrated} equilibrium, distinct effective contraction rates together with nonzero linearized sensitivities for both types make the satisfaction sensor alone observable; laundering is specifically a capture-state pathology, not a generic deficiency of satisfaction measurement. (With equal rates the calibrated pair has a repeated eigenvalue and a single scalar output cannot separate the modes -- rank one when the sensor is nonzero, zero when it is not: a degeneracy of the test configuration, not of the theorem.)
 \end{corollary}
 
-\begin{proposition}[Detection latency]\label{prop:latency}
-Along the captured face, $x_L(t)=(x_{L,0}-\bar x)(1+\zeta)^t+\bar x$ with $\bar x=-\iota_L/\zeta$, so the audit sensor's alarm time at threshold $\theta$ obeys
+\begin{theorem}[Exact detection latency]\label{prop:latency}
+Along the captured face with $\zeta>0$, nonzero sign-aligned injection, and
+$x_L(t)=(x_{L,0}-\bar x)(1+\zeta)^t+\bar x$, where
+$\bar x=-\iota_L/\zeta$, set
 \[
-T_{\det}(\varepsilon)\;=\;\frac{\ln\bigl(\theta/(\varepsilon\,\pi_L\,(x_{L,0}-\bar x)^2)\bigr)}{2\ln(1+\zeta)}\;+\;O(1):
+r:=1+\zeta,\qquad
+a:=|x_{L,0}-\bar x|,\qquad b:=|\bar x|,\qquad
+R_\varepsilon:=\sqrt{\frac{\theta}{\varepsilon\pi_L}}.
 \]
-linear in $\ln(1/\varepsilon)$ with slope $1/(2\ln(1+\zeta))$. In the battery the fitted slope is $41$ against the predicted $42$ with $R^2>0.999$, and the asymptotic growth rate of the sensor gap matches $2\ln(1+\zeta)$ to $0.4\%$. Because the sensor reads $x_L^2$, it identifies $|x_L|$; the harm is symmetric in the sign of the deviation, so this parity blindness is immaterial.
-\end{proposition}
+For every $\varepsilon,\pi_L,\theta>0$ satisfying
+$R_\varepsilon\ge\max\{b,|x_{L,0}|\}$, the first integer $t$ with
+$\varepsilon\pi_Lx_L(t)^2\ge\theta$ is exactly
+\[
+T_{\det}(\varepsilon)
+=
+\left\lceil
+\frac{\ln((R_\varepsilon+b)/a)}{\ln r}
+\right\rceil.
+\]
+Writing
+\[
+L_\varepsilon
+:=
+\frac{\ln\bigl(\theta/(\varepsilon\pi_La^2)\bigr)}{2\ln r},
+\qquad
+\delta_\varepsilon
+:=
+\frac{\ln(1+b/R_\varepsilon)}{\ln r},
+\]
+the integer remainder obeys the explicit bounds
+\[
+\delta_\varepsilon
+\;\le\;T_{\det}(\varepsilon)-L_\varepsilon
+\;<\;1+\delta_\varepsilon,
+\qquad
+0\le\delta_\varepsilon\le\frac{\ln2}{\ln(1+\zeta)}.
+\]
+Consequently, as $\varepsilon\to0^+$ at fixed
+$(\pi_L,\theta,\zeta,\iota_L,x_{L,0})$, latency is linear in
+$\ln(1/\varepsilon)$ with slope $1/(2\ln(1+\zeta))$ and a uniformly bounded
+remainder. Because the sensor reads $x_L^2$, it identifies $|x_L|$; the harm
+is symmetric in the sign of the deviation, so this parity blindness is
+immaterial.
+\end{theorem}
+\begin{proof}
+Sign alignment gives
+$|x_L(t)|=ar^t-b$ and $a=|x_{L,0}|+b$. The alarm condition is therefore
+$R_\varepsilon\le ar^t-b$, equivalently
+$\ln((R_\varepsilon+b)/a)/\ln r\le t$. The stated range makes this real
+crossing time nonnegative, so its first integer solution is its ceiling. The
+identity
+\[
+\frac{\ln((R_\varepsilon+b)/a)}{\ln r}
+=L_\varepsilon+\delta_\varepsilon
+\]
+and $q\le\lceil q\rceil<q+1$ give the remainder bracket. Finally
+$b/R_\varepsilon\in[0,1]$ on the stated range, which gives the displayed
+$\ln2/\ln r$ bound.
+\end{proof}
+
+\begin{numresult}\label{nr:latency}
+In the battery the fitted latency slope is $41$ against the predicted $42$ with $R^2>0.999$, and the asymptotic growth rate of the sensor gap matches $2\ln(1+\zeta)$ to $0.4\%$.
+\end{numresult}
 
 \begin{remark}[Sensor mandate]\label{rem:sensor}
 Detectability is binary in $\varepsilon$; latency is logarithmic. A regulator therefore chooses $\varepsilon$ from a latency target rather than a detectability one:
 \[
-\varepsilon \;\ge\; \theta\,\pi_L^{-1}\,(x_{L,0}-\bar x)^{-2}\,(1+\zeta)^{-2T_{\mathrm{target}}}.
+\varepsilon \;\ge\;
+\frac{\theta}{\pi_L\bigl(a(1+\zeta)^{T_{\mathrm{target}}}-b\bigr)^2},
+\qquad a(1+\zeta)^{T_{\mathrm{target}}}>b.
 \]
-This is the formal content of an audit-sensor mandate, and Theorem~\ref{thm:exact} is the reason it cannot be replaced by any amount of satisfaction telemetry: the laundered channel carries literally zero bits about the diverging coordinate.
+This condition is necessary and sufficient for an alarm by the target time in
+the sign-aligned captured-face model. It is the formal content of an
+audit-sensor mandate, and Theorem~\ref{thm:exact} is the reason it cannot be
+replaced by any amount of satisfaction telemetry: the laundered channel
+carries literally zero bits about the diverging coordinate. In the explicit
+finite deterministic-channel model, for any finite prior over low-coordinate
+states and any finite quantization of the satisfaction output, mutual
+information equals output Shannon entropy and is exactly zero; this consequence
+of Theorem~\ref{thm:exact} is machine-checked in
+\texttt{PaperIII/DeterministicInformation.lean}.
 \end{remark}
 
 \section{Rate separation: the separatrix limit}\label{sec:rate}
 
-The companion's bistable benchmark---$\eta=0.5$, $c=0.9$, $\lambda_0=0.02$, $I=0.02$, $v=0.10$, $g=0$, saddle at $\beta^\ddagger=0.9754$---separates calibration from capture by a basin boundary in $(\beta,D)$. How high that boundary sits in $D$, from a transient initial condition $(\beta_0,D_0)$ with excess stock, depends on the adaptation rate: a fast operator ratchets $\beta$ through the transient before the stock relaxes; a slow one averages over the stationary landscape, where $G_g<0$ below the saddle. The limit is not, as one might first guess, a continuum flow.
+The companion's bistable benchmark -- $\eta=0.5$, $c=0.9$, $\lambda_0=0.02$, $I=0.02$, $v=0.10$, $g=0$, saddle at $\beta^\dagger=0.9754$ -- separates calibration from capture by a basin boundary in $(\beta,D)$. How high that boundary sits in $D$, from a transient initial condition $(\beta_0,D_0)$ with excess stock, depends on the adaptation rate: a fast operator ratchets $\beta$ through the transient before the stock relaxes; a slow one averages over the stationary landscape, where $G_g<0$ below the saddle. The limit is not, as one might first guess, a continuum flow.
 
-\begin{theorem}[Jump-map separatrix limit]\label{thm:jump}
-Rescale the stock excess as $\tilde E:=\alpha\bigl(D-D^\ast_g(\beta)\bigr)$. Along initial conditions $D_0=D^\ast_g(\beta_0)+\kappa/\alpha$, as $\alpha\to0$ the $(\beta,\tilde E)$ trajectory of \eqref{eq:stock}--\eqref{eq:map} converges, over the transit, to the orbit of the $\alpha$-free \emph{jump map}
-\begin{equation}\label{eq:jumpmap}
-(\beta,\tilde E)\;\longmapsto\;\bigl(\beta + A(\beta)\,\tilde E,\;\;\sigma(\beta)\,\tilde E\bigr),
+\begin{theorem}[Jump-map transit limit]\label{thm:jump}
+Assume $g<\lambda_0$ and rescale the stock excess as $\tilde E:=\alpha\bigl(D-D^\ast_g(\beta)\bigr)$. One simultaneous step of \eqref{eq:stock}--\eqref{eq:map} is then, exactly and for every $\alpha \neq 0$,
+\[
+\beta' \;=\; \Pi_{[0,1]}\bigl(\beta + A(\beta)\,\tilde E + \alpha\,G_g(\beta)\bigr),
 \qquad
-A(\beta)=2c(1-c\beta),\quad \sigma(\beta)=s(\beta)+g,
+\tilde E' \;=\; \sigma(\beta)\,\tilde E + \alpha\bigl(D^\ast_g(\beta)-D^\ast_g(\beta')\bigr),
+\]
+with $A(\beta)=2c(1-c\beta)$ and $\sigma(\beta)=s(\beta)+g$. Consequently, from fixed rescaled data $x_0=(\beta_0,\tilde E_0)$ with $\beta_0\in[0,1]$ -- initial stock $D_0=D^\ast_g(\beta_0)+\tilde E_0/\alpha$ -- the trajectory converges as $\alpha\to0^+$, at every fixed finite horizon, to the orbit of the $\alpha$-free \emph{projected jump map}
+\begin{equation}\label{eq:jumpmap}
+(\beta,\tilde E)\;\longmapsto\;\bigl(\Pi_{[0,1]}\bigl(\beta + A(\beta)\,\tilde E\bigr),\;\;\sigma(\beta)\,\tilde E\bigr),
 \end{equation}
-whose individual $\beta$-steps remain order one in the limit. Consequently
+whose individual $\beta$-steps remain order one in the limit. On transits all of whose raw policy inputs lie in $[0,1]$ the projection is inactive and \eqref{eq:jumpmap} is the unprojected affine jump map; the projection is not removable in general, since a raw jump past one makes the two maps differ.
+
+More strongly, write $x_t^\alpha=(\beta_t^\alpha,\tilde E_t^\alpha)$ for the displayed exact rescaled recursion and $x_t^0$ for the projected jump orbit from the same $x_0$. There is a finite constant $C$, depending only on the fixed primitives and $x_0$, such that for every $\alpha>0$ and $t\in\mathbb N$,
 \[
-\alpha\,\bigl(D_{\mathrm{sep}}(\alpha;\beta_0)-D^\ast_g(\beta_0)\bigr)\;\longrightarrow\;\kappa^\ast(\beta_0)
-\;:=\;\sup\Bigl\{\tilde E_0:\ \sup_t\beta_t<\beta^\ddagger\ \text{under \eqref{eq:jumpmap}}\Bigr\},
+\lVert x_t^\alpha-x_t^0\rVert_\infty \;\le\; C\,\alpha t.
 \]
-and the continuum integral
+If $\tilde E_0>0$, set $q:=1-\lambda_0+g\in(0,1)$ and, for $0<\epsilon\le\tilde E_0$,
 \[
-K(\beta_0)\;=\;\int_{\beta_0}^{\beta^\ddagger}\frac{1-s(b)-g}{2c(1-cb)}\,db
+H_\epsilon:=\left\lceil\frac{\log(\tilde E_0/\epsilon)}{\log(1/q)}\right\rceil,
+\qquad
+L_\epsilon:=1+\frac{\log(\tilde E_0/\epsilon)}{\log(1/q)}.
 \]
-is the small-jump approximation to $\kappa^\ast$, exact in the limit of vanishing jump size (e.g.\ $\beta_0\to\beta^\ddagger$).
+Then $|\tilde E^0_{H_\epsilon}|\le\epsilon$ and, uniformly over the named projected transit,
+\[
+\max_{0\le t\le H_\epsilon}\lVert x_t^\alpha-x_t^0\rVert_\infty
+\;\le\; C\,\alpha L_\epsilon.
+\]
+Moreover, the explicit joint range
+\[
+C\alpha L_{\epsilon/2}<\epsilon/2
+\]
+guarantees $|\tilde E^\alpha_{H_{\epsilon/2}}|<\epsilon$.  Since
+\[
+L_\epsilon=1+\frac{\log(\tilde E_0/\epsilon)}{\log(1/q)},
+\]
+the displayed inequality is the precise growing-horizon bound.  Along every
+joint family with $\epsilon\to0^+$ and
+$\alpha\log(1/\epsilon)\to0$, its right-hand side tends to zero uniformly over
+$0\le t\le H_\epsilon$.
 \end{theorem}
 
-\begin{proof}[Derivation]
-One step of the full map gives $\Delta\beta=\alpha\bigl(G_g(\beta)+A(\beta)E\bigr)=A(\beta)\tilde E+O(\alpha)$ and, using $\sigma D^\ast+I=D^\ast$,
+\begin{proof}
+Substituting $D = D^\ast_g(\beta) + \tilde E/\alpha$ into \eqref{eq:stock}--\eqref{eq:map} and using $\sigma D^\ast_g + I = D^\ast_g$ gives the displayed pair with no expansion: the conjugacy is exact at every $\alpha \neq 0$.
+
+For the uniform estimate, put $d:=\lambda_0-g$, $B:=I/d$, $w:=1+2c/d$, $\Xi:=2c^2+w\,2\eta(1-\lambda_0)$, and $F:=v+2cB+wB$. The characteristic lies in $[0,B]$, $|G_g|\le v+2cB$, $|A|\le2c$, $A$ is $2c^2$-Lipschitz, $\sigma$ is $2\eta(1-\lambda_0)$-Lipschitz, and the policy projection is $1$-Lipschitz. Hence, with
 \[
-\tilde E_{t+1}=\sigma(\beta_t)\tilde E_t+\alpha\bigl[D^\ast_g(\beta_t)-D^\ast_g(\beta_{t+1})\bigr]=\sigma(\beta_t)\tilde E_t+O(\alpha),
+b_t:=|\beta_t^\alpha-\beta_t^0|,
+\qquad e_t:=|\tilde E_t^\alpha-\tilde E_t^0|,
 \]
-since the bracket is bounded on any compact subinterval of $\{1-s-g>0\}$ even though $\Delta\beta=O(1)$. The transit spends $O(\log(1/\epsilon))$ effective steps before $\tilde E<\epsilon$, so accumulated errors are $O(\alpha\log(1/\epsilon))$, vanishing with $\alpha$; below $\kappa^\ast$ the limiting orbit's $\beta$ stays a fixed distance below $\beta^\ddagger$ while $\tilde E\to0$, after which the gradient $G_g+A E$ is uniformly negative and the orbit calibrates; above $\kappa^\ast$ the limiting orbit crosses $\beta^\ddagger$ with $\tilde E$ bounded below, and monotonicity carries the full orbit across the basin boundary. The integral arises by treating \eqref{eq:jumpmap} as the differential relation $d\tilde E/d\beta=-\bigl(1-\sigma(\beta)\bigr)/A(\beta)$, valid when individual jumps $A\tilde E$ are small relative to the scale on which the integrand varies.
+the two exact recursions give
+\[
+\begin{aligned}
+b_{t+1}&\le b_t+2c\,e_t+2c^2|\tilde E_t^0|b_t+\alpha(v+2cB),\\
+e_{t+1}&\le q\,e_t+2\eta(1-\lambda_0)|\tilde E_t^0|b_t+\alpha B.
+\end{aligned}
+\]
+The projected excess satisfies $|\tilde E_t^0|\le|\tilde E_0|q^t$, while $2c+wq\le w$. Therefore the weighted error $R_t:=b_t+w e_t$ obeys
+\[
+R_{t+1}\le\bigl(1+\Xi|\tilde E_0|q^t\bigr)R_t+\alpha F,
+\qquad R_0=0.
+\]
+Iteration and $1+u\le e^u$ yield
+\[
+R_t\le \alpha Ft\prod_{k<t}\bigl(1+\Xi|\tilde E_0|q^k\bigr)
+\le \alpha Ft\exp\!\left(\frac{\Xi|\tilde E_0|}{d}\right).
+\]
+Since $w\ge1$, both coordinate errors are at most $R_t$; take $C:=F\exp(\Xi|\tilde E_0|/d)$. This proves the all-horizon bound and hence the fixed-horizon limit.
+
+Finally, $|\tilde E_t^0|\le\tilde E_0q^t$ and the definition of $H_\epsilon$ give $|\tilde E^0_{H_\epsilon}|\le\epsilon$ and $H_\epsilon<L_\epsilon$. Applying the all-horizon estimate at every $t\le H_\epsilon$ proves the uniform logarithmic-transit bound. At $H_{\epsilon/2}$, the triangle inequality gives $|\tilde E^\alpha_{H_{\epsilon/2}}|\le\epsilon/2+C\alpha L_{\epsilon/2}<\epsilon$ on the displayed joint range.
+\end{proof}
+
+\begin{remark}[Separatrix scale]\label{rem:sepscale}
+Write
+\[
+\kappa^\ast(\beta_0)\;:=\;\sup\Bigl\{\tilde E_0:\ \sup_t\beta_t<\beta^\dagger\ \text{under \eqref{eq:jumpmap}}\Bigr\}.
+\]
+Under $(\mathrm{SS}^+_g)$ every orbit of the full loop converges and limits are monotone in the initial stock, so at each $\beta_0$ the captured initial stocks form an up-set and $D_{\mathrm{sep}}(\alpha;\beta_0)$ is well defined as its infimum. Proposition~\ref{prop:seplimit} proves the limit $\alpha\,(D_{\mathrm{sep}}-D^\ast_g(\beta_0))\to\kappa^\ast(\beta_0)$; the battery measures the rescaled threshold descending onto $\kappa^\ast$ across six rates (Section~\ref{sec:verification}).
+\end{remark}
+
+\begin{lemma}[Characteristic capture]\label{lem:charcap}
+In a bistable configuration of the loop -- fixed points $p_1 < p_2 < p_3$ with saddle policy $\beta^\dagger$ -- every state $(\beta, D)$ with $\beta > \beta^\dagger$ and $D \ge D^\ast_g(\beta)$ lies in the basin of the captured corner, for every $\alpha$ satisfying $(\mathrm{SS}_g)$.
+\end{lemma}
+\begin{proof}
+From $(\beta, D^\ast_g(\beta))$ the first step is componentwise comparable: $G_g(\beta) > 0$ above the saddle moves the policy weakly up, and the stock is exactly stationary on the characteristic. By the comparable-step principle of Theorem~\ref{thm:classify} the orbit is monotone and converges to a fixed point with policy at least $\beta > \beta^\dagger$, which the catalogue forces to be $p_3$. For $D$ above the characteristic, monotonicity of fate is not by itself enough: the statement places no upper bound on $D$, while the policy coordinate is not monotone in its own input above the monotonicity ceiling. Split instead on the stationary ceiling $D^\ast_g(1) = I/(\lambda_0-g)$. At or below it the state lies in $B$ and the comparison above applies verbatim. Above it there are two cases. If the orbit's stock never returns to the ceiling, then $\partial_\beta U > G_g(1) > 0$ at every state it visits, since $1-c\beta \ge 1-c$ and $D > D^\ast_g(1)$; the policy therefore rises by at least $\alpha\,G_g(1)$ per step until it clips at $1$, after which the stock contracts to $D^\ast_g(1)$. If it first returns at some time $T$, the policy is nondecreasing up to $T$ by the same gradient bound, so the entry state dominates $\bigl(\beta_{T-1}, D^\ast_g(\beta_{T-1})\bigr)$ componentwise with $\beta_{T-1} \ge \beta > \beta^\dagger$, and the characteristic-orbit argument applies to it inside $B$. Forward invariance of the region above the characteristic is not an available substitute: at an unclipped state exactly on the characteristic the stock is stationary while the policy rises, so the next state lies strictly below the new characteristic.
+\end{proof}
+
+\begin{proposition}[Burn decomposition: the scale is a Riemann sum of its integral]\label{prop:burn}
+Let $w(\beta) := (1-\sigma(\beta))/A(\beta)$ and consider jump orbits \eqref{eq:jumpmap} from $\beta_0$ with $\tilde E_0 \in [0, 1/(2c^2))$.
+\begin{enumerate}
+\item[(i)] Along any such orbit that never clips, the burn telescopes exactly:
+$\tilde E_0 = \sum_{t\ge0} w(\beta_t)\,(\beta_{t+1}-\beta_t)$.
+\item[(ii)] The policy limit $\beta_\infty(\tilde E_0)$ is continuous and non-decreasing on $[0, 1/(2c^2))$. The excesses whose orbits never clip form an initial segment; $\beta_\infty$ is strictly increasing there and identically $1$ above it. Strictness is not global: at the benchmark from $\beta_0 = 0$, both $\tilde E_0 = 3/5$ and $\tilde E_0 = 61/100$ lie in $[0, 50/81) = [0, 1/(2c^2))$ and give raw first policy inputs $27/25$ and $549/500$, so both clip on the first step and share the limit one; at $\beta_0 = 0.4$ the plateau covers $61\%$ of the stated interval. The plateau nevertheless sits strictly above the critical excess. If the transit brackets the saddle -- $\beta_0 < \beta^\dagger < \beta_\infty(\tilde E_0)$ for some admissible $\tilde E_0$ -- then $\kappa^\ast(\beta_0)$ is the unique root of $\beta_\infty = \beta^\dagger$; since $\beta_\infty(\kappa^\ast) = \beta^\dagger < 1$, the critical orbit is unclipped with $\beta_t \uparrow \beta^\dagger$ and $\kappa^\ast$ lies strictly inside the strictly increasing segment, so the separation is two-sided -- $\beta_\infty < \beta^\dagger$ below $\kappa^\ast$ and $\beta_\infty > \beta^\dagger$ above it. Finally
+\[
+\kappa^\ast(\beta_0) \;=\; \sum_{t\ge0} w(\beta_t)\,(\beta_{t+1}-\beta_t):
+\]
+the exact left-endpoint Riemann sum of $K(\beta_0) := \int_{\beta_0}^{\beta^\dagger} w(b)\,db$ over the critical orbit's own partition of $[\beta_0, \beta^\dagger]$.
+\item[(iii)] The jumps $h_t = A(\beta_t)\tilde E_t$ along the critical orbit are strictly decreasing, and
+\[
+\bigl|\kappa^\ast(\beta_0) - K(\beta_0)\bigr| \;\le\; h_0\, V(w)
+\;=\; A(\beta_0)\,\kappa^\ast(\beta_0)\, V(w),
+\qquad V(w) := \int_{\beta_0}^{\beta^\dagger} |w'(b)|\,db,
+\]
+with $K \le \kappa^\ast$ when $w$ decreases on $[\beta_0,\beta^\dagger]$, as at the benchmark. Consequently $\kappa^\ast(\beta_0)/K(\beta_0) \to 1$ as $\beta_0 \to \beta^{\dagger-}$; once $A(\beta_0)V(w) < 1$, moreover, $|\kappa^\ast/K - 1| \le A(\beta_0)V/(1-A(\beta_0)V)$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(i) $\tilde E_t - \tilde E_{t+1} = (1-\sigma(\beta_t))\tilde E_t = w(\beta_t)A(\beta_t)\tilde E_t = w(\beta_t)(\beta_{t+1}-\beta_t)$, and $\tilde E_t \le \tilde E_0\bar\sigma^{\,t} \to 0$ with $\bar\sigma := 1-\lambda_0+g < 1$; telescope. (ii) On $\{0 \le \tilde E < 1/(2c^2)\}$ the jump map is cooperative -- $\partial\beta'/\partial\beta = 1-2c^2\tilde E > 0$ and the other three partials are nonnegative -- $\beta_t$ is nondecreasing, and the tails $\beta_\infty - \beta_T \le A(0)\,\tilde E_0\,\bar\sigma^{\,T}/(1-\bar\sigma)$ are uniform on compacts, so $\beta_\infty$ is a uniform limit of continuous maps, and non-decreasing in $\tilde E_0$ because the projection is order-preserving \citep{hofheinz2026drift}. Where the larger orbit never clips the smaller does not either, both are then raw orbits, and their ordered policy gaps $b_t$ obey $b_{t+1} \ge b_t(1-2c^2\tilde E_t')$ with $b_1 = A(\beta_0)(\tilde E_0' - \tilde E_0) > 0$ and $\sum_t \tilde E_t' < \infty$, so $b_\infty \ge b_1 \prod_{t\ge1}(1-2c^2\tilde E_t') > 0$: strict there. Above that segment the raw input stays at least one, since $A > 0$ and $\tilde E \ge 0$, so the face is absorbing and $\beta_\infty \equiv 1$; the displayed plateau instance is checked by direct substitution. Because $\beta^\dagger < 1$, the level $\beta^\dagger$ is attained inside the strictly increasing segment: the intermediate value theorem gives the root, strictness gives its uniqueness and the two-sided separation, and the critical orbit never clips because its policy increases to $\beta^\dagger < 1$. (iii) $h_{t+1}/h_t = \sigma(\beta_t)\,A(\beta_{t+1})/A(\beta_t) < 1$. Subtracting the integral from the sum,
+\[
+\kappa^\ast - K \;=\; \sum_t \int_{\beta_t}^{\beta_{t+1}} \bigl(w(\beta_t) - w(b)\bigr)\,db,
+\]
+each term is at most $h_t$ times the variation of $w$ on $[\beta_t,\beta_{t+1}]$, and $\sum_t h_t V_t \le h_0 V$; when $w$ decreases every term is nonnegative. The ratio bound is arithmetic.
+\end{proof}
+
+\begin{lemma}[Sub-saddle trap, uniformly in the adaptation rate]\label{lem:trap}
+Fix a bistable configuration and $\rho \in (0, \beta^\dagger)$, and set
+\[
+m := -\max_{[0,\,\beta^\dagger-\rho/2]} G_g > 0,
+\qquad
+L := \max_{[0,\,\beta^\dagger-\rho/2]} (D^\ast_g)',
+\qquad
+\bar G := \max_{[0,1]} |G_g|,
+\qquad
+\varepsilon^\ast := \frac{\rho\,(1-\bar\sigma)}{16c}.
+\]
+There is an explicit $\alpha_0 > 0$, depending only on these constants, such that for every $\alpha \le \alpha_0$: every full-loop state $(\beta, D)$ with $\beta \le \beta^\dagger - \rho$ and $\alpha\bigl(D - D^\ast_g(\beta)\bigr) \le \varepsilon^\ast$ converges to the calibrated corner.
+\end{lemma}
+\begin{proof}
+Write $E_t := D_t - D^\ast_g(\beta_t)$, $E_t^+ := \max(E_t,0)$, $d:=1-\bar\sigma=\lambda_0-g$, and $q:=\bar\sigma$. Bound the moving-characteristic correction \emph{directionally}. Absolute policy movement is not controlled by $\bar G$ where $E_t < 0$, the transient gradient there being more negative than $G_g(\beta_t)$, and the hypothesis is only an upper bound on $\alpha E_0$; but if the policy moves up, $D^\ast_g$ is increasing and the correction is nonpositive, while if it moves down, $D_t \ge 0$ gives $\partial_\beta U \ge -v$, so the projection lowers the policy by at most $\alpha v$. With $L$ any positive Lipschitz bound for $D^\ast_g$ -- the reachable-interval maximum above, or the global $2\eta(1-\lambda_0)I/(\lambda_0-g)^2$ -- this gives the one-sided recurrence
+\[
+E_{t+1}^+ \;\le\; qE_t^+ \;+\; \alpha L v .
+\]
+valid on the whole initial-state domain. Take
+\[
+\alpha_0 \;:=\; \min\Bigl\{\frac{1-\bar\sigma}{4c^2I},\ \frac{m\,(1-\bar\sigma)}{16\,c\,L\,v}\Bigr\},
+\]
+which implies $(\mathrm{SS}_g)$ strictly and makes the error floor at most $m/(16c)$. The coupled induction used by the formal proof gives, for every $t$ before any putative escape from the sub-saddle interval,
+\[
+E_t^+ \;\le\; q^tE_0^+ + \frac{\alpha Lv}{d},
+\qquad
+\beta_t \;\le\; \beta_0+
+\frac{8c}{3}\frac{\alpha E_0^+}{d}(1-q^t).
+\]
+The initial allowance gives
+\[
+\frac{8c}{3}\frac{\alpha E_0^+}{d}\le\frac{\rho}{6},
+\]
+so $\beta_t\le\beta^\dagger-\rho+\rho/6<\beta^\dagger-\rho/2$ for every $t$. This closes the induction globally; no logarithmic cutoff and no additional ceiling on $\alpha$ are needed. Since $q^tE_0^+\to0$ and the error floor is at most $m/(16c)$, eventually $E_t^+\le m/(8c)$. On the invariant sub-saddle interval,
+$G_g(\beta_t)\le-m$ and $A(\beta_t)\le2c$, hence
+$\partial_\beta U(\beta_t,D_t)\le-m+2cE_t^+\le-m/2$.
+The policy therefore reaches $0$ in finitely many further steps and remains there; the stock recursion then contracts to $D^\ast_g(0)$, so the orbit converges to $p_1$.
+\end{proof}
+
+\begin{proposition}[The separatrix limit]\label{prop:seplimit}
+In a bistable configuration under $(\mathrm{SS}^+_g)$, at every $\beta_0$ with a saddle-bracketing transit,
+\[
+\alpha\,\bigl(D_{\mathrm{sep}}(\alpha;\beta_0)-D^\ast_g(\beta_0)\bigr)\;\longrightarrow\;\kappa^\ast(\beta_0)
+\qquad (\alpha \to 0^+).
+\]
+\end{proposition}
+\begin{proof}
+\emph{Upper half.} Fix $\delta > 0$. The jump orbit from $\tilde E_0 = \kappa^\ast+\delta$ has policy limit above $\beta^\dagger$ by Proposition~\ref{prop:burn}(ii), so some finite $t^\ast$ has $\beta_{t^\ast} > \beta^\dagger$, and $\tilde E_{t^\ast} > 0$. By Theorem~\ref{thm:jump} at horizon $t^\ast$, for all small $\alpha$ the rescaled full-loop orbit lands within $\tfrac12(\beta_{t^\ast}-\beta^\dagger)$ and $\tfrac12\tilde E_{t^\ast}$ of the jump state: a state with policy above $\beta^\dagger$ and stock above the characteristic, captured by Lemma~\ref{lem:charcap}. Monotonicity of fate gives $D_{\mathrm{sep}} \le D^\ast_g(\beta_0)+(\kappa^\ast+\delta)/\alpha$.
+
+\emph{Lower half.} Fix $\delta > 0$ and let $2\rho := \beta^\dagger - \beta_\infty(\kappa^\ast-\delta) > 0$, again by Proposition~\ref{prop:burn}(ii). Choose $T$ with jump excess $\tilde E_T \le \varepsilon^\ast(\rho)/2$; by Theorem~\ref{thm:jump} at horizon $T$, for all small $\alpha$ the rescaled full-loop orbit lands with policy below $\beta^\dagger-\rho$ and rescaled excess below $\varepsilon^\ast(\rho)$, and Lemma~\ref{lem:trap} calibrates it. Monotonicity of fate gives $D_{\mathrm{sep}} \ge D^\ast_g(\beta_0)+(\kappa^\ast-\delta)/\alpha$. Together, $\alpha\,(D_{\mathrm{sep}}-D^\ast_g(\beta_0)) \in [\kappa^\ast-\delta,\, \kappa^\ast+\delta]$ for all small $\alpha$.
 \end{proof}
 
 \begin{remark}[Why $K$ is an approximation, not a bound]\label{rem:Knotbound}
-The jump map evaluates the burn rate $(1-\sigma)/A$ at the \emph{left endpoint} of each order-one jump. When the integrand is decreasing in $\beta$---as at the benchmark---left-endpoint sampling overestimates the burn, pushing $\kappa^\ast$ slightly above $K$; the orientation reverses when the integrand increases. The discrepancy is a Riemann-sum error at the jump scale, not a one-sided inequality, and vanishes with the jump size. The discrete update convention matters at the same order: the simultaneous-update map \eqref{eq:stock}--\eqref{eq:map} yields \eqref{eq:jumpmap} with $\sigma$ evaluated at the pre-jump $\beta$; a sequential convention shifts $\sigma$ to the post-jump $\beta$ and changes $\kappa^\ast$ at order one. This is why the paper fixes the convention explicitly.
+The jump map evaluates the burn rate $(1-\sigma)/A$ at the \emph{left endpoint} of each order-one jump. When the integrand is decreasing in $\beta$ -- as at the benchmark -- left-endpoint sampling overestimates the burn, pushing $\kappa^\ast$ slightly above $K$; the orientation reverses when the integrand increases. The discrepancy is a Riemann-sum error at the jump scale, not a one-sided inequality, and vanishes with the jump size. The discrete update convention matters at the same order: the simultaneous-update map \eqref{eq:stock}--\eqref{eq:map} yields \eqref{eq:jumpmap} with $\sigma$ evaluated at the pre-jump $\beta$; a sequential convention shifts $\sigma$ to the post-jump $\beta$ and changes $\kappa^\ast$ at order one. The convention is therefore part of the statement.
 \end{remark}
 
 At the benchmark with $\beta_0=0.4$: $\kappa^\ast=0.2384$ and $K=0.2366$ (within $0.8\%$); the measured products $\alpha\,(D_{\mathrm{sep}}-D^\ast(\beta_0))$ are
@@ -363,18 +645,18 @@ monotone in $\alpha$ with Richardson extrapolation $0.2405$, within $0.9\%$ of $
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.62\linewidth]{fig_ratesep.png}
+\civicincludegraphics[width=0.70\linewidth]{Rescaled measured separatrix distances converge toward the jump-map threshold as the adaptation rate alpha approaches zero}{fig_ratesep.pdf}
 \caption{The separatrix limit at the benchmark, $\beta_0=0.4$: measured $\alpha\,(D_{\mathrm{sep}}-D^\ast(\beta_0))$ descends monotonically onto the jump-map separatrix scale $\kappa^\ast$ as $\alpha\to0$; the continuum integral $K$ lies within $0.8\%$, and the Richardson extrapolation of the two smallest rates lands within $0.9\%$ of $\kappa^\ast$.}
 \label{fig:ratesep}
 \end{figure}
 
 \begin{remark}[Cadence as a regulable]\label{rem:cadence}
-Theorem~\ref{thm:jump} prices the adaptation rate: from a transient shock of excess stock $E_0$, capture requires $\alpha\gtrsim\kappa^\ast(\beta_0)/E_0$, so capping preference-update cadence relative to belief-mixing time buys separatrix height in exact inverse proportion. This is the deterministic skeleton of the two-timescale principle in stochastic approximation \citep{borkar1997stochastic,borkar2008stochastic}: there, separating timescales is an algorithm-design device; here, the timescale ratio is itself the regulated quantity, and the jump map is the object that prices it.
+The separatrix limit (Proposition~\ref{prop:seplimit}) prices the adaptation rate: from a transient shock of excess stock $E_0$, capture requires $\alpha\gtrsim\kappa^\ast(\beta_0)/E_0$, so capping preference-update cadence relative to belief-mixing time buys separatrix height in inverse proportion in the small-$\alpha$ limit. This is the deterministic skeleton of the two-timescale principle in stochastic approximation \citep{borkar1997stochastic,borkar2008stochastic}: there, separating timescales is an algorithm-design device; here, the timescale ratio is itself the regulated quantity, and the jump map is the object that prices it.
 \end{remark}
 
 \section{Identification and the safe-side rule}\label{sec:id}
 
-The certificate is only as useful as its parameters are estimable. Consider a contested-stream panel: per-claim squared deviations tracked over $T$ periods under a known deference path $\beta_t$, claim retirements observed, arrival cohorts observed with their masses. The natural estimators are
+The certificate is only as useful as its parameters are estimable. The task is system identification in the standard sense -- recovering a dynamic system's parameters from input--output records under sufficient excitation \citep{ljung1999system} -- with two features that decide the design: the excitation is the deference path, which an operator at an attractor holds still, and the estimand of record is not the fitted model but a one-sided inequality on it, so the relevant error criterion is the sign of a margin rather than a norm. Consider a contested-stream panel: per-claim squared deviations tracked over $T$ periods under a known deference path $\beta_t$, claim retirements observed, arrival cohorts observed with their masses. The natural estimators are
 \begin{gather*}
 \hat\lambda_0=\frac{\text{retirements}}{\text{claim-period exposure}},
 \qquad
@@ -383,19 +665,131 @@ The certificate is only as useful as its parameters are estimable. Consider a co
 \end{gather*}
 the last because the content channel makes expected arrival mass affine in the lagged aggregate: $\E[\text{mass}_t\mid D_{t-1}]=I_0+gD_{t-1}$.
 
-\begin{proposition}[Recovery and rates]\label{prop:id}
-In the battery's panels ($T=600$, three Gamma-cohort arrivals per period, sinusoidal $\beta$-path): mean errors are $2\%$ for $\hat\lambda_0$, regression-exact for $\hat\eta$, $13\%$ of the $\lambda_0$ scale for $\hat g$, and $3\%$ for $\hat I_0$; across $T\in\{300,600,1200,2400\}$ the four RMSEs scale with fitted log-log slopes $-0.61$, $-0.44$, $-0.46$, $-0.41$, consistent with $T^{-1/2}$ rates. The plug-in margin $\hat m=v(\hat\lambda_0-\hat g)-2c\hat I_0$ predicted the true dynamical fate out of sample in $40/40$ designed trials: estimated-certified loops were never captured from adversarial initial conditions, and estimated-capturable loops captured.
-\end{proposition}
+\begin{numresult}[Recovery and rates]\label{prop:id}
+The identification algebra above is exact -- nonzero exposure recovers $\lambda_0$ from expected retirements, regressor variation recovers $\eta$ and $(g, I_0)$ from the displayed regressions, and exact estimates reproduce the margin $v(\lambda_0-g)-2cI_0$ exactly; finite-sample accuracy is a battery measurement, reported here. In thirty seed-pinned battery panels ($T=600$, three Gamma-cohort arrivals per period, sinusoidal $\beta$-path), mean errors are $2\%$ for $\hat\lambda_0$, regression-exact for $\hat\eta$, $13\%$ of the $\lambda_0$ scale for $\hat g$, and $3\%$ for $\hat I_0$; the corresponding ninetieth percentiles are $4\%$, regression-exact, $26\%$, and $5\%$. In a separate rate experiment with twenty-four panels at each $T\in\{300,600,1200,2400\}$, the fitted log--log RMSE slopes of the three noisy estimators $(\hat\lambda_0,\hat g,\hat I_0)$ are $-0.61,-0.46,-0.41$; $\hat\eta$ is algebraically exact in that simulation, so its floating-point RMSE is not used as rate evidence. The plug-in margin $\hat m=v(\hat\lambda_0-\hat g)-2c\hat I_0$ predicted the true dynamical fate out of sample in $40/40$ designed trials: estimated-certified loops were never captured from adversarial initial conditions, and estimated-capturable loops captured. These are descriptive frequencies under the stated simulation law and seeds, not distribution-free performance guarantees or field-population probabilities.
+\end{numresult}
+
+There is nevertheless an exact finite-sample sensitivity statement beneath
+these measurements. Write an observed retirement count as
+$\lambda_0E+e_R$, two contraction moments as
+$1-\eta r_j+e_j$, and two arrival-mass moments as
+$I_0+gD_j+u_j$. For $E\ne0$, $r_1\ne r_2$, and $D_1\ne D_2$,
+\begin{align*}
+\hat\lambda_0-\lambda_0&=e_R/E,&
+\hat\eta-\eta&=-\frac{e_2-e_1}{r_2-r_1},\\
+\hat g-g&=\frac{u_2-u_1}{D_2-D_1},&
+\hat I_0-I_0&=u_1-D_1\frac{u_2-u_1}{D_2-D_1}.
+\end{align*}
+Thus the response and gain errors are bounded respectively by
+$(|e_1|+|e_2|)/|r_2-r_1|$ and
+$(|u_1|+|u_2|)/|D_2-D_1|$: insufficient excitation appears exactly as a
+small denominator, with no asymptotic shorthand. For fixed $(v,c)$, parameter
+errors $(\delta_\lambda,\delta_g,\delta_I)$ perturb the margin by exactly
+$v(\delta_\lambda-\delta_g)-2c\delta_I$, whose magnitude is at most
+$|v|(|\delta_\lambda|+|\delta_g|)+2|c||\delta_I|$. These identities and
+bounds are machine-checked in
+\texttt{PaperIII/FiniteSampleIdentification.lean}; they assume error bounds,
+not a sampling distribution, and therefore do not supply the empirical RMSEs.
 
 For decisions, point estimates are not enough; the rule must be conservative against estimation noise on the dangerous side.
 
-\begin{proposition}[Delta-method margin inference and the safe-side rule]\label{prop:safe}
-With $\hat\lambda_0$ asymptotically independent of the OLS pair $(\hat g,\hat I_0)$ (distinct data slices), the margin variance is
+\begin{proposition}[Margin variance and the safe-side implication]\label{prop:safe}
+Let the estimators be square-integrable, and let $\hat\lambda_0$ be independent of the \emph{joint} OLS pair $(\hat g,\hat I_0)$ -- the estimators use distinct data slices. Then the margin estimator $\hat m = v(\hat\lambda_0-\hat g)-2c\hat I_0$ satisfies, exactly,
 \[
-\widehat\Var(\hat m)\;=\;v^2\bigl(\widehat\Var\hat\lambda_0+\widehat\Var\hat g\bigr)\;+\;4c^2\,\widehat\Var\hat I_0\;+\;4vc\,\widehat\Cov(\hat g,\hat I_0),
+\Var(\hat m)\;=\;v^2\bigl(\Var\hat\lambda_0+\Var\hat g\bigr)\;+\;4c^2\,\Var\hat I_0\;+\;4vc\,\Cov(\hat g,\hat I_0).
 \]
-with $\widehat\Var\hat\lambda_0=\hat\lambda_0(1-\hat\lambda_0)/\text{exposure}$ and the OLS covariance for the pair. The safe-side rule \emph{certify iff $\hat m-2\,\mathrm{SE}(\hat m)>0$} produced zero false certifications across all capturable loops in the battery ($0/18$) while retaining power $20/22$ on comfortably certified loops. Under standard asymptotics its false-certification probability is conservative at the $\Phi(-2)\approx2.3\%$ level.
+Moreover the safe-side rule -- \emph{certify iff $\hat m-2\,\mathrm{SE}(\hat m)>0$} -- is deterministically sound on its coverage event: whenever $|\hat m-m|\le 2\,\mathrm{SE}(\hat m)$, certification implies $m>0$.
 \end{proposition}
+\begin{proof}
+Independence of $\hat\lambda_0$ from the joint pair makes $v\hat\lambda_0$ independent of $-v\hat g-2c\hat I_0$ by measurable composition, so their variances add, while the covariance inside the pair remains; expanding $\Var(v\hat g+2c\hat I_0)$ produces the cross term. The implication is arithmetic: $m \ge \hat m-|\hat m-m| \ge \hat m-2\,\mathrm{SE}(\hat m) > 0$.
+\end{proof}
+
+\paragraph{Five-parameter extension.}
+When $(v,c)$ are estimated rather than fixed, put
+$\vartheta:=(v,c,\lambda_0,g,I_0)$ and let $\Sigma$ be the \emph{joint}
+covariance matrix of $\hat\vartheta$. The exact perturbation identity is
+\[
+m(\vartheta+\Delta)-m(\vartheta)
+=
+\nabla m(\vartheta)^\top\Delta
++\Delta_v(\Delta_{\lambda_0}-\Delta_g)-2\Delta_c\Delta_{I_0},
+\]
+with
+\[
+\nabla m(\vartheta)
+=
+(\lambda_0-g,\,-2I_0,\,v,\,-v,\,-2c).
+\]
+Accordingly the full delta-method variance is
+\begin{equation}\label{eq:fivevar}
+\Var_\Delta(\hat m)
+=
+\nabla m(\vartheta)^\top\Sigma\nabla m(\vartheta).
+\end{equation}
+The three-parameter identity in Proposition~\ref{prop:safe} is the exact
+fixed-$(v,c)$ specialization under its stated slice-independence assumption.
+A sum of the five diagonal contributions is valid only under the additional
+condition that every off-diagonal covariance entering \eqref{eq:fivevar}
+vanishes; in particular, jointly estimated $(\hat v,\hat c)$ and the OLS pair
+$(\hat g,\hat I_0)$ may not be treated as independent by default. The
+perturbation identity, positive-semidefinite covariance form, and diagonal
+specialization are machine-checked.
+
+The safe-side implication is not tied to a normal approximation. For any
+registered radius $R$ satisfying the coverage event
+$|\hat m-m|\le R$, the decision $\hat m-R>0$ implies $m>0$ exactly. If
+$\hat\vartheta=\vartheta+\Delta$, the perturbation identity supplies the
+finite nonlinear radius
+\[
+R_{\mathrm{exact}}(\vartheta,\Delta)
+:=
+|\nabla m(\vartheta)^\top\Delta|
++|\Delta_v(\Delta_{\lambda_0}-\Delta_g)-2\Delta_c\Delta_{I_0}|,
+\]
+which always covers $|\hat m-m|$ by the triangle inequality. Thus a plug-in
+margin exceeding this linear-plus-remainder radius is a non-asymptotic
+certificate. The coverage-event implication, this exact radius, and the
+resulting certificate are machine-checked alongside the covariance algebra.
+
+Coverage probability requires assumptions beyond the pointwise implication. A
+distribution-free finite-sample statement is available for a scalar margin
+estimator: if $\hat m$ is square-integrable and unbiased for $m$, with positive
+\emph{true} variance $\sigma^2$, then for every fixed $R>0$,
+\[
+ \Pr\{|\hat m-m|>R\}\le \frac{\sigma^2}{R^2},\qquad
+ m\le0\ \Longrightarrow\ \Pr\{\hat m>R\}\le\frac{\sigma^2}{R^2}.
+\]
+Consequently $R=2\sigma$ gives at least $75\%$ coverage and at most $25\%$
+false certification without any distributional approximation. This deliberately
+weak Chebyshev calibration, including the false-certification transfer, is
+machine-checked in \texttt{PaperIII/CoverageProbability.lean}. It uses the
+true standard deviation and unbiasedness; it does not justify replacing
+$\sigma$ by a random estimated standard error.
+
+For a finite registered family of primitive tests, joint coverage is a
+separate obligation. If test $j$ has failure event $F_j$ and a proved marginal
+bound $\Pr(F_j)\le\delta_j$, then
+$\Pr(\bigcup_jF_j)\le\sum_j\delta_j$; any false composite verdict that is
+possible only when some primitive event fails inherits the same sum. This
+Bonferroni transfer is exact and requires no independence, and is also
+machine-checked in \texttt{PaperIII/CoverageProbability.lean}. Thus a protocol
+must allocate a familywise error budget; repeated use of an unadjusted
+``two-SE'' radius does not by itself calibrate the composite verdict.
+
+In operation the variances are estimated rather than known:
+$\widehat\Var\hat\lambda_0=\hat\lambda_0(1-\hat\lambda_0)/\text{exposure}$
+under a Bernoulli retirement model at fixed exposure, and the OLS covariance
+estimator for the pair. Under the additional asymptotic assumptions of a
+limiting standard normal law for $(\hat m-m)/\widehat{\mathrm{SE}}(\hat m)$
+and consistent standard-error estimation, the rule's one-sided
+false-certification probability tends to
+$\Phi(-2)\approx2.3\%$ at the boundary $m=0$ and is no larger for fixed
+$m<0$. The variance identities and coverage-event implications above are
+exact; this estimated-SE calibration is asymptotic.
+
+\begin{numresult}\label{nr:safe}
+In forty seed-pinned battery draws the safe-side rule produced zero false certifications across all capturable loops ($0/18$) while retaining power $20/22$ on comfortably certified loops. The event $|\hat m-m|\le2\widehat{\mathrm{SE}}(\hat m)$ occurred in $37/40$ draws, an empirical coverage frequency of $92.5\%$ with a $95\%$ Wilson interval $[80.1\%,97.4\%]$. This interval estimates coverage only under the battery's simulation law; it is neither the finite-sample Chebyshev theorem (which uses true variance) nor proof of the asymptotic normal calibration.
+\end{numresult}
 
 The pipeline is therefore closed: observable panels $\to$ loop-parameter estimates $\to$ margin with standard errors $\to$ a certification decision whose error structure is one-sided in the safe direction.
 
@@ -405,34 +799,37 @@ The deliverable is a menu of inequalities on loop properties, each priced in mar
 
 \emph{Gain caps.} Require $g\le\bar g<\lambda_0$ (per-community $\sum_jg_{kj}<\lambda_{0k}$ in networks, or the sharp spectral form $\rho(\bar S+G)<1$). The certificate curve of Figure~\ref{fig:zones} is the price schedule: the usefulness premium needed for guaranteed safety is $2cI/(\lambda_0-\bar g)$, diverging as the cap approaches the grounding rate. Content-ranking and recommendation choices that determine how strongly standing disagreement spawns fresh contested claims are the physical lever.
 
-\emph{Grounding floors.} Require $\lambda_0\ge\underline\lambda$: institutional resolution capacity---fact-checking with reach, adjudication, authoritative settlement---raises the divergence wall and cheapens every other instrument simultaneously, since both zone boundaries scale as $(\lambda_0-g)^{-1}$.
+\emph{Grounding floors.} Require $\lambda_0\ge\underline\lambda$: institutional resolution capacity -- fact-checking with reach, adjudication, authoritative settlement -- raises the divergence wall and cheapens every other instrument simultaneously, since both zone boundaries scale as $(\lambda_0-g)^{-1}$.
 
-\emph{Audit-sensor mandates.} Require an unweighted-error sensor of weight $\varepsilon$ chosen from a latency target via Remark~\ref{rem:sensor}. By Theorem~\ref{thm:exact} this is the \emph{only} instrument that operates after the certificate fails: the satisfaction channel at capture carries zero information about the diverging coordinate, so no analysis of satisfaction telemetry, however sophisticated, can substitute.
+\emph{Audit-sensor mandates.} Require an unweighted-error sensor of weight $\varepsilon$ chosen from a latency target via Remark~\ref{rem:sensor}. By Theorem~\ref{thm:exact} this is the menu's \emph{only} instrument that operates after the certificate fails: the satisfaction channel at capture carries zero information about the diverging coordinate, so within the model no analysis of satisfaction telemetry, however sophisticated, can substitute.
 
-\emph{Cadence caps.} Bound the preference-update rate relative to belief mixing: by Theorem~\ref{thm:jump}, the protected shock size scales as $\kappa^\ast(\beta_0)/\alpha$, so halving cadence doubles the transient excess stock the loop can absorb without capture.
+\emph{Cadence caps.} Bound the preference-update rate relative to belief mixing: by the separatrix limit (Proposition~\ref{prop:seplimit}), the protected shock size is $\kappa^\ast(\beta_0)/\alpha$ to leading order, so halving cadence asymptotically doubles the transient excess stock the loop can absorb without capture. Pricing the cap at fixed operating scale needs an explicit separatrix-rate envelope -- open in Section~\ref{sec:open}; the envelope-to-bounds transfer is machine-checked in \texttt{PaperIII/CadenceRate.lean}.
 
-A regulator certifies the loop the product runs inside; the product's behavior---the knob---is never the regulated quantity. By Theorem~\ref{thm:cert} it is also the only regulated quantity that is robust to the product, since the certificate binds every adaptation policy at once.
+A regulator certifies the loop the product runs inside; the product's behavior -- the knob -- is never the regulated quantity. By Theorem~\ref{thm:cert} it is also robust to the product as the knob cannot be, the certificate binding every sign-consistent responsive rule at once.
+
+This menu is deliberately unlike the instruments now in use, and the difference is the object rather than the rigor. Capability evaluation and deployment gating test a system before release \citep{shevlane2023model}; sociotechnical and holistic evaluation widen the unit of assessment to deployed impact \citep{weidinger2023sociotechnical, solaiman2025evaluating}; algorithmic auditing examines a deployed system from outside \citep{metaxa2021auditing}, or through an internal accountability process \citep{raji2020closing}. Each takes the system's conduct as the object, and each therefore has to be repeated whenever the conduct changes. The inequalities above take the loop as the object and are for that reason indifferent to the conduct. The audit-sensor mandate is where the two traditions meet: it is an instrumentation requirement of exactly the kind auditing already asks for, except that its necessity here is a theorem -- Theorem~\ref{thm:exact} -- rather than a matter of good practice, and its sufficient magnitude is set by a latency target rather than negotiated. The measurement side of that meeting -- estimands, experimental arms, and decision thresholds for locating a deployed system on the pressure--drift--capture ladder, its certified core built from the sub-saddle trap at its explicit constants -- is pre-registered in the companion audit protocol \citep{hofheinz2026audit}.
 
 \section{Verification}\label{sec:verification}
 
-Every formal claim above is paired with an independent numerical witness in a seed-pinned battery of fourteen suites (\texttt{derisk\_loops.py}, seed $23$), written before the corresponding prose. The suites verify, in order: the closed stationary forms of all four conservation cells against long iteration and the conservation loci ($\zeta=0$; $g=\lambda_0$) including the interior-minimum location $u_c$ (N0a--c); the certificate's $G_g<0$ conclusion and the calibration of four adaptation rules---gradient, sign, momentum, multiplicative---from three adversarial initial conditions on sixty certified draws, the local stability of the captured corner below the capture line on sixty draws, and the intermediate zone's dichotomy including machine-precision convergence to interior partial-capture equilibria (N1a--c); both gain ceilings with horizons scaled to the spectral gap (N2); the observability ranks $1/2/2$, the kernel membership of the unstable mode, and the latency law with fitted slope $41$ against predicted $42$ (N3); the monotone growth of the separatrix with falling $\alpha$ (N4); panel recovery of $(\lambda_0,\eta,g,I_0)$ and the $40/40$ out-of-sample fate predictions (N5); the jump-map limit $\kappa^\ast$, the integral approximation $K$, the six-point product table with Richardson extrapolation within $0.9\%$, and the near-saddle continuum agreement within $1\%$ (N6); the exact nonlinear indistinguishability---identical satisfaction outputs to the last bit over four hundred steps---and the sensor-gap growth rate within $0.4\%$ of $2\ln(1+\zeta)$ (N7); the $T^{-1/2}$ estimator rates and the safe-side rule's $0/18$ false certifications with $20/22$ power (N8); and the network bound, the multi-knob certificate, the spectral ceiling on both sides, and the exact scalar recovery (N9). Two of the paper's results were discovered by failing assertions rather than confirmed by passing ones: the partial-capture equilibria of Theorem~\ref{thm:zones}(B), found when intermediate-zone trajectories refused to reach a corner, and the jump-map limit of Theorem~\ref{thm:jump}, found when the measured products refused to converge to the conjectured integral. The battery is the method, not an appendix to it.
+Every formal claim above is paired with an independent numerical witness in a seed-pinned battery of fifteen suites (\texttt{derisk\_loops.py}, seed $23$), written before the corresponding prose. The suites verify, in order: the closed stationary forms of all four conservation cells against long iteration and the conservation loci ($\zeta=0$; $g=\lambda_0$) including the interior-minimum location $u_c$ (N0a--c); the certificate's $G_g<0$ conclusion and the calibration of four adaptation rules -- gradient, sign, momentum, multiplicative -- from three adversarial initial conditions on sixty certified draws, the local stability of the captured corner below the capture line on sixty draws, and the intermediate zone's dichotomy including machine-precision convergence to interior partial-capture equilibria (N1a--c); both gain ceilings with horizons scaled to the spectral gap (N2); the observability ranks $1/2/2$, the kernel membership of the unstable mode, and the latency law with fitted slope $41$ against predicted $42$ (N3); the monotone growth of the separatrix with falling $\alpha$ (N4); panel recovery of $(\lambda_0,\eta,g,I_0)$ and the $40/40$ out-of-sample fate predictions (N5); the jump-map limit $\kappa^\ast$, the integral approximation $K$, the six-point product table with Richardson extrapolation within $0.9\%$, and the near-saddle continuum agreement within $1\%$ (N6); the exact nonlinear indistinguishability -- identical satisfaction outputs to the last bit over four hundred steps -- and the sensor-gap growth rate within $0.4\%$ of $2\ln(1+\zeta)$ (N7); the $T^{-1/2}$ estimator rates and the safe-side rule's $0/18$ false certifications with $20/22$ power (N8); the network bound, the multi-knob certificate, the stability ceiling on both sides, and the exact scalar recovery (N9); and the burn-decomposition identity to machine precision, the two-sided $K$-bounds with strictly decreasing jumps, the near-saddle ratio, the trichotomy of Proposition~\ref{prop:burn}(ii) -- strict increase below the clipping plateau, $\beta_\infty \equiv 1$ on it, and the plateau strictly above $\kappa^\ast$ at $\beta_0 = 0,\,0.4,\,0.9$ (occupying $35.1\%$, $60.7\%$, $95.9\%$ of the admissible interval) -- characteristic capture, and the upper half-limit at small $\alpha$ (N10). The battery has the standing to falsify, not merely to confirm: each suite asserts a claim, so a failing suite is a refutation rather than a defect report. The interior attractors of Theorem~\ref{thm:zones}(B) and the separatrix scale of Remark~\ref{rem:sepscale} are constrained by the suites independently of their derivations. The battery is the method, not an appendix to it.
+
+Every theorem, lemma, proposition, and corollary of this paper is additionally machine-checked in Lean 4 against Mathlib, with no unproved steps and no axioms beyond Lean's standard three; the numerical results are battery measurements and lie outside the formalization by type. The development resides at \texttt{lean/} in the replication repository, and \texttt{\#print axioms} reports the exact dependency set of any declaration. Sharpness is machine-checked in the same development: the clipped-plateau witnesses printed in Proposition~\ref{prop:burn}(ii), the projection non-removability of Theorem~\ref{thm:jump}, and the companion's period-two instance behind the ascending-branch proviso of Theorem~\ref{thm:classify} witness that these hypotheses are necessary rather than conventional.
 
 \section{Open problems}\label{sec:open}
 
-\emph{Endogenous gain.} Here $g$ is a fixed property of the content channel. In a content market, $g$ itself responds to engagement---polarizing claims are supplied because they perform---creating a loop around the loop whose fixed points need not respect any static cap. The natural conjecture is that the certificate survives with $g$ replaced by its market equilibrium value, but the equilibrium may sit on the wrong side of the wall.
+\emph{Endogenous gain.} Here $g$ is a fixed property of the content channel. In a content market, $g$ itself responds to engagement -- polarizing claims are supplied because they perform -- creating a loop around the loop whose fixed points need not respect any static cap. The natural conjecture is that the certificate survives with $g$ replaced by its market equilibrium value, but the equilibrium may sit on the wrong side of the wall.
 
-\emph{Root structure of $G_g$.} The zone theorem uses only the sign pattern of $G_g$; conditions under which $G_g$ has at most one interior root pair (equivalently, $F$ unimodal) would sharpen zone (B) from existence to uniqueness of the partial-capture equilibrium.
-
-\emph{Welfare foundations for $v$.} The certificate prices safety in units of the usefulness premium; deriving $v$ from primitives---what users would pay for grounded answers---would convert the certificate from a consistency condition into a welfare statement.
+\emph{Welfare foundations for $v$.} The certificate prices safety in units of the usefulness premium; deriving $v$ from primitives -- what users would pay for grounded answers -- would convert the certificate from a consistency condition into a welfare statement.
 
 \emph{Partial-capture economics.} Theorem~\ref{thm:conservation} gives operators with moderate supercritical gain a stationary \emph{incentive} to stop at $\beta_c$, and Theorem~\ref{thm:zones} gives the matching attractor. Whether competition among operators selects for or against the partial-capture regime is open, and is the regime most likely to be observed in the wild precisely because no alarm fires there.
 
-\emph{Network identification.} Section~\ref{sec:id} identifies a scalar gain; identifying the coupling matrix $G$---and hence the Perron margin $1-\rho(\bar S+G)$---from cross-community panels is the spectral analogue, presumably via the lag structure of cross-community arrival masses.
+\emph{Network identification.} Section~\ref{sec:id} identifies a scalar gain; identifying the coupling matrix $G$ -- and hence the Perron margin $1-\rho(\bar S+G)$ -- from cross-community panels is the spectral analogue, presumably via the lag structure of cross-community arrival masses.
 
-\emph{Variational structure of $\kappa^\ast$.} The jump-map separatrix scale is computed by bisection; a variational or fixed-point characterization of $\kappa^\ast(\beta_0)$, and sharp two-sided bounds interpolating to $K$, would make the cadence cap analytically priceable.
+\emph{Sharper pricing of $\kappa^\ast$.} Two-sided refinements of Proposition~\ref{prop:burn}(iii) at fixed $\beta_0$, rather than asymptotically, and explicit rates in $\alpha$ for the separatrix limit of Proposition~\ref{prop:seplimit}, would price the cadence cap exactly at operating scale.
 
-\emph{Stochastic transit.} The companion's Arrhenius protection concerns noise-driven escape from a basin; the jump-map limit concerns deterministic transit across one. Their composition---noisy adaptation at small $\alpha$ crossing the jump-map separatrix---is the realistic regime and should interpolate between the two scalings.
+\emph{Stochastic transit.} The companion's Arrhenius protection concerns noise-driven first saddle-policy crossing, the proved precursor of basin exit; the jump-map limit concerns deterministic transit across a basin. Their composition -- noisy adaptation at small $\alpha$ crossing the jump-map separatrix -- is the realistic regime and should interpolate between the two scalings.
 
+\markright{References}
 \bibliographystyle{plainnat}
 \bibliography{civic_loops_refs}
 

@@ -1,3 +1,7 @@
+Scope: This MIT License applies only to the repository paths identified as
+MIT-licensed in LICENSES.md. It does not apply to lean/, papers/, or the
+rendered paper figures in figures/*.pdf.
+
 MIT License
 
 Copyright (c) 2026 Daniel Hofheinz

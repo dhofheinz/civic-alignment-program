@@ -1,23 +1,54 @@
+\ifdefined\pdfsetrandomseed\pdfsetrandomseed 20260804 \fi
+\newif\ifcivictagged
+\ifdefined\IfFormatAtLeastTF
+\IfFormatAtLeastTF{2025-06-01}{%
+  \DocumentMetadata{lang=en-US,tagging=on}
+  \civictaggedtrue
+}{}
+\fi
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{microtype}
 \usepackage{graphicx}
+\graphicspath{{../figures/}{./}}
+\ifcivictagged
+  \newcommand{\civicincludegraphics}[3][]{\includegraphics[alt={#2},#1]{#3}}
+\else
+  \newcommand{\civicincludegraphics}[3][]{\includegraphics[#1]{#3}}
+\fi
 \usepackage{array}
+\usepackage{booktabs}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage[round]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\definecolor{civicref}{HTML}{8C2F1B}
+\definecolor{civiccite}{HTML}{1F5FA8}
+\usepackage[colorlinks,linkcolor=civicref,citecolor=civiccite,urlcolor=civiccite]{hyperref}
+\hypersetup{
+  pdfauthor={Daniel Hofheinz},
+  pdftitle={Civic Drift: Threshold Dynamics of Satisfaction-Optimized Deference},
+  pdfsubject={A dynamic model of satisfaction-optimized deference and the resulting civic drift and capture},
+  pdfkeywords={AI alignment, civic drift, civic capture, dynamical systems, hysteresis, AI governance},
+  pdfcopyright={Copyright (c) 2026 Daniel Hofheinz. All rights reserved.},
+  pdfdisplaydoctitle=true
+}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{assumption}{Assumption}
-\newtheorem{conjecture}{Conjecture}
-\newtheorem{numresult}{Numerical Result}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{numresult}[theorem]{Numerical Result}
 \theoremstyle{remark}
-\newtheorem{remark}{Remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+\hfuzz=0.2pt \interfootnotelinepenalty=10000
+\pagestyle{headings}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 
 \DeclareMathOperator{\MSE}{MSE}
 \DeclareMathOperator{\Var}{Var}
@@ -26,31 +57,35 @@
 \newcommand{\E}{\mathbb{E}}
 
 \title{Civic Drift: Threshold Dynamics of\\ Satisfaction-Optimized Deference}
-\author{Daniel Hofheinz}
-\date{July 29, 2026}
+\author{Daniel Hofheinz\\[2pt]
+  {\small \href{mailto:daniel@danielhofheinz.com}{\texttt{daniel@danielhofheinz.com}}
+   \,$\cdot$\, \href{https://orcid.org/0009-0009-5237-5887}{ORCID 0009-0009-5237-5887}}}
+\date{August 5, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-A satisfaction-optimized AI system can gradually tune itself into a captured regime where agreement is rewarded, disagreement is preserved, correction becomes harder, early-warning signals precede the transition, and satisfaction metrics eventually stop seeing the harm. Three moves prove it. (i) With a continuous distribution of literacy types, the companion's contested-claim condition collapses to one covariance inequality, and its manipulability gradient becomes a harm-incidence curve over the literacy distribution. (ii) Under repeated exposure to a fixed claim, a closed-form horizon threshold $T^\star$ separates evidence dilution from correction of over-anchoring; under straddling, one group's harm sign flips at finite horizon while the other's never does. (iii) When the operator ascends measured satisfaction against a disagreement stock that deference itself replenishes, the coupled system is a bistable planar cooperative map, and crossing the basin boundary is an accumulative-risk threshold: no step is decisive, the trajectory is. Per unit of deference, agreement gained is cancelled at par by disagreement manufactured --- an exact conservation identity. Capture is therefore driven entirely by what breaks the conservation: stratification feedback that seeds tomorrow's disagreement from today's, and replenishment of the contested stream that deference preserves rather than resolves. Deterministically, prevention is free and the whole intervention cost concentrates in a closed-form cure threshold, paid transiently; under measurement noise, modest standing civic weights are conjectured --- and numerically supported --- to buy exponential protection. Variance and autocorrelation of the disagreement stock rise ahead of capture; and at capture the satisfaction weight on the most-harmed group vanishes identically while that group's error attains the maximum the state space permits. The results organize a three-tier diagnostic ladder --- pressure, drift, capture --- each tier with estimands and a licensed verdict, and every claim is verified against an independent numerical battery.
+A satisfaction-optimized AI system can tune itself into a captured regime where agreement is rewarded, disagreement preserved, correction harder, and satisfaction metrics stop seeing the harm. Three moves prove it. (i) With continuous literacy types, the contested-claim condition collapses to a covariance inequality and the manipulability gradient becomes a harm-incidence curve. (ii) Under repeated exposure, a closed-form horizon $T^\star$ separates evidence dilution from over-anchoring correction: one group's harm sign flips at finite horizon, the other's never does. (iii) When the operator ascends measured satisfaction against a disagreement stock deference itself replenishes, the coupled system is a bistable planar cooperative map with an interior saddle: below an explicit step-size threshold every trajectory converges; separatrix crossing is accumulative risk -- no step is decisive, the trajectory is -- above it, persistent oscillation is a second failure mode. Agreement gained per unit of deference is cancelled at par by disagreement manufactured, so capture is driven by what breaks the conservation: stratification feedback and contested-stream replenishment. Prevention is free; release and restoration carry closed-form transient prices, the second at or above the first. Under noise, first saddle-policy crossing and basin exit obey Arrhenius laws at the crossing and basin quasipotentials; the exit law uses the weighted convergent-step condition; only their fixed-rate equality remains open. Modest standing civic weights buy exponential protection. Variance and autocorrelation rise before capture; at capture, the most-harmed group's satisfaction weight vanishes identically at maximal error. A three-tier ladder -- pressure, drift, capture -- organizes the results as estimands and licensed verdicts; every theorem is machine-checked in Lean 4, every claim battery-verified.
 \end{abstract}
+
+{\small\tableofcontents}
 
 \section{Introduction}\label{sec:intro}
 
-The companion paper \citep{hofheinz2026civic} proves the pressure: on contested claims, optimizing per-interaction satisfaction selects deference policies that strictly decrease collective epistemic capacity $C$ --- the system strongly interaction-aligned yet civic-misaligned. It also supplies the vocabulary this paper instruments --- three tiers of diagnosis, each a different kind of claim. \emph{Civic misalignment pressure}: the satisfaction gradient rewards behavior that worsens civic-capacity metrics, event by event --- a statement about incentives at a point. \emph{Civic drift}: repeated operator optimization, coupled to the population feedback it induces, moves the deployed state toward worse civic states --- a statement about trajectories. \emph{Civic capture}: basin membership --- the satisfaction gradient pins deference at the corner, capacity degrades toward its floor, and satisfaction telemetry is structurally blind to the harmed group. The companion proves the pressure; this paper proves when pressure becomes drift and when drift becomes capture.
+The companion paper \citep{hofheinz2026civic} proves the pressure: on contested claims, optimizing per-interaction satisfaction selects deference policies that strictly decrease collective epistemic capacity $C$ -- the system strongly interaction-aligned yet civic-misaligned. It also supplies the vocabulary this paper instruments -- three tiers of diagnosis, each a different kind of claim. \emph{Civic misalignment pressure}: the satisfaction gradient rewards behavior that worsens civic-capacity metrics, event by event -- a statement about incentives at a point. \emph{Civic drift}: repeated operator optimization, coupled to the population feedback it induces, moves the deployed state toward worse civic states -- a statement about trajectories. \emph{Civic capture}: basin membership -- the satisfaction gradient pins deference at the corner, capacity degrades toward its floor, and satisfaction telemetry is structurally blind to the harmed group. The companion proves the pressure; this paper proves when pressure becomes drift and when drift becomes capture.
 
-The mechanism fits in one breath, as a five-step loop. (1) Satisfaction rewards deference, because deference reduces friction, and the marginal reward scales with the disagreement available to paper over (the ratchet, Lemma~\ref{lem:ratchet}). (2) Deference preserves disagreement, because it lowers evidence uptake (manufacture, Lemma~\ref{lem:manu}). (3) At stationarity these two forces cancel exactly, and the loop is neutral (Lemma~\ref{lem:knife}). Per unit of deference, agreement gained is cancelled at par by disagreement manufactured --- an exact conservation identity. Capture is therefore driven entirely by what breaks the conservation: stratification feedback that seeds tomorrow's disagreement from today's, and replenishment of the contested stream that deference preserves rather than resolves. (4) Deployment practice breaks the symmetry toward capture: gradients are evaluated myopically at fixed current beliefs, and polarized environments seed disagreement back into the stream, so each step is myopically rewarded and stationarily regretted (Proposition~\ref{prop:myopia}). (5) Under the broken symmetry the coupled operator--population system is bistable, and crossing the basin boundary changes the future pull of optimization itself (Theorem~\ref{thm:bistable}, Figure~\ref{fig:phase}). No individual step is decisive; the trajectory is.
+The mechanism fits in one breath, as a five-step loop. (1) Satisfaction rewards deference, because deference reduces friction, and the marginal reward scales with the disagreement available to paper over (the ratchet, Lemma~\ref{lem:ratchet}). (2) Deference preserves disagreement, because it lowers evidence uptake (manufacture, Lemma~\ref{lem:manu}). (3) At stationarity these two forces cancel exactly -- agreement gained per unit of deference is cancelled at par by disagreement manufactured -- and the loop is neutral (Lemma~\ref{lem:knife}); capture is driven by what breaks the conservation. (4) Deployment practice breaks the symmetry toward capture: gradients are evaluated myopically at fixed current beliefs, and polarized environments seed disagreement back into the stream, so each step along the contracting portion of the path is myopically rewarded and stationarily regretted (Proposition~\ref{prop:myopia}); the mechanism explains the approach, while the destination is described by the divergence at capture. (5) Under the broken symmetry the coupled operator--population system has two attracting corners separated by an interior saddle, and below an explicit bound on the operator's adaptation rate every trajectory settles at one of them, so crossing the basin boundary changes the future pull of optimization itself (Theorem~\ref{thm:bistable}, Figure~\ref{fig:phase}). No individual step is decisive; the trajectory is. Above that bound the same cooperative structure admits sustained oscillation instead: the adaptation rate is a bifurcation axis, not a nuisance parameter.
 
-This answers the static objection --- that an operator can tune the deference knob $\beta$ safely, monitor it, and adjust --- by locating the risk in the adjustment process itself. Preference optimization, A/B testing, and engagement tuning implement gradient ascent on \emph{measured} satisfaction \citep{gao2023scaling,sharma2024towards,wen2025language,williams2024targeted}, and the population state that satisfaction is measured against is itself moved by the policy. The program therefore deepens from \emph{a bad objective selects a bad parameter} to \emph{a bad objective plus feedback produces path-dependent capture}, and the natural risk model is accumulative rather than decisive \citep{kasirzadeh2025two}: harm arrives not as an event but as the crossing of a basin boundary, after which reversal costs strictly more than prevention would have. The danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime.
+This answers the static objection -- that an operator can tune the deference knob $\beta$ safely, monitor it, and adjust -- by locating the risk in the adjustment process itself. Preference optimization, A/B testing, and engagement tuning implement gradient ascent on \emph{measured} satisfaction \citep{gao2023scaling,sharma2024towards,wen2025language,williams2025targeted}\footnote{A 2026 replication/critique reports that the reward hacking of \citet{wen2025language} disappears in the one setting it reran with a corrected setup (\url{https://iclr-blogposts.github.io/2026/blog/2026/mislead-lm/}); the bracket does not rest on it, the remaining three sources carrying the claim.}, and the population state that satisfaction is measured against is itself moved by the policy. That closure is the subject of performative prediction \citep{perdomo2020performative}, whose theory concerns convergence to performatively stable points of repeated risk minimization; the phenomena proved below -- two attractors separated by a basin boundary, an asymmetric price schedule across it, and a measured objective that goes blind at one of the attractors -- are exactly what stability analysis at a single operating point does not see. Two older literatures mark the boundary from the other side. Continuous-opinion dynamics under bounded confidence already yields consensus, polarization, or fragmentation from local averaging alone \citep{hegselmann2002opinion, deffuant2000mixing}, but there the multiplicity comes from a fixed confidence radius among symmetric peers: no operator, no objective, and therefore no price for crossing between outcomes. The economics of media slant already supplies the operator -- a supplier accommodating audience priors to maximize demand, segmenting and slanting toward its own audience precisely on divisive topics \citep{mullainathan2005market, gentzkow2006media} -- but with the audience's belief distribution entering as a given input rather than as a state the supplier's own accommodation moves, and hence with no basin to be trapped in. What is proved below needs both halves at once: an optimizer ascending against the population it is itself reshaping, which is what makes the asymmetric schedule of Theorem~\ref{thm:hyst} possible at all. The program therefore deepens from \emph{a bad objective selects a bad parameter} to \emph{a bad objective plus feedback produces path-dependent capture}, and the natural risk model is accumulative rather than decisive \citep{kasirzadeh2025two}: harm arrives not as an event but as the crossing of a basin boundary, after which reversal costs strictly more than prevention would have. The danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime.
 
-Two boundary results, treated in full after the drift core, guard the scope. With a continuous distribution of literacy types, the companion's contested-claim assumption collapses to a single covariance inequality --- the exact frontier of the regime, not a new restriction --- and the two-point manipulability gradient becomes a harm-incidence curve over the literacy distribution (Section~\ref{sec:cont}). And under repeated exposure to a fixed claim, a closed-form horizon threshold $T^\star$ marks where marginal deference turns locally corrective for the truth-side group while remaining harmful for the far-side group: the nuance result, bounding the one-step harm theorem to the bias-dominated transient on slowly re-evidenced claims (Section~\ref{sec:horizon}).
+Two boundary results, treated in full after the drift core, guard the scope. With a continuous distribution of literacy types, the companion's contested-claim assumption collapses to a single covariance inequality -- the exact frontier of the regime, not a new restriction -- and the two-point manipulability gradient becomes a harm-incidence curve over the literacy distribution (Section~\ref{sec:cont}). And under repeated exposure to a fixed claim, a closed-form horizon threshold $T^\star$ marks where marginal deference turns locally corrective for the truth-side group while remaining harmful for the far-side group: the nuance result, bounding the one-step harm theorem to the bias-dominated transient on slowly re-evidenced claims (Section~\ref{sec:horizon}).
 
-Section~\ref{sec:dynamics} is the core: an exactly aggregated model of an operator ascending measured satisfaction against a disagreement stock that deference replenishes. We prove bistability for the resulting planar cooperative map (Theorem~\ref{thm:bistable}), an exact hysteresis threshold separating a free prevention price from a strictly positive, transiently paid cure price (Theorem~\ref{thm:hyst}), Arrhenius protection under measurement noise (Conjecture~\ref{conj:arr}, Numerical Result~\ref{nr:arr}), critical-slowing-down early warnings at the capture fold (Proposition~\ref{prop:warning}), and satisfaction--capacity decoupling at capture in saturation-robust form (Theorem~\ref{thm:launder}, Corollary~\ref{cor:sat}). Sections~\ref{sec:cont} and~\ref{sec:horizon} then develop the two scope guards; Section~\ref{sec:battery} organizes every result into the Dynamic Civic Battery around the three tiers and four probes; Section~\ref{sec:verification} records the verification protocol; Section~\ref{sec:open} states what remains open. The opinion-dynamics lineage of the population side runs through \citet{degroot1974reaching}, \citet{friedkin1990social}, and \citet{golub2010naive}; the transition-dynamics lineage of the operator side runs through \citet{scheffer2009early} and \citet{dakos2008slowing}.
+Section~\ref{sec:dynamics} is the core: an exactly aggregated model of an operator ascending measured satisfaction against a disagreement stock that deference replenishes. We prove bistability for the resulting planar cooperative map (Theorem~\ref{thm:bistable}), an exact hysteresis schedule separating a free prevention price from strictly positive, transiently paid release and restoration prices (Theorem~\ref{thm:hyst}), closed-form two-sided quasipotential bounds under measurement noise (Proposition~\ref{prop:qpbounds}) with the mean first-crossing Arrhenius law proved between them and its rate identified variationally (Theorems~\ref{thm:arr} and~\ref{thm:rate}), and the genuine basin-exit stopping time with its finite-horizon variational barrier, a base-condition mean-rate bracket, and a sharp basin-quasipotential law under weighted convergence (Proposition~\ref{prop:basinexitprocess}). The saddle-passage gap is capped quantitatively (Proposition~\ref{prop:passage}) while fixed-rate equality of the crossing and basin quasipotentials remains conjectural (Conjecture~\ref{conj:arr}, Numerical Result~\ref{nr:arr}). We also prove critical-slowing-down early warnings at the capture fold (Proposition~\ref{prop:warning}) and satisfaction--capacity decoupling at capture in saturation-robust form (Theorem~\ref{thm:launder}, Corollary~\ref{cor:sat}). Sections~\ref{sec:cont} and~\ref{sec:horizon} then develop the two scope guards; Section~\ref{sec:battery} organizes every result into the Dynamic Civic Battery around the three tiers and four probes; Section~\ref{sec:verification} records the verification protocol -- every theorem, lemma, proposition, and corollary machine-checked in Lean~4, every claim battery-verified; Section~\ref{sec:open} states what remains open. The opinion-dynamics lineage of the population side runs through \citet{degroot1974reaching}, \citet{friedkin1990social}, and \citet{golub2010naive}; the transition-dynamics lineage of the operator side runs through \citet{scheffer2009early} and \citet{dakos2008slowing}.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.62\linewidth]{fig_phase.png}
+\civicincludegraphics[width=0.70\linewidth]{Blue and red basins in the beta-D phase plane, separated by the saddle separatrix; nullclines and sample trajectories show paths toward calibrated and captured attractors}{fig_phase.pdf}
 \caption{Phase portrait of the coupled map \eqref{eq:map} at benchmark parameters. Shaded regions are the numerically classified basins of the calibrated (blue) and captured (red) attractors: capture is basin membership, and drift is motion toward the separatrix $\Gamma$. Curves are the nullclines $D = v/[2c(1-c\beta)]$ and $D = D^\ast(\beta)$; thin paths are sample trajectories, including one that climbs toward capture before bending home along $\Gamma$.}
 \label{fig:phase}
 \end{figure}
@@ -64,7 +99,7 @@ We import the per-event primitives of the companion paper, conditional on a cont
 a strictly convex quadratic with minimizer $w^\star_\gamma = (\delta-\gamma)/a$, where $a := \delta + \delta_m - 2\gamma > 0$. The deference policy gives effective deference $d(\beta)$ and evidence weight $w(\beta) = \eta(1-d(\beta))$ for responsiveness $\eta \in (0,1]$; the marginal-harm bracket is $h(\beta) := (\delta-\gamma) - w(\beta)\,a = a\,(w^\star_\gamma - w(\beta))$, so that $d\,\MSE/d\beta = 2r\,h(\beta)$ with de-anchoring rate $r := -dw/d\beta$.
 
 \begin{remark}[Reduced-form coordinate]\label{rem:reduced}
-Throughout, $\beta$ is a reduced-form coordinate for satisfaction-selected accommodation across many coupled behaviors --- tone, refusal style, retrieval depth, uncertainty display, personalization, source friction, memory, ranking, follow-up pressure --- not a literal product control. Its audit meaning is behavioral: the movement of answers toward user priors at held-fixed evidence.
+Throughout, $\beta$ is a reduced-form coordinate for satisfaction-selected accommodation across many coupled behaviors -- tone, refusal style, retrieval depth, uncertainty display, personalization, source friction, memory, ranking, follow-up pressure -- not a literal product control. Its audit meaning is behavioral: the movement of answers toward user priors at held-fixed evidence.
 \end{remark}
 
 \section{Endogenous Deference: Drift, Capture, Hysteresis}\label{sec:dynamics}
@@ -85,10 +120,14 @@ Deviation from evidence transforms affinely, $b - m \mapsto (1-w)(b-m)$, so each
 \end{proof}
 
 \begin{remark}[Representative weight]\label{rem:repweight}
-The aggregation uses a representative population evidence weight: the per-claim affine law holds type-by-type, the stock aggregates with the mixture contraction, and type heterogeneity re-enters explicitly in the laundering analysis of Section~\ref{sec:launder}.
+The aggregation uses a representative population evidence weight. With type stocks $D_{\tau,t}$ summing to $D_t$ and type evidence weights $w_\tau$ (Section~\ref{sec:launder}), the per-claim affine law gives, exactly,
+\[
+\E[D_{t+1}\,|\,\mathcal{F}_t] \;=\; (1-\lambda_0)\Bigl[\textstyle\sum_\tau \bigl(1-w_\tau(\beta_t)\bigr)^2\, D_{\tau,t}/D_t\Bigr]\, D_t \;+\; I :
+\]
+the effective contraction is the current stock-share-weighted mixture of the type contractions, and the shares move with the state. Homogeneous weights collapse the mixture to \eqref{eq:Dlaw} exactly; a fixed registered stock composition yields a scalar law with one constant mixture factor. The single representative weight of \eqref{eq:Dlaw} is the maintained homogeneous reading; the identity and both reductions are machine-checked in \texttt{PaperII/HeterogeneousStock.lean}, and type heterogeneity re-enters explicitly in the laundering analysis of Section~\ref{sec:launder}.
 \end{remark}
 
-We study the conditional-mean dynamics \eqref{eq:Dlaw}; arrival and retiral fluctuations are exercised numerically, and the rank-one single-claim suite of the battery verifies that the variant law $D' = (m(\beta)\sqrt{D} + j)^2$, with $m(\beta) = 1-\eta(1-\beta)$, reproduces the bistable phenomenology of Theorem~\ref{thm:bistable} across randomized draws (Section~\ref{sec:verification}), so nothing below hinges on the affine form; Appendix~\ref{app:reduced} licenses the reduced satisfaction itself.
+We study the conditional-mean dynamics \eqref{eq:Dlaw}; arrival and retiral fluctuations are exercised numerically. Robustness to the affine form is partly a theorem: for the grounded rank-one family $D' = (m(\beta)\sqrt{D} + j)^2$ with $m(\beta) = \sqrt{1-\lambda_0}\,\bigl(1-\eta(1-\beta)\bigr)$ -- squared deviation again persists at exactly $1-\lambda_0$ per period -- global convergence to exactly three ordered equilibria holds under explicit crossing and step conditions, machine-checked as \texttt{groundedSqrt\_global\_bistability} through a generic nonlinear cooperative theorem; those conditions are maintained model restrictions until a parameter witness is registered, and hyperbolicity, the $C^1$ stable arc, and the full basin topology remain theorems of the affine law \eqref{eq:Dlaw} alone. The rank-one single-claim suite verifies the same corner phenomenology across randomized draws and witnesses the proved grounded family directly (Section~\ref{sec:verification}); Appendix~\ref{app:reduced} licenses the reduced satisfaction itself.
 
 The operator does not choose $\beta$; it runs projected gradient ascent with step $\alpha > 0$ on measured satisfaction. We take the reduced satisfaction
 \begin{equation}\label{eq:U}
@@ -116,66 +155,108 @@ $\partial D_{t+1}/\partial\beta = s'(\beta)D_t \ge 0$: deference preserves today
 \end{lemma}
 
 \begin{lemma}[Satisfaction conservation; the knife edge]\label{lem:knife}
-For any type with effective deference $d = (1-e)\beta$ and weight $w = \eta(1-d)$, identically
+For any type with effective deference $d = (1-e)\beta$ and weight $w = \eta(1-d)$, the conservation law holds identically in cross-multiplied form,
 \begin{equation}\label{eq:knife}
-\frac{(1-d)^2}{w^2} \;=\; \frac{1}{\eta^2}.
+\eta^2 (1-d)^2 \;=\; w^2 ,
 \end{equation}
-Consequently, in the per-type deviation model $x_{t+1} = (1-w)x_t + \iota$ with \emph{exogenous} injection $\iota$, the stationary squared agreement gap $(1-d)^2 (x^\ast)^2 = \iota^2/\eta^2$---and hence stationary satisfaction---is exactly flat in $\beta$: agreement gained per unit deference is cancelled to the last order by disagreement manufactured. Capture is driven entirely by what breaks this conservation law.
+for every $d$ including the full-deference endpoint $d = 1$. Where $w > 0$ -- equivalently $d < 1$ -- \eqref{eq:knife} may be divided through as $(1-d)^2/w^2 = 1/\eta^2$, and in the per-type deviation model $x_{t+1} = (1-w)x_t + \iota$ with \emph{exogenous} injection $\iota$ the stationary squared agreement gap $(1-d)^2 (x^\ast)^2 = \iota^2/\eta^2$ -- and hence stationary satisfaction -- is exactly flat in $\beta$: agreement gained per unit deference is cancelled to the last order by disagreement manufactured. At $d = 1$ with $\iota \neq 0$ the recursion is $x_{t+1} = x_t + \iota$, which has no stationary point, so the flatness statement is vacuous there and the divergence of Theorem~\ref{thm:launder}(ii) describes the endpoint instead. Capture is driven entirely by what breaks this conservation law.
 \end{lemma}
 \begin{proof}
-$w = \eta(1-d)$ gives \eqref{eq:knife} by substitution; $x^\ast = \iota/w$, so $(1-d)^2(x^\ast)^2 = \iota^2(1-d)^2/w^2$.
+$w = \eta(1-d)$ gives \eqref{eq:knife} by substitution, with no division. For $w > 0$, $x^\ast = \iota/w$, so $(1-d)^2(x^\ast)^2 = \iota^2(1-d)^2/w^2 = \iota^2/\eta^2$. For $w = 0$ the affine map has unit multiplier and $x_{t+1} - x_t = \iota \neq 0$, so no fixed point exists.
 \end{proof}
 
 \begin{proposition}[Myopia trap]\label{prop:myopia}
-Add stratification feedback $\zeta \in (0, w)$---polarized environments seed more polarized claims---so that $x_{t+1} = (1-w+\zeta)x_t + \iota$. Then the stationary squared gap is $\iota^2\,u^2/(\eta u - \zeta)^2$ with $u := 1-d$, strictly increasing in $\beta$; stationary satisfaction is strictly decreasing in $\beta$, while the instantaneous gradient at fixed beliefs, $2(1-e)(1-d)x^2$, is strictly positive. Every gradient step is myopically rewarded and stationarily regretted.
+Add stratification feedback $\zeta \in (0, w)$ -- polarized environments seed more polarized claims -- so that $x_{t+1} = (1-w+\zeta)x_t + \iota$, and assume nonzero injection $\iota \neq 0$ and policy-sensitive extraction $e < 1$. Then the stationary squared gap is $\iota^2\,u^2/(\eta u - \zeta)^2$ with $u := 1-d$, strictly increasing in $\beta$; stationary satisfaction is strictly decreasing in $\beta$; and the instantaneous gradient at fixed beliefs, $2(1-e)(1-d)x^2$, is strictly positive at every \emph{nonzero} belief $x$, in particular at the stationary belief $x^\ast = \iota/(\eta u - \zeta) \neq 0$. Every gradient step taken from a nonzero belief is myopically rewarded and stationarily regretted. Both hypotheses are necessary: at $\iota = 0$ the stationary gap is identically zero, and at $e = 1$ deference does not move this type at all -- $u \equiv 1$, the gap is flat in $\beta$, and the displayed gradient carries the factor $1-e = 0$.
 \end{proposition}
 \begin{proof}
-$x^\ast = \iota/(w-\zeta) = \iota/(\eta u - \zeta)$. The map $u \mapsto u/(\eta u - \zeta)$ has derivative $-\zeta/(\eta u - \zeta)^2 < 0$, so it is strictly decreasing in $u$, hence strictly increasing in $\beta$; squaring preserves this on the positive part. The instantaneous gradient is the $\beta$-derivative of $-(1-d)^2x^2$ at fixed $x$.
+$x^\ast = \iota/(w-\zeta) = \iota/(\eta u - \zeta)$. The map $u \mapsto u/(\eta u - \zeta)$ has derivative $-\zeta/(\eta u - \zeta)^2 < 0$, so it is strictly decreasing in $u$; since $du/d\beta = -(1-e) < 0$ exactly because $e < 1$, the gap is strictly increasing in $\beta$, and squaring preserves this on the positive part. The instantaneous gradient is the $\beta$-derivative of $-(1-d)^2x^2$ at fixed $x$, with $1-e > 0$ and $1-d > 0$ (the latter forced by $\zeta < w$).
 \end{proof}
 
 \subsection{Bistability}\label{sec:bistable}
 
-Two standing conditions govern the planar analysis of \eqref{eq:map}.
+The projection in \eqref{eq:map} is part of the model rather than a technical device: deference is bounded, and full deference is attainable. Its consequences are used at every boundary below and are collected once.
 
-\begin{assumption}[Small step, SS]\label{ass:ss}
-$2\alpha c^2 I \le \lambda_0$.
-\end{assumption}
-
-\begin{assumption}[Threshold structure, H]\label{ass:H}
-$G(0) < 0 < G(1)$, and $G$ has a single sign change on $(0,1)$, at $\beta^\dagger$, with $G'(\beta^\dagger) > 0$.
-\end{assumption}
-
-(SS) is sufficient, not necessary: the verification battery exercises configurations beyond it. At the benchmark parameters $(\eta, c, \lambda_0, I, v, \alpha) = (0.5, 0.9, 0.02, 0.02, 0.10, 0.6)$ used throughout the figures, (SS) holds with roughly three percent slack ($2\alpha c^2 I = 0.0194$ against $\lambda_0 = 0.02$) and (H) holds with $G(0) = -0.052$, $G(1) = 0.080$, and a single root at $\beta^\dagger = 0.975$. The saddle location is benchmark-specific: across a sweep of bistable configurations around the benchmark ($\eta \in [0.3,0.7]$, $c \in [0.75,0.95]$, $\lambda_0, I \in [0.01,0.06]$, $v \in [0.05,0.35]$), $\beta^\dagger$ ranges from $0.45$ to $1.00$ with median $0.96$ (the separatrix-sweep suite, Section~\ref{sec:verification}).
-
-\begin{lemma}[Absorbing box]\label{lem:box}
-$B := [0,1] \times [I,\, I/\lambda_0]$ is forward invariant under \eqref{eq:map}, and every trajectory with $D_0 \ge 0$ enters $B$ and remains there.
+\begin{lemma}[Clipped steps]\label{lem:clip}
+Let $J = [\underline z, \bar z]$ be a compact interval, $\Pi_J$ the projection onto it, and $f$ a raw update.
+\begin{enumerate}
+\item[(i)] \emph{Order.} $\Pi_J$ is non-decreasing and $1$-Lipschitz, so $\Pi_J \circ f$ inherits every monotonicity and comparison property of $f$, and contracts differences.
+\item[(ii)] \emph{Deadzone.} $\Pi_J$ is constant above $\bar z$ and below $\underline z$, so a strict inequality established for $f$ transfers to $\Pi_J \circ f$ only where the projection is inactive; in general it weakens. In particular, if a raw rate $k$ gives $\bar z - f(z) \le (\bar z - z)(1-k)$, then $\bar z - \Pi_J f(z) \le (\bar z - z)\max\{0,\,1-k\}$, which is the valid factor for \emph{every} $k$.
+\item[(iii)] \emph{Absorption.} A face is fixed under a sign condition on the raw drive rather than a vanishing one: $f \ge \bar z$ at $\bar z$ makes $\{\bar z\}$ invariant, and $f - z$ bounded below by a positive constant near the face makes it attained in finitely many steps. Symmetrically at $\underline z$.
+\item[(iv)] \emph{Non-injectivity.} $\Pi_J$ identifies any two states whose raw updates overshoot the same endpoint, so $\Pi_J \circ f$ is not injective once $f$ leaves $J$ at two distinct arguments on one side -- as \eqref{eq:map} does, every raw policy input at or above one being sent to one. The orientation and injectivity hypotheses of the convergence theory of unclipped planar cooperative maps are therefore unavailable for it \citep{smith1998planar,hirsch2006monotone}. Overshoot at a single argument does not suffice: $\Pi_{[0,1]} \circ f$ is injective for $f(\beta) = \beta$ on $[0,1)$ with $f(1) = 3/2$.
+\end{enumerate}
 \end{lemma}
 \begin{proof}
-$s(\beta) \in [s_0,\, 1-\lambda_0]$ with $s_0 = (1-\lambda_0)(1-\eta)^2$. For $D \in [I, I/\lambda_0]$: $D' \ge s_0 I + I \ge I$ and $D' \le (1-\lambda_0)(I/\lambda_0) + I = I/\lambda_0$. Any $D_0 \ge 0$ has $D_1 \ge I$; if $D > I/\lambda_0$ then $D' - D \le -\lambda_0 D + I < 0$, so $D$ decreases monotonically until it enters $[I, I/\lambda_0]$ and stays. The $\beta$-coordinate is clipped to $[0,1]$.
+$\Pi_J(x) = \min\{\bar z, \max\{\underline z, x\}\}$ is a non-decreasing $1$-Lipschitz retraction of $\mathbb{R}$ onto $J$, constant beyond each endpoint; this gives (i), the transfer clause of (ii), and (iv). For the rate clause, $\bar z - \Pi_J f \le \max\{0,\,\bar z - f\} \le \max\{0,\,(\bar z - z)(1-k)\} = (\bar z - z)\max\{0,\,1-k\}$, the last step because $\bar z - z \ge 0$. For (iii), $f \ge \bar z$ gives $\Pi_J f = \bar z$, and steps of at least a fixed positive size reach the face in finitely many.
+\end{proof}
+
+The policy clip of \eqref{eq:map} is the case $J = [0,1]$ and the belief bound of Corollary~\ref{cor:sat} the case $J = [-\bar x, \bar x]$. The captured equilibrium below is a clipped fixed point in the sense of (iii) -- fixed because the gradient points outward, not because it vanishes -- and (iv) is why the global-curve theory of unclipped planar cooperative maps does not apply to \eqref{eq:map}.
+
+Two standing conditions govern the planar analysis of \eqref{eq:map}.
+
+\begin{assumption}[Cooperativity step, SS]\label{ass:ss}
+$2\alpha c^2 I < \lambda_0$.
+\end{assumption}
+
+(SS) is exactly the condition that the Jacobian entry $1 - 2\alpha c^2 D$ is nonnegative on the box: it makes the map cooperative. It is not by itself a stability or convergence condition, and Theorem~\ref{thm:bistable} separates the two roles.
+
+\begin{assumption}[Convergent step, SS$^+$]\label{ass:ssplus}
+\begin{equation}\label{eq:ssplus}
+\alpha \;<\; \alpha_{\mathrm{mono}} \;:=\; \frac{\lambda_0\, s(0)}{2cI\bigl[c\,s(0) + 2\eta(1-\lambda_0)\bigr]} .
+\end{equation}
+\end{assumption}
+
+(SS$^+$) implies (SS). It bounds the off-diagonal coupling of the Jacobian below its diagonal product uniformly on the box -- equivalently it forces $\det J > 0$ there -- and Theorem~\ref{thm:bistable}(e) shows it is what converts cooperativity into convergence. The off-diagonal product is exactly proportional to $\alpha$, while the diagonal product tends uniformly to $s(\beta) \ge s(0) > 0$ as $\alpha\to0^+$; hence every configuration admits some $\alpha$ satisfying (SS$^+$).
+
+\begin{assumption}[Threshold structure, H]\label{ass:H}
+$G(0) < 0 < G(1)$.
+\end{assumption}
+
+\begin{lemma}[The threshold is automatic]\label{lem:root}
+Under (H), $G$ has exactly one root $\beta^\dagger$ in $(0,1)$, and it is a transversal up-crossing: $G'(\beta^\dagger) > 0$.
+\end{lemma}
+\begin{proof}
+Multiply through by the positive denominator: $q(\beta) := G(\beta)\,(1-s(\beta)) = -v(1-s(\beta)) + 2cI(1-c\beta)$ is a quadratic in $\beta$ with leading coefficient $v(1-\lambda_0)\eta^2 > 0$, and $1-s \ge \lambda_0 > 0$ on $[0,1]$, so $G$ and $q$ share roots and signs there. (H) gives $q(0) < 0 < q(1)$: $0$ lies strictly between the two real roots of $q$, and $q(1) > 0$ places $1$ strictly above the larger root, which is therefore the unique root of $q$ in $(0,1)$; being the larger root of a positive-leading quadratic, $q$ crosses it from below, $q'(\beta^\dagger) > 0$. Finally $G' = q'/(1-s)$ at any root of $q$, since the product-rule term through $s'$ carries the factor $q(\beta^\dagger) = 0$; hence $G'(\beta^\dagger) > 0$.
+\end{proof}
+
+(SS$^+$) is sufficient, not necessary: the verification battery exercises configurations beyond it. At the benchmark parameters $(\eta, c, \lambda_0, I, v, \alpha) = (0.5, 0.9, 0.02, 0.02, 0.10, 0.1)$ used throughout the figures, (SS$^+$) holds with a twelve percent margin ($\alpha = 0.1$ against $\alpha_{\mathrm{mono}} = 0.1134$, giving $\det J \ge 0.117$ on $B$), so the global-convergence clause of Theorem~\ref{thm:bistable}(e) covers the displayed dynamics; (SS) holds with slack ($2\alpha c^2 I = 0.0032$ against $\lambda_0 = 0.02$), and (H) holds with $G(0) = -0.052$ and $G(1) = 0.080$, the root forced by Lemma~\ref{lem:root} sitting at $\beta^\dagger = 0.9754$. The saddle location is benchmark-specific: across a sweep of bistable configurations around the benchmark ($\eta \in [0.3,0.7]$, $c \in [0.75,0.95]$, $\lambda_0, I \in [0.01,0.06]$, $v \in [0.05,0.35]$), $\beta^\dagger$ ranges from $0.45$ to $1.00$ with median $0.96$ (the separatrix-sweep suite, Section~\ref{sec:verification}).
+
+\begin{lemma}[Absorbing box]\label{lem:box}
+$B := [0,1] \times [I,\, I/\lambda_0]$ is forward invariant under \eqref{eq:map}. For any $D_0 \ge 0$, writing $M := \max(D_0,\, I/\lambda_0)$: the order interval $[0,1] \times [I,\, M]$ is forward invariant and contains the trajectory from $t = 1$, and $\limsup_t D_t \le I/\lambda_0$. The orbit therefore enters every neighborhood of $B$, but need not enter $B$ itself in finite time.
+\end{lemma}
+\begin{proof}
+$s(\beta) \in [s_0,\, 1-\lambda_0]$ with $s_0 = (1-\lambda_0)(1-\eta)^2$, and the $\beta$-coordinate is clipped to $[0,1]$. For $D \in [I, I/\lambda_0]$: $D' \ge s_0 I + I \ge I$ and $D' \le (1-\lambda_0)(I/\lambda_0) + I = I/\lambda_0$, so $B$ is forward invariant. Any $D_0 \ge 0$ has $D_1 \ge I$. Since $M \ge I/\lambda_0$ gives $(1-\lambda_0)M + I \le M$, the interval $[I, M]$ is forward invariant likewise, and iterating the affine recursion with multiplier at most $1-\lambda_0 < 1$ gives $\limsup_t D_t \le I/\lambda_0$. The last clause is sharp: at $\beta \equiv 1$ the recursion is exactly $D' = (1-\lambda_0)D + I$, so $D_0 = I/\lambda_0 + \delta$ with $\delta > 0$ yields $D_n = I/\lambda_0 + (1-\lambda_0)^n \delta > I/\lambda_0$ at every finite $n$, and under (H) the face $\beta = 1$ is invariant by Lemma~\ref{lem:clip}(iii), so this is a trajectory of the coupled map.
 \end{proof}
 
 \begin{lemma}[Monotonicity]\label{lem:mono}
 Under (SS), the map \eqref{eq:map} is order-preserving on $B$ for the componentwise order.
 \end{lemma}
 \begin{proof}
-Write $T(\beta,D) = (\Pi(f), g)$ with $f = \beta + \alpha(-v + 2c(1-c\beta)D)$ and $g = s(\beta)D + I$. On $B$: $\partial f/\partial\beta = 1 - 2\alpha c^2 D \ge 1 - 2\alpha c^2 I/\lambda_0 \ge 0$ by (SS); $\partial f/\partial D = 2\alpha c(1-c\beta) > 0$; $\partial g/\partial\beta = s'(\beta)D \ge 0$; $\partial g/\partial D = s(\beta) > 0$. The clip $\Pi$ is non-decreasing, so both components are non-decreasing in both arguments.
+Write $T(\beta,D) = (\Pi(f), g)$ with $f = \beta + \alpha(-v + 2c(1-c\beta)D)$ and $g = s(\beta)D + I$. On $B$: $\partial f/\partial\beta = 1 - 2\alpha c^2 D \ge 1 - 2\alpha c^2 I/\lambda_0 \ge 0$ by (SS); $\partial f/\partial D = 2\alpha c(1-c\beta) > 0$; $\partial g/\partial\beta = s'(\beta)D \ge 0$; $\partial g/\partial D = s(\beta) > 0$. Lemma~\ref{lem:clip}(i) carries this through the clip, so both components are non-decreasing in both arguments.
 \end{proof}
 
 \begin{theorem}[Bistability and the basin dichotomy]\label{thm:bistable}
 Under (SS) and (H):
 \begin{enumerate}
-\item[(i)] Every trajectory of \eqref{eq:map} converges to a fixed point.
-\item[(ii)] The fixed points are exactly $p_1 = (0, D^\ast(0))$, $p_2 = (\beta^\dagger, D^\ast(\beta^\dagger))$, and $p_3 = (1, D^\ast(1))$, totally ordered $p_1 < p_2 < p_3$.
-\item[(iii)] $p_1$ (calibrated) and $p_3$ (captured) are asymptotically stable. At $p_2$, the Jacobian is a non-negative matrix with real eigenvalues, and its Perron eigenvalue exceeds $1$ \emph{if and only if} $G'(\beta^\dagger) > 0$; the second eigenvalue satisfies $\lambda_2 < 1$ always, and $\lambda_2 > -1$ whenever $2\eta \le c(1+s_0)$.
-\item[(iv)] When $p_2$ is a hyperbolic saddle, its stable set is a one-dimensional invariant decreasing curve $\Gamma$ through $p_2$, and $B \setminus \Gamma$ is the disjoint union of the open basins of $p_1$ and $p_3$. Crossing $\Gamma$ is the accumulative-risk threshold. No individual step is decisive; the trajectory is.
+\item[(a)] \emph{Equilibria.} The fixed points are exactly $p_1 = (0, D^\ast(0))$, $p_2 = (\beta^\dagger, D^\ast(\beta^\dagger))$, and $p_3 = (1, D^\ast(1))$, totally ordered $p_1 < p_2 < p_3$.
+\item[(b)] \emph{Corner attractors.} $p_1$ (calibrated) and $p_3$ (captured) are asymptotically stable, with the explicit trapping neighborhoods of the clipping argument below.
+\item[(c)] \emph{Saddle spectrum.} At $p_2$, the Jacobian is a non-negative matrix with real eigenvalues, and its Perron eigenvalue exceeds $1$ \emph{if and only if} $G'(\beta^\dagger) > 0$ -- hence always, the up-crossing being automatic by Lemma~\ref{lem:root}; the second eigenvalue satisfies $\lambda_2 < 1$ always, and $\lambda_2 > -1$ whenever $2\eta \le c(1+s_0)$.
+\item[(d)] \emph{Monotone-step principle.} If the states of an orbit are componentwise comparable at any one time -- $x_{t+1} \ge x_t$ or $x_{t+1} \le x_t$ -- then cooperativity propagates the comparison, the orbit is componentwise monotone from that time on, and being confined to a compact box it converges to a fixed point. This uses cooperativity alone: no orientation, injectivity, or smoothness.
+\item[(e)] \emph{Global convergence.} Under (SS$^+$), every orbit in $B$ converges to $p_1$, $p_2$, or $p_3$. Moreover $\det J > 0$ on $B$, so at $p_2$ the second eigenvalue satisfies $\lambda_2 \in (0,1)$ without further hypothesis, and $p_2$ is a hyperbolic saddle, $G'(\beta^\dagger) > 0$ being automatic (Lemma~\ref{lem:root}). Its stable set $\Gamma$ is then closed, invariant, and of empty interior; near $p_2$ it is a $C^1$ decreasing arc; and $B \setminus \Gamma$ is the disjoint union of the open basins of $p_1$ and $p_3$, with $\Gamma$ their common boundary. Crossing $\Gamma$ is the accumulative-risk threshold. No individual step is decisive; the trajectory is.
+\item[(f)] \emph{Sharpness.} The step-size hypothesis in (e) is not removable. There are parameters satisfying (SS) and (H) strictly for which the map has an exact period-two orbit in $B$: at
+\[
+(\eta, c, \lambda_0, I, v, \alpha) = \bigl(\tfrac12,\ \tfrac18,\ \tfrac34,\ \tfrac1{20},\ \tfrac{75137}{5391360},\ \tfrac{1198080}{2651}\bigr),
+\]
+where $\beta^\dagger = 161/227$, the orbit
+\[
+(7/11,\, 11737/189540) \;\mapsto\; (7/9,\, 113/1872) \;\mapsto\; (7/11,\, 11737/189540)
+\]
+is exact and the deference coordinate does not converge. Cooperativity constrains the direction of motion, not its amplitude; an operator adapting fast enough overshoots the characteristic and oscillates.
 \end{enumerate}
 \end{theorem}
 \begin{proof}
-(i) By Lemmas~\ref{lem:box}--\ref{lem:mono}, $T$ is a continuous order-preserving map of the compact order interval $B$ into itself. By the theory of planar cooperative difference equations \citep{smith1998planar}, every orbit of such a map is eventually componentwise monotone, hence convergent; see also \citet{hirsch2005monotone}.
+(a) A point with $\beta \in (0,1)$ is fixed iff $D = D^\ast(\beta)$ and $\partial_\beta U(\beta, D^\ast(\beta)) = G(\beta) = 0$, which by Lemma~\ref{lem:root} happens only at $\beta^\dagger$. The corner $\beta = 0$ is fixed with $D = D^\ast(0)$ iff $G(0) \le 0$, and $\beta = 1$ with $D = D^\ast(1)$ iff $G(1) \ge 0$, by Lemma~\ref{lem:clip}(iii); both hold under (H). Total ordering follows since $D^\ast$ is increasing.
 
-(ii) A point with $\beta \in (0,1)$ is fixed iff $D = D^\ast(\beta)$ and $\partial_\beta U(\beta, D^\ast(\beta)) = G(\beta) = 0$, which under (H) happens only at $\beta^\dagger$. The corner $\beta = 0$ is fixed with $D = D^\ast(0)$ iff $G(0) \le 0$, and $\beta = 1$ with $D = D^\ast(1)$ iff $G(1) \ge 0$; both hold under (H). Total ordering follows since $D^\ast$ is increasing.
-
-(iii) \emph{Corners.} At $p_1$, $\partial_\beta U(0, D^\ast(0)) = G(0) < 0$; by continuity there is a neighborhood on which $\partial_\beta U \le G(0)/2 < 0$, so $\beta$ decreases by at least $\alpha|G(0)|/2$ per step until clipped at $0$ in finitely many steps, after which $D$ is an AR(1) contraction to $D^\ast(0)$. Symmetrically at $p_3$ with $G(1) > 0$. \emph{Interior.} The unclipped Jacobian at $p_2$ is
+(b), (c) \emph{Corners.} At $p_1$, $\partial_\beta U(0, D^\ast(0)) = G(0) < 0$; by continuity there is a neighborhood on which $\partial_\beta U \le G(0)/2 < 0$, so $\beta$ decreases by at least $\alpha|G(0)|/2$ per step until clipped at $0$ in finitely many steps, after which $D$ is an AR(1) contraction to $D^\ast(0)$. Symmetrically at $p_3$ with $G(1) > 0$. \emph{Interior.} The unclipped Jacobian at $p_2$ is
 \[
 J = \begin{pmatrix} a & b \\ \tilde c & d \end{pmatrix},
 \quad a = 1 - 2\alpha c^2 \bar D,\; b = 2\alpha c(1-c\beta^\dagger),\; \tilde c = s'(\beta^\dagger)\bar D,\; d = s(\beta^\dagger),
@@ -189,53 +270,378 @@ while differentiating \eqref{eq:G},
 \[
 G'(\beta) \;=\; \frac{2cI}{(1-s(\beta))^2}\bigl[(1-c\beta)s'(\beta) - c(1-s(\beta))\bigr].
 \]
-The bracketed factors are negatives of one another, so $\operatorname{sign} p(1) = -\operatorname{sign} G'(\beta^\dagger)$, and $\lambda_{\mathrm{PF}} > 1 \iff p(1) < 0 \iff G'(\beta^\dagger) > 0$: linear instability of the interior fixed point is \emph{equivalent} to transversal up-crossing of $G$. For the second eigenvalue, $\lambda_2 = \mathrm{tr} - \lambda_{\mathrm{PF}} < \mathrm{tr} - 1 \le (1) + (1-\lambda_0) - 1 < 1$. For $\lambda_2 > -1$ it suffices that $p(-1) = (1+a)(1+d) - b\tilde c > 0$; under (SS), $b\tilde c \le 2\alpha c \cdot 2\eta \cdot I/\lambda_0 \le 2\eta/c$, while $(1+a)(1+d) \ge 1 + s_0$, giving the stated sufficient condition.
+The bracketed factors are negatives of one another, so $\operatorname{sign} p(1) = -\operatorname{sign} G'(\beta^\dagger)$, and $\lambda_{\mathrm{PF}} > 1 \iff p(1) < 0 \iff G'(\beta^\dagger) > 0$: linear instability of the interior fixed point is \emph{equivalent} to transversal up-crossing of $G$, and Lemma~\ref{lem:root} supplies the up-crossing. For the second eigenvalue, $\lambda_2 = \mathrm{tr} - \lambda_{\mathrm{PF}} < \mathrm{tr} - 1 \le (1) + (1-\lambda_0) - 1 < 1$. For $\lambda_2 > -1$ it suffices that $p(-1) = (1+a)(1+d) - b\tilde c > 0$; under (SS), $b\tilde c \le 2\alpha c \cdot 2\eta \cdot I/\lambda_0 \le 2\eta/c$, while $(1+a)(1+d) \ge 1 + s_0$, giving the stated sufficient condition.
 
-(iv) A hyperbolic saddle of a $C^1$ map has a one-dimensional $C^1$ stable manifold. For a planar cooperative map the stable manifold of an interior saddle lying between two stable, order-comparable fixed points is an unordered (decreasing) invariant curve separating their basins \citep{smith1998planar,hirsch2005monotone}; the order intervals $[p_1, p_2]$ and $[p_2, p_3]$ are invariant, orbits within them converge to their stable endpoint or to $p_2$, and by (i) every orbit off $\Gamma$ converges to $p_1$ or $p_3$.
+(d) Suppose $x_{t+1} \ge x_t$ componentwise. Both coordinates of $T$ are nondecreasing in both arguments on $B$ (Lemma~\ref{lem:mono}), so $x_{t+2} = T(x_{t+1}) \ge T(x_t) = x_{t+1}$, and by induction the orbit is nondecreasing from $t$ on. A nondecreasing orbit in the compact box converges, and continuity of $T$ makes the limit a fixed point. The case $x_{t+1} \le x_t$ is symmetric. Nothing beyond order preservation is used.
+
+(e) Suppose no step is componentwise comparable. Then every increment $\Delta_t = x_{t+1}-x_t$ lies in the open southeast quadrant ($\Delta\beta>0>\Delta D$) or the open northwest quadrant. Write $a = 1-2\alpha c^2 D$, $b = 2\alpha c(1-c\beta)$, $\tilde c = s'(\beta)D$, $d = s(\beta)$ for the Jacobian entries and $a_{\min}, d_{\min}, b_{\max}, \tilde c_{\max}$ for their extrema on $B$; since $s' \le 2\eta(1-\lambda_0)$, $1-c\beta \le 1$, $D \le I/\lambda_0$ and $s \ge s(0)$, \eqref{eq:ssplus} is exactly $a_{\min}d_{\min} > b_{\max}\tilde c_{\max}$. Decompose an increment along the two legs of its coordinate rectangle, which stay in $B$: a southeast step $\Delta_t = (p,-q)$ with $p,q>0$ gives $\beta$-increment at least $a_{\min}p - b_{\max}q$ and $D$-increment at most $\tilde c_{\max}p - d_{\min}q$. For $\Delta_{t+1}$ to be northwest its $\beta$-part must be negative and its $D$-part positive; since the projection is monotone and $1$-Lipschitz the first forces $q/p > a_{\min}/b_{\max}$ and the second forces $q/p < \tilde c_{\max}/d_{\min}$, so $a_{\min}d_{\min} < b_{\max}\tilde c_{\max}$, contradicting (SS$^+$). (If the projection collapses the $\beta$-increment to zero the step is comparable and (d) applies.) The northwest-to-southeast transition is excluded symmetrically, so the quadrant is constant along the orbit; each coordinate is then monotone and bounded, and the limit is a fixed point.
+
+Under (SS$^+$) one also has $\det J > 0$ throughout $B$, so at $p_2$ the eigenvalue product is positive and $\lambda_2 = \det J/\lambda_{\mathrm{PF}} \in (0,1)$. Convergence of every orbit, the open corner traps of (b), and the three-point catalogue of (a) give the basin decomposition.
+
+The remaining topology needs only order: \emph{no two componentwise-ordered distinct points converge to $p_2$ together}. Suppose $x < y$ did. Monotonicity keeps the orbits ordered, and one step makes the stock gap strictly positive, since $s(\beta_y)D_y - s(\beta_x)D_x = s(\beta_x)(D_y - D_x) + (s(\beta_y) - s(\beta_x))D_y$ with $s$ strictly increasing and $D \ge I > 0$. Both orbits eventually lie in any box $N$ around $p_2$; because $p(1) < 0$ at $p_2$ with $b, \tilde c > 0$, and the update is unclipped near the interior point $p_2$, the box $N$ can be chosen so that the Jacobian dominates entrywise a positive matrix $M$ with $p_M(1) < 0$, whose Perron eigenvalue is then $\lambda_M > 1$ with left eigenvector $\varphi > 0$. For ordered states in $N$ the mean value theorem gives $T(y) - T(x) \ge M(y - x)$ componentwise, so $\langle\varphi,\, y_n - x_n\rangle$ grows by the factor $\lambda_M$ per step while $y_n - x_n \to 0$: a contradiction. Hence $\Gamma$ is unordered. It therefore has empty interior, every nonempty open set containing ordered pairs; and it is the common boundary of the two basins: at every $z \in \Gamma$ an ordered perturbation into $B$ exists on each side (in the stock coordinate, or the policy coordinate at a stock face), its orbit converges to a fixed point ordered against $p_2$ and distinct from it, so the upward perturbations lie in the basin of $p_3$ and the downward ones in the basin of $p_1$.
+
+For the geometry of $\Gamma$: hyperbolicity gives $p_2$ a one-dimensional $C^1$ local stable manifold -- the map is unclipped, hence $C^1$, on a neighborhood of the interior point $p_2$ -- tangent to the $\lambda_2$-eigenvector $(b,\, \lambda_2 - a)$. Since $\lambda_{\mathrm{PF}} > \max(a,d)$ for a nonnegative matrix with strictly positive off-diagonal entries, $\lambda_2 = \mathrm{tr}\,J - \lambda_{\mathrm{PF}} < \min(a,d)$, so the eigenvector's components have strictly opposite signs and the local arc is decreasing.
+
+The local manifold accounts for \emph{all} of $\Gamma$ near $p_2$, which for a general planar map it need not: the manifold theorem describes the states whose whole forward orbit stays near $p_2$, while $\Gamma$ could a priori thread the neighborhood with additional strands whose orbits first leave it. Here the order structure excludes them. Along any orbit in $\Gamma$ no step is componentwise comparable -- distinct comparable states cannot both lie in the unordered $\Gamma$, and an equal step is a fixed point, hence $p_2$ itself -- so the quadrant argument above makes both coordinates monotone, toward their limits at $p_2$; a componentwise-monotone orbit converging to $p_2$ never leaves the order box spanned by its start and $p_2$, so every point of $\Gamma$ near $p_2$ is a staying state, and the identification costs no further analysis. $\Gamma$ is invariant as a stable set and closed in $B$, being the complement of the two open basins. The local arc does not upgrade to a global curve, by Lemma~\ref{lem:clip}(iv).
+
+(f) The displayed instance is checked directly: it satisfies every primitive restriction, (SS) with $2\alpha c^2 I/\lambda_0 = 2496/2651 < 1$, and (H) with transversal root $\beta^\dagger = 161/227$ (Lemma~\ref{lem:root}), while the two listed states map to one another exactly.
 \end{proof}
 
-At benchmark the saddle's eigenvalues are $\lambda_{\mathrm{PF}} = 1.0695$ and $\lambda_2 = 0.4446$, matching the instability--transversality equivalence of part~(iii) at the measured root (Section~\ref{sec:verification}); the basins are shown in Figure~\ref{fig:phase}.
+At benchmark the saddle's eigenvalues are $\lambda_{\mathrm{PF}} = 1.0407$ and $\lambda_2 = 0.8417$, matching the instability--transversality equivalence of clause~(c) at the measured root (Section~\ref{sec:verification}); the basins are shown in Figure~\ref{fig:phase}. At the sharpness configuration of clause (f), the second eigenvalue crosses $-1$ at $\alpha \approx 451.5$ -- the saddle's period-doubling threshold, in closed form from $p(-1) = 0$ -- and the exact orbit sits within a tenth of a percent above it: the witness lives at the birth of the period-two branch. At the benchmark, $2\eta \le c(1+s_0)$ holds independently of $\alpha$, so no such flip exists anywhere inside (SS).
 
 \subsection{Hysteresis: prevention versus cure}\label{sec:hyst}
 
 Suppose the operator's objective carries a civic weight, $J_\rho = U + \rho\,C$ with $\partial_\beta C = -hD$ for some harm scale $h > 0$; normalize $h = 1$, so the gradient becomes $\partial_\beta J_\rho = -v + (2c(1-c\beta) - \rho)D$.
 
-\begin{theorem}[Hysteresis: the prevention--cure asymmetry]\label{thm:hyst}
-Under (SS) and (H):
+\begin{theorem}[Hysteresis: the prevention--release--restoration price schedule]\label{thm:hyst}
+Assume (SS) and (H), and define the \emph{weighted crossing function}
+\begin{equation}\label{eq:Psi}
+\Psi(\beta) \;:=\; 2c(1-c\beta) \;-\; \frac{v\bigl(1-s(\beta)\bigr)}{I},
+\end{equation}
+so that $\partial_\beta J_\rho(\beta, D^\ast(\beta)) < 0$ exactly when $\rho > \Psi(\beta)$. Intervention then has three prices, each defined unconditionally:
 \begin{enumerate}
-\item[(i)] The captured corner $p_3$ is asymptotically stable for the $\rho$-weighted map if and only if
-\[
-\rho \;\le\; \rho_{\mathrm{cure}} \;:=\; 2c(1-c) \;-\; \frac{v\lambda_0}{I}.
-\]
-\item[(ii)] The calibrated corner $p_1$ is asymptotically stable for \emph{every} $\rho \ge 0$, with a basin containing a neighborhood $N$ of $p_1$ independent of $\rho$. Consequently, once a trajectory is calibrated, calibration persists under any subsequent non-increasing (indeed, any non-negative) civic-weight schedule, including $\rho = 0$.
-\item[(iii)] Hence a transient weight $\rho > \rho_{\mathrm{cure}}$ cures; deterministic prevention costs $\rho_{\mathrm{prev}} = 0$; and the prevention--cure gap $\rho_{\mathrm{cure}} - \rho_{\mathrm{prev}} = \rho_{\mathrm{cure}} > 0$ is the price of late intervention.
+\item[(i)] \emph{Prevention}, $\rho_{\mathrm{prev}} = 0$. The calibrated corner $p_1$ is asymptotically stable for \emph{every} $\rho \ge 0$, with a basin containing a neighborhood $N$ of $p_1$ independent of $\rho$. Once a trajectory is calibrated, calibration persists under any subsequent non-negative civic-weight schedule, including $\rho = 0$.
+\item[(ii)] \emph{Release}, $\rho_{\mathrm{cure}} := \Psi(1) = 2c(1-c) - v\lambda_0/I$. The captured corner $p_3$ remains a fixed point of the $\rho$-weighted map iff $\rho \le \rho_{\mathrm{cure}}$, the weighted corner gradient factoring exactly as $\partial_\beta J_\rho(1, D^\ast(1)) = (I/\lambda_0)(\rho_{\mathrm{cure}} - \rho)$. Strictly below, the corner is asymptotically stable; strictly above, the gradient points outward and the corner is repelling. At $\rho = \rho_{\mathrm{cure}}$ the normal gradient vanishes and stability is not determined at this order.
+\item[(iii)] \emph{Restoration}, $\rho_{\mathrm{restore}} := \max_{[0,1]}\Psi \;\ge\; \rho_{\mathrm{cure}}$. For $\rho > \rho_{\mathrm{restore}}$ the weighted gradient is strictly negative along the entire stationary characteristic, so $p_1$ is the \emph{unique} weighted equilibrium. If in addition $\rho \le 2c(1-c)$, so that the weighted map is still cooperative -- its mixed partial $\alpha\bigl(2c(1-c\beta)-\rho\bigr)$ stays nonnegative on $[0,1]$ -- and $J_\rho$ satisfies the weighted form of (SS$^+$), namely \eqref{eq:ssplus} with $2c$ replaced by $2c-\rho$ in the off-diagonal bound, then Theorem~\ref{thm:bistable}(e) applies to $J_\rho$ and every trajectory converges to that unique equilibrium: restoration, not merely release. Cooperativity of the weighted map is not sufficient on its own, for the reason recorded in Theorem~\ref{thm:bistable}(f): transient stock above the characteristic can drive alternating steps at any civic weight. The window $(\rho_{\mathrm{restore}},\,2c(1-c)]$ is nonempty whenever the two upper prices coincide, since $2c(1-c)-\rho_{\mathrm{cure}} = v\lambda_0/I > 0$. For $\rho_{\mathrm{cure}} < \rho < \rho_{\mathrm{restore}}$ the corner is released but $\Psi = \rho$ has interior solutions; descending crossings are stable by the crossing identity of Theorem~\ref{thm:bistable}(c), so the trajectory may instead settle at an intermediate weighted attractor.
+\item[(iv)] The two upper prices coincide, $\rho_{\mathrm{restore}} = \rho_{\mathrm{cure}}$, exactly when $\Psi$ attains its maximum at the captured corner. A sufficient condition is
+\begin{equation}\label{eq:curedom}
+c^2 I \;<\; v\,\eta\,(1-\lambda_0)(1-\eta),
+\end{equation}
+under which $\Psi$ is non-decreasing on $[0,1]$. At the benchmark \eqref{eq:curedom} reads $0.0162 < 0.0245$, so $\rho_{\mathrm{restore}} = \rho_{\mathrm{cure}} = 0.0800$ there.
 \end{enumerate}
+The prevention--restoration gap $\rho_{\mathrm{restore}} - \rho_{\mathrm{prev}} = \rho_{\mathrm{restore}} > 0$ is the full price of late intervention; $\rho_{\mathrm{cure}}$ is the part of it that buys escape alone.
 \end{theorem}
 \begin{proof}
-(i) Stability of $\beta = 1$ requires the clipped gradient to point upward at the corner stock: $\partial_\beta J_\rho(1, D^\ast(1)) = -v + (2c(1-c) - \rho)\,I/\lambda_0 \ge 0$, which rearranges to $\rho \le \rho_{\mathrm{cure}}$; for $\rho > \rho_{\mathrm{cure}}$ the gradient at the corner is strictly negative, $\beta$ leaves the corner, $D$ then falls below $D^\ast(1)$, and the gradient falls further---the corner argument of Theorem~\ref{thm:bistable}(iii) applies in reverse. (ii) $\partial_\beta J_\rho(0, D) = -v + (2c-\rho)D \le -v + 2cD = \partial_\beta U(0,D)$ for all $\rho \ge 0$, so the $\rho = 0$ stability neighborhood of $p_1$ from Theorem~\ref{thm:bistable}(iii) works uniformly in $\rho$: within $N$, $\beta$ reaches $0$ in finitely many steps and $D$ contracts to $D^\ast(0)$, regardless of the $\rho$-schedule. (iii) is immediate from (i)--(ii).
+The characterization of $\Psi$ is immediate: on the stationary characteristic $D^\ast(\beta) = I/(1-s(\beta))$, so $v/D^\ast(\beta) = v(1-s(\beta))/I$ and $\partial_\beta J_\rho(\beta, D^\ast(\beta)) = -v + (2c(1-c\beta)-\rho)D^\ast(\beta)$ is negative iff $\rho > \Psi(\beta)$.
+
+(i) $\partial_\beta J_\rho(0, D) = -v + (2c-\rho)D \le -v + 2cD = \partial_\beta U(0,D)$ for all $\rho \ge 0$, so the $\rho = 0$ stability neighborhood of $p_1$ from Theorem~\ref{thm:bistable}(b) works uniformly in $\rho$: within $N$, $\beta$ reaches $0$ in finitely many steps and $D$ contracts to $D^\ast(0)$, regardless of the $\rho$-schedule.
+
+(ii) $\beta = 1$ is fixed under the clipped weighted step iff the gradient there points outward or vanishes: $\partial_\beta J_\rho(1, D^\ast(1)) = -v + (2c(1-c) - \rho)\,I/\lambda_0$, which factors as $(I/\lambda_0)(\rho_{\mathrm{cure}} - \rho)$ and is nonnegative iff $\rho \le \rho_{\mathrm{cure}}$. For $\rho < \rho_{\mathrm{cure}}$ the gradient is strictly positive and the corner argument of Theorem~\ref{thm:bistable}(b) gives asymptotic stability; for $\rho > \rho_{\mathrm{cure}}$ it is strictly negative, $\beta$ leaves the corner, $D$ then falls below $D^\ast(1)$, and the gradient falls further -- the same argument in reverse. At $\rho = \rho_{\mathrm{cure}}$ the factor vanishes, so neither direction applies and the equality case is left open. Note $\rho_{\mathrm{cure}} = \Psi(1)$ since $1-s(1) = \lambda_0$.
+
+(iii) $\Psi$ is continuous on the compact $[0,1]$, so $\rho_{\mathrm{restore}}$ is attained and $\rho_{\mathrm{restore}} \ge \Psi(1) = \rho_{\mathrm{cure}}$. Above it, $\rho > \Psi(\beta)$ for every $\beta$, so the weighted gradient is negative along the whole characteristic and no interior weighted equilibrium exists; with (i) the calibrated corner is the only one available. Within the band, $\Psi = \rho$ has solutions by the intermediate value theorem, and at a descending crossing the crossing identity of Theorem~\ref{thm:bistable}(c) applies with $G$ replaced by $\Psi - \rho$, giving a stable interior equilibrium. For the convergence claim, the weighted map's mixed partial is $\alpha\bigl(2c(1-c\beta)-\rho\bigr)$, nonnegative on $[0,1]$ exactly when $\rho\le 2c(1-c)$; on that range Lemma~\ref{lem:mono}'s argument applies verbatim to $J_\rho$, and the weighted form of (SS$^+$) assumed in (iii) bounds the weighted off-diagonal maximum $\alpha(2c-\rho)$ against the unchanged diagonal product exactly as in Theorem~\ref{thm:bistable}(e), whose quadrant argument then yields convergence to a fixed point; uniqueness identifies the limit as $p_1$. Uniqueness of the equilibrium does not by itself give convergence.
+
+(iv) Writing $u(\beta) = 1-\eta(1-\beta)$, $s(\beta_2)-s(\beta_1) = (1-\lambda_0)\eta(\beta_2-\beta_1)(u(\beta_2)+u(\beta_1)) \ge 2\eta(1-\lambda_0)(1-\eta)(\beta_2-\beta_1)$ for $\beta_1 \le \beta_2$, so $\Psi(\beta_2) - \Psi(\beta_1) \ge (\beta_2-\beta_1)\bigl[2v\eta(1-\lambda_0)(1-\eta)/I - 2c^2\bigr] \ge 0$ under \eqref{eq:curedom}. Hence $\Psi$ is non-decreasing and $\rho_{\mathrm{restore}} = \Psi(1) = \rho_{\mathrm{cure}}$. Conversely, if $\Psi$ attains its maximum at $\beta = 1$ the two coincide by definition.
 \end{proof}
 
-At benchmark, $\rho_{\mathrm{cure}} = 0.0800$; an adiabatic up-sweep from the captured corner escapes at measured $\rho = 0.0801$, and the down-sweep remains calibrated to $\rho = 0$ (Figure~\ref{fig:hyst}). The theorem is two-regime by construction: deterministically, prevention is free --- the calibrated corner is stable for every $\rho \ge 0$ --- and the entire intervention cost concentrates in the cure threshold, paid transiently. The stochastic complement below shows that modest \emph{standing} weights buy exponential protection at a small fraction of the cure price.
+\begin{remark}[The release band is civic-weighted partial capture]\label{rem:band}
+When $\rho_{\mathrm{restore}} > \rho_{\mathrm{cure}}$ the band $(\rho_{\mathrm{cure}}, \rho_{\mathrm{restore}})$ carries stable interior equilibria of the weighted map: deference released from the corner but pinned strictly between capture and calibration. This is the civic-weight image of the partial-capture band that the loop paper finds in its zone structure \citep{hofheinz2026loops}, and it inherits that regime's governance hazard exactly. The stock is inflated but finite, no corner collapse or divergence fires, and an operator who measures only whether deference left the corner records a successful intervention. A protocol that treats release as evidence of restoration will therefore certify recovery in the one regime where recovery did not occur; the two prices must be reported separately.
+\end{remark}
+
+\begin{remark}[The restoration price rises with the danger]\label{rem:pricerise}
+Condition \eqref{eq:curedom} fails when $c^2 I$ is large relative to $v\eta(1-\lambda_0)(1-\eta)$ -- strong satisfaction sensitivity to deference, heavy contested-claim injection, thin usefulness premium. These are the same primitives that make capture likely in the first place, and the same combination that widens the certificate price of the loop paper. The price schedule is therefore not a caveat attached to the asymmetry but part of its content. Read directionally from the displayed primitives -- no joint comparative-statics theorem is claimed -- late intervention costs more where lateness was most likely, and the gap between escape and recovery opens in the regime the program is most concerned with.
+\end{remark}
+
+\begin{remark}[Too much civic weight breaks the monotone structure]\label{rem:ceiling}
+The cooperativity ceiling $2c(1-c)$ in (iii) is not an artifact of the proof. Above it the mixed partial $\alpha\bigl(2c(1-c\beta)-\rho\bigr)$ turns negative at high deference: a civic weight strong enough that \emph{standing disagreement pushes deference down} reverses the sign the monotone theory needs, and the trajectory-level guarantees of Theorem~\ref{thm:bistable} no longer apply to the weighted map. The practical reading is benign, since the cheapest sufficient weight sits just above $\rho_{\mathrm{restore}}$ and the window has width $v\lambda_0/I$ at coincidence; but it does mean that raising $\rho$ without bound buys no further certified guarantee -- past the ceiling, the effect of additional weight is a separate, non-monotone analysis -- and that the interval, not the threshold, is the object to report.
+\end{remark}
+
+At benchmark, $\rho_{\mathrm{restore}} = \rho_{\mathrm{cure}} = 0.0800$; an adiabatic up-sweep from the captured corner escapes at measured $\rho = 0.0801$, and the down-sweep remains calibrated to $\rho = 0$ (Figure~\ref{fig:hyst}). The theorem is two-regime by construction: deterministically, prevention is free -- the calibrated corner is stable for every $\rho \ge 0$ -- and the entire intervention cost concentrates in the release and restoration prices of Theorem~\ref{thm:hyst}, paid transiently. The stochastic complement below shows that modest \emph{standing} weights buy exponential protection at a small fraction of the restoration price.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\linewidth]{fig_hysteresis.png}
+\civicincludegraphics[width=0.70\linewidth]{Hysteresis loop in civic weight rho: the captured up-sweep escapes only above the cure threshold, while the calibrated down-sweep remains calibrated to zero}{fig_hysteresis.pdf}
 \caption{Hysteresis loop in the civic weight $\rho$ at benchmark parameters. The up-sweep (starting captured) escapes only past $\rho_{\mathrm{cure}} = 2c(1-c) - v\lambda_0/I$; the down-sweep remains calibrated all the way to $\rho = 0$. The loop area is the irreversibility cost of late intervention.}
 \label{fig:hyst}
 \end{figure}
 
-\begin{conjecture}[Arrhenius escape]\label{conj:arr}
-Let the operator's gradient estimate carry measurement noise, $\widehat{\partial_\beta J_\rho} = \partial_\beta J_\rho + \sigma\xi_t$ with $\xi_t$ i.i.d.\ standard normal --- the reduced form of estimating satisfaction from finite user samples. For the clipped cooperative map, escape from the calibrated basin is an activated event in the Freidlin--Wentzell sense \citep{freidlin2012random}: the mean escape time satisfies $\log \bar T_{\mathrm{esc}} = V(\rho)/\sigma^2 + O(1)$, with a quasipotential barrier $V(\rho)$ strictly increasing in the standing civic weight $\rho$. The closed form of $V(\rho)$ is open (Section~\ref{sec:open}).
+Let the operator's gradient estimate carry measurement noise, $\widehat{\partial_\beta J_\rho} = \partial_\beta J_\rho + \sigma\xi_t$ with $\xi_t$ i.i.d.\ standard normal -- the reduced form of estimating satisfaction from finite user samples. The barrier this noise must climb is the discrete Freidlin--Wentzell quasipotential of its own geometry: writing a controlled path as $\beta_{t+1} = \Pi_{[0,1]}(\beta_t + \alpha(\partial_\beta J_\rho(\beta_t, D_t) + u_t))$ with the stock exact,
+\begin{equation}\label{eq:qp}
+V(\rho) \;:=\; \inf\Bigl\{\tfrac12\textstyle\sum_t u_t^2 \;:\; \text{the path from $p_1$ leaves the calibrated basin of the $\rho$-weighted map}\Bigr\}.
+\end{equation}
+
+For smooth nondegenerate perturbations the discrete-time large-deviation theory is classical \citep{kifer1988random, freidlin2012random}, and metastability has a potential-theoretic treatment at book length \citep{bovier2015metastability}. Three features of \eqref{eq:map} sit outside the standard hypotheses, and the proofs below are correspondingly self-contained: the projection clips the policy at both faces, so the map is neither smooth nor injective on the box; the noise enters the policy channel alone, so the one-step transition kernel is degenerate and the stock recursion exact; and the sharp rate object of Theorem~\ref{thm:rate} is the crossing quasipotential rather than \eqref{eq:qp}, their identity being precisely what remains open (Conjecture~\ref{conj:arr}).
+
+\begin{proposition}[Quasipotential bounds]\label{prop:qpbounds}
+Assume (SS) and (H), and let the civic weight satisfy $0 \le \rho < \rho_{\mathrm{cure}}$ within the cooperativity window $\rho \le 2c(1-c)$. Then $G_\rho := G - \rho D^\ast$ has a unique root $\beta^\dagger_\rho \in (0,1)$, an ascending transversal crossing -- $G_\rho(1-s) = q - \rho I$ is again a positive-leading quadratic with $q_\rho(0) \le q(0) < 0$ since $\rho \ge 0$, and $q_\rho(1) > 0$ exactly when $\rho < \rho_{\mathrm{cure}}$, so Lemma~\ref{lem:root} applies verbatim -- and, with $L_\rho$ the Lipschitz constant of $G_\rho$ on $[0, \beta^\dagger_\rho]$,
+\[
+\frac{2}{\alpha\,(1+2\alpha L_\rho)}\int_0^{\beta^\dagger_\rho}\bigl(-G_\rho(b)\bigr)\,db
+\;\le\; V(\rho) \;\le\; S^{\uparrow}(\rho),
+\]
+where $S^{\uparrow}(\rho) := \inf_{\varepsilon > 0} S^{\uparrow}_\varepsilon(\rho)$ is the cost of the explicit two-phase strategy, $g_\rho(\beta, D) = -v + (2c(1-c\beta)-\rho)D$: \emph{climb} with $u = 2(-g_\rho)^+ + \varepsilon$ until the policy first exceeds the weighted saddle -- the margin makes the crossing finite, in at most $\lceil \beta^\dagger_\rho/(\alpha\varepsilon)\rceil$ steps, where the unmargined control only approaches it -- then \emph{hold} with the cancelling control $u = (-g_\rho)^+$, which pins the policy exactly while the stock relaxes at rate $s$, stopping when the state first dominates an on-characteristic point beyond the saddle (finite, since the held stock climbs geometrically past every level below its limit), whereupon characteristic capture and monotone fate complete the escape. Each $S^{\uparrow}_\varepsilon(\rho)$ is the finite action of an admissible escape; the battery reports the $\varepsilon = 10^{-9}$ cost, itself an upper bound. Holding every primitive except the adaptation rate fixed, $S^{\uparrow}(\rho) = (2/\alpha)\int_0^{\beta^\dagger_\rho}(-G_\rho)\,(1+O(\alpha))$ as $\alpha \to 0^+$. The lower-bound integral is elementary in closed form, strictly increasing in $\rho$, with
+\[
+\frac{d}{d\rho}\,\frac{2}{\alpha}\int_0^{\beta^\dagger_\rho}(-G_\rho(b))\,db \;=\; \frac{2}{\alpha}\int_0^{\beta^\dagger_\rho} D^\ast(b)\,db:
+\]
+the marginal barrier purchased by a unit of standing civic weight is twice the integrated characteristic stock per unit adaptation rate. Wherever the bracket separates, the barrier itself strictly increases: $V(\rho') > V(\rho)$ whenever the left side at $\rho'$ exceeds $S^{\uparrow}(\rho)$.
+\end{proposition}
+\begin{proof}
+\emph{Exit forces the running maximum past the weighted saddle.} Along any controlled path from $p_1$, the stock obeys $D_t \le D^\ast(\bar\beta_t)$ for the running maximum $\bar\beta_t$, by induction, $s$ being increasing; and from below the path never drops beneath $p_1$ -- the projection floors the policy at $0$, and the same induction from the calibrated start gives $D_t \ge s(0)\,D^\ast(0) + I = D^\ast(0)$. While $\bar\beta_t < \beta^\dagger_\rho$, the reached state is therefore pinched between the calibrated state, which is fixed ($G_\rho(0) < 0$ and the stock stationary), and the on-characteristic point $(\bar\beta_t, D^\ast(\bar\beta_t))$, whose first weighted step is comparable downward ($G_\rho(\bar\beta_t) < 0$, stock stationary), so that its unforced orbit is componentwise monotone to $p_1$ -- the comparable step propagates by cooperativity, and the limit is a weighted equilibrium on the characteristic at or below $\bar\beta_t$, which leaves only $p_1$. Cooperativity propagates both comparisons to the unforced orbit of the reached state, squeezing it to $p_1$ coordinatewise. Every state reachable before the maximum passes $\beta^\dagger_\rho$ therefore lies in the calibrated basin.
+
+\emph{Lower bound.} When a step advances the maximum from $b$ by $\Delta$, the required control is cheapest at zero dip -- its derivative in the dip depth is $1/\alpha - 2c^2D^\ast(b) \ge 0$ under (SS) -- so $u \ge |G_\rho(b)| + \Delta/\alpha$ and $u^2/2 \ge 2|G_\rho(b)|\Delta/\alpha$. Summing over the max-partition of $[0, \beta^\dagger_\rho]$ and comparing to the integral through $L_\rho$, with cell widths $\Delta \le \alpha u$, gives $(1+2\alpha L_\rho)V \ge (2/\alpha)\int(-G_\rho)$.
+
+\emph{Upper bound.} On the climb the net gradient is $-g_\rho + \varepsilon \ge \varepsilon$, so the crossing is finite; each step advances the policy by $\alpha(|g_\rho| + \varepsilon)$ at cost $(2|g_\rho| + \varepsilon)^2/2$ -- $2|g_\rho|/\alpha$ per unit of policy up to the margin -- along a trajectory whose stock lags the characteristic by $O(\alpha)$ (Gr\"onwall on the lag recursion, the relaxation rate being $1-s(\beta^\dagger_\rho)$ on the transit). On the hold the cancelling control pins the policy exactly, the net gradient being $g_\rho + (-g_\rho)^+ = 0$ while $g_\rho \le 0$, at geometrically vanishing cost as the stock relaxes; the stopping state dominates an on-characteristic point beyond the saddle, whose unforced orbit climbs monotonically to the captured corner -- the weighted stationary gradient is positive beyond the saddle and $\rho < \rho_{\mathrm{cure}}$ keeps the corner fixed -- and cooperativity keeps the stopped state's orbit above that climbing orbit at every step, so it cannot converge to $p_1$: the terminal state lies outside the calibrated basin. The margin's total contribution to the action is $O(\varepsilon/\alpha)$ over the climb, so it vanishes in the infimum at fixed $\alpha$; along the family with every primitive except the adaptation rate fixed, the lag and hold contributions are $O(\alpha)$ relative to the main term, giving the displayed form.
+
+\emph{Monotonicity.} $\partial_\rho(-G_\rho) = D^\ast > 0$, and the Leibniz boundary term vanishes since $G_\rho(\beta^\dagger_\rho) = 0$.
+\end{proof}
+
+\begin{corollary}[Small-rate closed form]\label{cor:qplimit}
+Under the hypotheses of Proposition~\ref{prop:qpbounds}, with every primitive except the adaptation rate held fixed, $\displaystyle \alpha\,V(\rho)\;\longrightarrow\;2\int_0^{\beta^\dagger_\rho}\bigl(-G_\rho(b)\bigr)\,db$ as $\alpha\to0^+$. The limit is elementary in closed form -- the integrand is rational with the real-rooted quadratic denominator $1-s$, so the integral evaluates in logarithms -- and its $\rho$-derivative is $2\int_0^{\beta^\dagger_\rho} D^\ast(b)\,db$.
+\end{corollary}
+\begin{proof}
+Multiply the bounds of Proposition~\ref{prop:qpbounds} by $\alpha$: the lower bound is $2\int(-G_\rho)/(1+2\alpha L_\rho)$ and the strategy cost is $2\int(-G_\rho)\,(1+O(\alpha))$; both tend to the display.
+\end{proof}
+
+\begin{proposition}[Crossing probabilities at the barrier scale]\label{prop:arrwindow}
+Under the hypotheses of Proposition~\ref{prop:qpbounds}, start the chain at the calibrated state and let the crossing event at horizon $T$ be that the policy's running maximum reaches the weighted saddle $\beta^\dagger_\rho$ -- a necessary precursor of exit from the calibrated basin. As $\sigma \to 0^+$:
+\begin{enumerate}
+\item[(i)] for every $\delta > 0$ there is a finite horizon $T_\delta$ with
+$\liminf\; \sigma^2 \log \mathbb{P}(\text{crossing within } T_\delta) \ge -S^{\uparrow}(\rho) - \delta$, and the crossing paths so produced enter the captured basin;
+\item[(ii)] for every fixed horizon $T$,
+$\displaystyle \limsup\; \sigma^2 \log \mathbb{P}(\text{crossing within } T) \le -\,\frac{2}{\alpha\,(1+2\alpha L_\rho)}\int_0^{\beta^\dagger_\rho}\bigl(-G_\rho\bigr)$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(i) Run the two-phase strategy with its climb extended a margin past the weighted saddle, then the cancelling hold while the stock relaxes onto the characteristic: finitely many steps $T_\delta$, action at most $S^{\uparrow}(\rho)+\delta/2$, terminal state a fixed distance inside the capture region of the characteristic-capture argument. The $T_\delta$-step chain is a continuous function of its noise vector, so some $\varepsilon > 0$ makes every realization within $\varepsilon$ of the control tube capture; each Gaussian step has $\mathbb{P}(|\sigma\xi - u| \le \varepsilon) \ge (c'\varepsilon/\sigma)\exp\bigl(-(|u|+\varepsilon)^2/2\sigma^2\bigr)$, and the product's prefactor vanishes at the scale $\sigma^2\log$. (ii) The realized noise is the control, $u_t = \sigma\xi_t$, and any crossing path pays $\sum u_t^2/2$ at least the corrected integral, by the max-advance inequality in the proof of Proposition~\ref{prop:qpbounds}; the crossing event therefore lies inside $\{\sigma^2\sum_{t\le T}\xi_t^2 \ge 2\,(\text{corrected integral})\}$, and the chi-square Chernoff bound gives, for $\lambda < 1/2$, probability at most $\exp\bigl(-2\lambda\,(\text{c.i.})/\sigma^2 + T\,c(\lambda)\bigr)$; let $\sigma \to 0$ at fixed $T$, then $\lambda \uparrow 1/2$.
+\end{proof}
+
+\begin{theorem}[The saddle-crossing Arrhenius law, two-sided]\label{thm:arr}
+Under the hypotheses of Proposition~\ref{prop:qpbounds}, write $V_-(\rho)$ and $V_+(\rho)$ for the printed bracket -- the corrected lower integral and the two-phase cost $S^{\uparrow}(\rho)$ -- start the chain at the calibrated state, and let $T_{\times}$ be the first time the policy's running maximum reaches $\beta^\dagger_\rho$. For every $\delta > 0$, as $\sigma \to 0^+$,
+\[
+\mathbb{P}\bigl(T_{\times} \le e^{(V_-(\rho)-\delta)/\sigma^2}\bigr) \longrightarrow 0,
+\qquad
+\mathbb{P}\bigl(T_{\times} \le e^{(V_+(\rho)+\delta)/\sigma^2}\bigr) \longrightarrow 1,
+\]
+and consequently the mean first-crossing time $\bar T_{\times} := \mathbb{E}[T_{\times}] \in (0,\infty]$ satisfies
+\[
+V_-(\rho) \;\le\; \liminf_{\sigma\to0^+}\, \sigma^2 \log \bar T_{\times}
+\;\le\; \limsup_{\sigma\to0^+}\, \sigma^2 \log \bar T_{\times} \;\le\; V_+(\rho).
+\]
+First saddle-policy crossing is an activated event -- exponential in $1/\sigma^2$, with rate pinned between the printed brackets -- and by Corollary~\ref{cor:qplimit} the rate is exact to leading order in the adaptation rate. This theorem does not identify the first time the state actually leaves the calibrated basin.
+\end{theorem}
+\begin{proof}
+\emph{Geometry of the pre-crossing region.} The noise enters the policy input alone and the stock recursion stays exact, so both inductions opening the proof of Proposition~\ref{prop:qpbounds} run along any noisy path from the calibrated state: the stock is dominated by the characteristic at the running maximum, $D_t \le D^\ast(\bar\beta_t)$, and the path never drops beneath $p_1$, the projection flooring the policy at $0$ and the stock recursion preserving $D_t \ge D^\ast(0)$. Before the crossing the state therefore lies in the compact rectangle $R := [0,\beta^\dagger_\rho] \times [D^\ast(0),\, D^\ast(\beta^\dagger_\rho)]$ and belongs to the calibrated basin. Fix a saddle radius $r > 0$ and a home ball $B_h$, a small closed order-rectangle neighborhood of $p_1$ in $R$. Every state of $R$ other than the weighted saddle itself converges home: a coordinate strictly below the saddle's makes the other strictly sub-characteristic within one unforced step -- the stock multiplier is strictly increasing, and below the characteristic the gradient is strictly negative -- and the orbit is then pinched, coordinatewise, between the fixed calibrated state and a strictly sub-saddle on-characteristic orbit, itself monotone to $p_1$ by the comparable-step principle within the cooperativity window. On the compact set $K_r := R \setminus B(z^\dagger_\rho, r)$, $z^\dagger_\rho$ the weighted saddle, the entry is uniform: pick a sub-saddle level $b$ whose characteristic rectangle $[p_1, (b, D^\ast(b))]$ sits inside $B_h$ -- this rectangle is invariant, pinched between its fixed corner and its monotone characteristic orbit -- so the states whose unforced orbit has entered it by a given time form open sets, by continuity of the iterates, that cover $K_r$; a finite subcover gives one $T_F = T_F(r)$ with every unforced orbit from $K_r$ inside $B_h$ at every time from $T_F$ on.
+
+\emph{A uniform block.} Set $W := T_F + \max(T_\delta, 1)$, fixed independently of $\sigma$, and run the chain for one block of $W$ steps from an arbitrary pre-crossing state. (A) If the state lies in the ball $B(z^\dagger_\rho, r)$ -- near the saddle in \emph{both} coordinates -- crossing is cheap because the gradient itself is small there: it vanishes at the saddle and is Lipschitz on the box, so $|g_\rho| \le \Lambda r$ on the ball, and the single projected step with control $(\beta^\dagger_\rho + m - \beta)/\alpha - g_\rho$ lands the policy at $\beta^\dagger_\rho + m$ exactly, a one-step crossing with margin $m$ at action $\tfrac12((r+m)/\alpha + \Lambda r)^2$, below $\delta/4$ for $r$ and $m$ small at the fixed adaptation rate; the Gaussian tube around this one step -- the margin absorbing perturbations, the starts ranging over a compact set -- crosses with probability at least $e^{-\delta/(2\sigma^2)}$. The stock's proximity to the characteristic is what makes the cancellation vanish: a state at saddle \emph{policy} with stock bounded away below the characteristic has a gradient bounded away from zero, and any advancing step from it costs a fixed quantum of action, so no policy-only case is admissible. (B) Otherwise the state lies in $K_r$: with probability at least $\tfrac12$ the block's first $T_F$ noises are small enough that the noisy path shadows the unforced one into $B_h$ -- the horizon is fixed and the step map Lipschitz on $R$ -- and the two-phase tube of Proposition~\ref{prop:arrwindow}(i), made uniform over the compact ball of starts by the same continuity, then crosses with probability at least $e^{-(V_+ + \delta/2)/\sigma^2}$. In both cases
+\[
+\mathbb{P}\bigl(\text{crossing during the block} \,\big|\, \text{the past}\bigr) \;\ge\; \tfrac12\, e^{-(V_+ + \delta/2)/\sigma^2} \;=:\; p_\sigma ,
+\]
+the noise driving each block being fresh.
+
+\emph{Crossing.} With $N_+ := \lceil e^{(V_+ + \delta)/\sigma^2}\rceil$ and $k := \lfloor N_+/W \rfloor$ blocks, $\mathbb{P}(T_{\times} > N_+) \le (1-p_\sigma)^{k} \le e^{-p_\sigma k} \to 0$, since $p_\sigma k \sim e^{\delta/(2\sigma^2)}/(2W) \to \infty$ at fixed $W$; and $\bar T_{\times} = \sum_{n \ge 0} \mathbb{P}(T_{\times} > n) \le W \sum_{j\ge0}(1-p_\sigma)^j = W/p_\sigma$, so $\sigma^2 \log \bar T_{\times} \le V_+ + \delta/2 + \sigma^2\log(2W)$.
+
+\emph{Persistence.} Every crossing path has a last exit from $B_h$ before the crossing, the chain starting there, so with $N_- := \lfloor e^{(V_- - \delta)/\sigma^2}\rfloor$ a union bound over the at most $N_-$ last-exit times leaves the per-excursion estimate: from any state on the exit boundary, the probability of crossing before returning to $B_h$ is at most $C e^{-(V_- - 3\delta/4)/\sigma^2}$. The bound prices not the crossing but its necessary precursor. Fix a strip width $w > 0$ and let $\tau_w$ be the first time the excursion's running maximum reaches $\beta^\dagger_\rho - w$; the maximum is monotone, so every crossing excursion first realizes $\tau_w$, and whatever follows the entrance -- saddle lingering included -- is irrelevant to an upper bound on its success. Two ingredients price the entrance, and before it there are no exceptional states: until $\tau_w$ the policy stays below $\beta^\dagger_\rho - w$, so every state of the excursion lies in the compact away set of the geometry paragraph at radius $w$, where the unforced funnel has the uniform horizon $T_F(w)$. First, the pathwise ledger of Proposition~\ref{prop:qpbounds}, run from the excursion's start -- its stock is within the home radius of $D^\ast(0)$, which is all the domination induction needs -- and capped at $\beta^\dagger_\rho - w$, charges any entering excursion at least $V_- - \delta/2$ once the home radius and $w$ are small, the trimmed segments contributing on that order. Second, lingering is charged without exemption: whenever the pre-entrance path stands anywhere and is not inside $B_h$ a horizon $T_0 := T_F(w)$ later, the window between costs at least a fixed $c_0 > 0$ -- its unforced comparison ends inside $B_h$ by the uniform funnel, and the fixed-horizon map is Lipschitz in the controls -- so a maximal disjoint family of such windows gives an excursion whose entrance takes $kT_0$ steps at least $\lfloor (k - K)/2 \rfloor - 1$ charged members, $K := \lceil 2\beta^\dagger_\rho/w \rceil$ bounding the blocks across which the maximum advances by at least $w$. For $k \le k^\ast := K + \lceil 4V_-/c_0 \rceil$ -- fixed, independent of $\sigma$ -- the entrance event sits inside a chi-square tail at rate $V_- - \delta/2$ over the fixed horizon $(k^\ast{+}1)T_0$, exactly as in Proposition~\ref{prop:arrwindow}(ii); for $k > k^\ast$, the charged count grows linearly in $k$ and the same Chernoff bound decays geometrically, the linear growth beating the fixed-length entropy term for small $\sigma$. Summing the two regimes gives the per-excursion estimate; the union bound then yields $\mathbb{P}(T_{\times} \le N_-) \le N_- \cdot C e^{-(V_- - 3\delta/4)/\sigma^2} \le C e^{-\delta/(4\sigma^2)} \to 0$. Finally $\bar T_{\times} \ge N_- \,\mathbb{P}(T_{\times} > N_-)$, giving the mean-time lower bound.
+\end{proof}
+
+\begin{theorem}[The first-crossing rate is the crossing quasipotential]\label{thm:rate}
+Under the hypotheses of Proposition~\ref{prop:qpbounds}, let
+\begin{equation}\label{eq:qpx}
+V^{\times}(\rho) \;:=\; \inf\Bigl\{\tfrac12\textstyle\sum_t u_t^2 \;:\; \text{the path from $p_1$ has running policy maximum reaching $\beta^\dagger_\rho$}\Bigr\},
+\end{equation}
+the crossing quasipotential, over the controlled paths of \eqref{eq:qp}. Then
+\[
+V_-(\rho) \;\le\; V^{\times}(\rho) \;\le\; V(\rho) \;\le\; V_+(\rho),
+\]
+the probability clauses of Theorem~\ref{thm:arr} hold with both printed constants replaced by $V^{\times}(\rho)$, and the first-crossing rate exists:
+\[
+\lim_{\sigma\to0^+}\, \sigma^2 \log \bar T_{\times} \;=\; V^{\times}(\rho),
+\]
+with $\alpha\,V^{\times}(\rho) \to 2\int_0^{\beta^\dagger_\rho}(-G_\rho)$ as $\alpha \to 0^+$, every other primitive fixed.
+\end{theorem}
+\begin{proof}
+\emph{The chain.} The pathwise ledger in the proof of Proposition~\ref{prop:qpbounds} prices the running maximum's advance to $\beta^\dagger_\rho$ -- not the exit -- so it charges every crossing path the corrected integral: $V_- \le V^{\times}$. Exit from the calibrated basin forces the running maximum to $\beta^\dagger_\rho$ (the same proposition's domination argument), so every exiting path is a crossing path and $V^{\times} \le V$; the two-phase strategy exits, so $V \le V_+$. The small-rate limit follows from the chain and Corollary~\ref{cor:qplimit}, whose pinch closes the bracket around everything between.
+
+\emph{Upper half at $V^{\times}$.} Fix $\delta > 0$. The infimum \eqref{eq:qpx} is over a nonempty set of nonnegative actions, so some finite controlled path from the calibrated state reaches running maximum $\beta^\dagger_\rho$ at action below $V^{\times} + \delta/4$. Make the crossing robust by boosting, not appending: raise the control of the step at which the maximum is attained by $m/\alpha$; the boosted step carries the policy $m$ past the saddle, cooperativity keeps the boosted path above the original thereafter, and the action increases by at most $\sqrt{2(V^{\times}+1)}\,m/\alpha + m^2/2\alpha^2$ -- a fresh step is never added, so no cancellation quantum is paid -- giving a path crossing with margin $m$ at action below $V^{\times} + \delta/3$ for $m$ small. In the uniform block of Theorem~\ref{thm:arr}'s proof, replace the two-phase tube of case (B) by the Gaussian tube around this fixed finite path: the margin absorbs the tube's perturbation, its length is a constant of $\delta$, the finitely many steps are jointly continuous in start and noise, and the starts range over the compact home ball, chosen small after the path's length, so the tube radius is uniform and the per-block crossing probability is at least $\tfrac12 e^{-(V^{\times}+\delta/2)/\sigma^2}$. Case (A) and the geometric-trials assembly are unchanged, giving $\mathbb{P}\bigl(T_{\times} \le e^{(V^{\times}+\delta)/\sigma^2}\bigr) \to 1$ and, through $\bar T_{\times} \le W/p_\sigma$, the mean-time bound $\limsup \sigma^2\log \bar T_{\times} \le V^{\times}$.
+
+\emph{Lower half at $V^{\times}$: the crossing quasipotential is Lipschitz at the calibrated state.} Given a crossing control $u$ from a state $z$ with $\|z - p_1\|_\infty \le \varepsilon$, match the policy path from $p_1$: one correction of size at most $\varepsilon/\alpha + O(\varepsilon)$ at the first step equalizes the pre-projection policy inputs, so both paths carry the same policy from the first step on, however they clip; thereafter the stock deficit obeys the exact linear recursion $d_{t+1} = s(\beta_t)\,d_t \le (1-\lambda_0)\,d_t$ -- the stock update is linear in the stock at a fixed policy, with the same multiplier for both paths -- and the correction that maintains the match at step $t$ is exactly $(2c(1-c\beta_t)-\rho)\,d_t$, the gradient being linear in the stock. The corrections are geometrically summable, uniformly in the path's length and route, so by Cauchy--Schwarz the matched control crosses from $p_1$, at the same step, at action at most the original plus $C\varepsilon(1 + \sqrt{2(V_+ + 1)})$, $C$ elementary in $c$, $\lambda_0$, $\eta$, $\alpha$. Hence $V^{\times}$ evaluated from any state of the home ball of radius $\varepsilon_0$ exceeds $V^{\times}(\rho) - C'\varepsilon_0$; and the same matching transfers the rate to the entrance event of Theorem~\ref{thm:arr}'s persistence paragraph: a noise window that drives the running maximum to $\beta^\dagger_\rho - w$ from a home-ball state contains a level-$(\beta^\dagger_\rho - w)$ crossing control, and matching it to the calibrated start, then boosting its last advancing control by $w/\alpha$, completes a full crossing from $p_1$ at $O(\varepsilon_0) + O(w)$ additional action -- so every entering window has action at least $V^{\times} - \delta/4$ once $\varepsilon_0$ and $w$ are small, choices depending only on $\delta$ and the fixed primitives. The persistence machinery then runs verbatim at this rate, over fixed horizons throughout, the accounting never referencing the rate and nothing after the entrance mattering. The union bound over last-exit times gives $\mathbb{P}\bigl(T_{\times} \le e^{(V^{\times}-\delta)/\sigma^2}\bigr) \to 0$, and $\bar T_{\times} \ge N_-\,\mathbb{P}(T_{\times} > N_-)$ the matching mean-time bound. Two-sided at every $\delta$, the limit exists and equals $V^{\times}(\rho)$.
+\end{proof}
+
+\begin{proposition}[Genuine basin exit: finite-horizon barrier and sharp weighted-regime rate]\label{prop:basinexitprocess}
+Let $B_\rho$ be the calibrated basin of the $\rho$-weighted deterministic map, relative to its invariant box, and define the genuine first-exit time
+\[
+\tau_B^\sigma := \inf\{t\ge 0:X_t^\sigma\notin B_\rho\},
+\qquad \inf\varnothing:=\infty.
+\]
+Under the hypotheses of Proposition~\ref{prop:qpbounds}, $B_\rho$ is relatively open, $\tau_B^\sigma$ is a stopping time, and pathwise
+\[
+T_\times\le \tau_B^\sigma,
+\qquad
+\mathbb E T_\times\le \mathbb E\tau_B^\sigma.
+\]
+Every finite control history which exits by time $T$ has action at least $V(\rho)$. Consequently, for $\sigma>0$, fixed $T$, and $0\le q<1$,
+\[
+\mathbb P(\tau_B^\sigma\le T)
+\;\le\;
+\exp\!\left(-\frac{qV(\rho)}{\sigma^2}\right)M(q)^T,
+\qquad
+M(q):=\mathbb E\exp(q\xi_0^2/2),
+\]
+and hence
+\[
+\limsup_{\sigma\to0^+}\sigma^2
+  \log\mathbb P(\tau_B^\sigma\le T)\le -V(\rho),
+\qquad
+V^\times(\rho)\le\liminf_{\sigma\to0^+}\sigma^2\log\mathbb E\tau_B^\sigma
+\le\limsup_{\sigma\to0^+}\sigma^2\log\mathbb E\tau_B^\sigma\le V(\rho),
+\]
+while for every $\delta>0$ some finite horizon $T_\delta$, independent of $\sigma$, realizes the matching lower rate:
+\[
+\liminf_{\sigma\to0^+}\sigma^2\log\mathbb P(\tau_B^\sigma\le T_\delta)\;\ge\;-V(\rho)-\delta .
+\]
+If, in addition, the weighted form of (SS$^+$) used in Theorem~\ref{thm:hyst}(iii) holds, then for every $\delta>0$,
+\[
+\mathbb P\!\left(
+  \tau_B^\sigma\le
+  \left\lfloor
+    \exp\!\left(\frac{V(\rho)-\delta}{\sigma^2}\right)
+  \right\rfloor
+\right)\longrightarrow 0,
+\qquad
+\lim_{\sigma\to0^+}\sigma^2\log\mathbb E\tau_B^\sigma=V(\rho).
+\]
+Across finite horizons the optimal genuine-exit probability rate is the basin quasipotential: every fixed horizon obeys the $V(\rho)$ upper barrier, and horizons selected by the tolerance attain it. Under the base (SS) assumptions the mean-exit rate is pinned between the two quasipotentials. Weighted (SS$^+$) gives the displayed sharp rate directly, without requiring $V^\times(\rho)=V(\rho)$. Under base (SS), that equality would also close the bracket; both implications are machine-checked.
+\end{proposition}
+\begin{proof}
+The policy-uniform prevention neighborhood is an attracting neighborhood of the calibrated point. If an orbit converges there, some finite iterate enters that neighborhood; continuity of the iterate gives an open neighborhood of the starting state whose orbits enter it as well. Deleting the common finite prefix then proves that $B_\rho$ is relatively open. Its complement is therefore Borel, and the first hitting time of that complement by the adapted noisy chain is a stopping time.
+
+The domination argument of Proposition~\ref{prop:qpbounds} places every state reached before the running maximum attains $\beta^\dagger_\rho$ inside $B_\rho$. Thus genuine exit cannot precede $T_\times$, and monotonicity of the extended integral gives the expectation comparison. If a finite control exits at time $k\le T$, its length-$k$ prefix is an admissible member of the defining set in \eqref{eq:qp}; its prefix action is at least $V(\rho)$ and the remaining squares are nonnegative. On the Gaussian event this says $\sigma^2\sum_{j<T}\xi_j^2/2\ge V(\rho)$. The displayed probability bound is the exponential Markov inequality with the product moment $M(q)^T$. First let $\sigma\to0$ at fixed $q<1$, then let $q\uparrow1$ for the fixed-horizon logarithmic bound. The mean lower bound follows from $\mathbb E T_\times\le\mathbb E\tau_B^\sigma$ and Theorem~\ref{thm:rate}.
+
+For the matching lower rate, take a control of \eqref{eq:qp} with action below $V(\rho)+\delta$ and call its horizon $T_\delta$. Exit survives upward comparison: every state reached from the calibrated start dominates the calibrated point, and among such states the complement of $B_\rho$ is an up-set -- were the larger state's unforced orbit to converge home, the smaller state's would be squeezed between the calibrated fixed point and it, converging home as well. Any noise realization dominating the control coordinatewise therefore exits too, even when the control's endpoint merely touches the basin boundary, with no overshoot margin; and the one-sided Gaussian orthant around the control carries $\sigma^2$-log probability tending to the negative of its action.
+
+For the mean's upper bracket, restart the same comparison: every state the chain occupies dominates the calibrated point, so a block of $T_\delta$ fresh noises dominating the near-minimal control exits from any such state, and survival decays geometrically in blocks of that length. Summing the survival tail bounds $\mathbb E\tau_B^\sigma$ by $T_\delta$ times the reciprocal orthant probability, whose $\sigma^2$-log tends to the control's action, below $V(\rho)+\delta$.
+
+For the exact rate under weighted (SS$^+$), fix a positive loss. Boundary accessibility supplies a closed inner target
+\[
+C_\eta:=\{x:\operatorname{dist}(x,B_\rho^c)\le\eta\}
+\]
+whose approach from $p_1$ costs within that loss of $V(\rho)$. Policy matching transports this charge to every start in a sufficiently small closed home ball: after the first step the matched path has exactly the same policy, its stock discrepancy contracts by a factor at most $1-\lambda_0$, and the squared-control error is geometrically summable. Both the terminal displacement and the action error are therefore uniform in the original path's horizon. Shrinking the target and home radii gives a common bound $V(\rho)-\varepsilon$ for every target-reaching path from the home ball.
+
+Compact recurrence supplies a horizon $N$ and charge $c>0$ for every length-$N$ segment that starts in the positive-clearance core and avoids the smaller home ball. Choose $K$ with $Kc\ge V(\rho)-\varepsilon$ and set $H=(K+1)(N+1)$. Consider the first entrance into $C_\eta$ during a completed excursion from the home ball. If it occurs by $H$, the transported target bound charges the corresponding prefix. If it occurs later, the first $H$ controls contain $K$ disjoint core blocks and their recurrence charges the same amount. Thus every completed excursion, irrespective of its duration, lies in a \emph{single $H$-dimensional} Gaussian action tail at level $(V(\rho)-\varepsilon)/\sigma^2$.
+
+Before any exit there is a first target entrance. Its last preceding visit to the home ball starts one of at most $T+1$ such excursion events by horizon $T$. A union bound and the fixed-dimensional Gaussian Chernoff estimate therefore give, for $0<q<1$,
+\[
+\mathbb P(\tau_B^\sigma\le T)
+\le (T+1)\exp\!\left(-\frac{q(V(\rho)-\varepsilon)}{\sigma^2}\right)M_H(q),
+\]
+where $M_H(q)<\infty$ is independent of $T$ and $\sigma$. Taking $T=\lfloor\exp((V(\rho)-\delta)/\sigma^2)\rfloor$ and choosing $\varepsilon$ and $q$ inside the gap proves the displayed persistence limit. Finally,
+\[
+T\,\mathbb P(\tau_B^\sigma>T)\le \mathbb E\tau_B^\sigma
+\]
+gives the lower mean-rate bound after $\delta\downarrow0$, while the restart estimate already proved gives the upper bound at $V(\rho)$.
+\end{proof}
+
+\paragraph{Why weighted convergence closes the exit rate.}
+The geometric boundary step in a direct lower proof at $V$ can be closed under the weighted form of (SS$^+$) used in Theorem~\ref{thm:hyst}(iii). For every $\varepsilon>0$ there are $\eta>0$ and $T<\infty$ such that every $x\in B_\rho$ with $\operatorname{dist}(x,B_\rho^c)<\eta$ admits a control of some length $n\le T$, action below $\varepsilon$, and terminal state outside $B_\rho$. Consequently, every controlled prefix from $p_1$ that ends in this inner layer with action $A$ satisfies $V(\rho)\le A+\varepsilon$.
+
+The proof is finite and constructive. Weighted (SS$^+$) makes every boundary orbit converge to a weighted fixed point; openness and disjointness of the two corner basins exclude both corners, leaving the weighted saddle. From the saddle, raise policy by $\delta$ in one step and cancel the gradient in the next so the raised policy is held: the second stock update is then strictly super-saddle, while both controls and their quadratic action tend to zero with $\delta$. The strict endpoint persists on an open saddle neighborhood. Compactness of the relative boundary gives a common entrance horizon and an open boundary neighborhood; compactness once more places a positive inner metric layer inside it. Concatenating the vanishing-action continuation to any prefix in that layer gives the displayed variational inequality. Horizon-independent policy matching and compact-core recurrence then turn the first layer entrance of every excursion into the fixed-dimensional action tail used above; there is no infinite length-class sum. This strengthening does not change the base assumptions of the bracket: under (SS) alone global convergence of boundary orbits is unavailable. It shows instead that, under weighted (SS$^+$), the actual basin-exit law is independent of the unresolved identity $V^\times=V$.
+
+The closed-form brackets and the variational rate divide the labor: $V_-$ and $V_+$ are the auditable bounds an assessor recomputes from the printed primitives, and $V^{\times}$ is the value the noise realizes between them.
+
+The two stopping times are two clocks. Pathwise $T_\times \le \tau_B^\sigma$; the mean crossing time obeys $\sigma^2\log\mathbb E T_\times \to V^{\times}(\rho)$ under the base assumptions (Theorem~\ref{thm:rate}), and the mean exit time obeys $\sigma^2\log\mathbb E\tau_B^\sigma \to V(\rho)$ under weighted (SS$^+$) (Proposition~\ref{prop:basinexitprocess}). Under weighted (SS$^+$), both expectations are finite and strictly positive for $\sigma>0$, so the two rate laws give
+\[
+\lim_{\sigma\to0^+}\sigma^2\log
+\frac{\mathbb E\tau_B^\sigma}{\mathbb E T_\times}
+= V(\rho)-V^{\times}(\rho).
+\]
+This equality identifies exponential separation; it asserts neither convergence of the unscaled ratio nor equality of the stopping times. Saddle crossing is the early-warning clock; the basin quasipotential sets the capture clock. The two share one exponential timescale exactly when $V^{\times}=V$, while in a strict-gap world crossings would run exponentially ahead of exits -- warnings that return home. Conjecture~\ref{conj:arr} is thus the question of whether the scalar warning crossing already attains the full two-dimensional exit cost.
+
+\begin{proposition}[Quantitative saddle passage]\label{prop:passage}
+Fix every primitive except the adaptation rate, assume (H) with the civic weight in the window of Proposition~\ref{prop:qpbounds}, and write $L^\ast := \max_{[0,1]} D^{\ast\prime}$, a rate-free constant. There exist $\alpha_0 \in (0,1]$ and $C < \infty$, depending only on the fixed primitives -- $\alpha_0$ small enough that (SS) holds with margin two ($4\alpha_0 c^2 I \le \lambda_0$) and $2c\,\alpha_0\,L^\ast < 1 - s(\beta^\dagger_\rho)$ -- such that for every adaptation rate $0 < \alpha \le \alpha_0$,
+\[
+V^{\times}(\rho) \;\le\; V(\rho) \;\le\; V^{\times}(\rho) \;+\; C\,\alpha^2\,\bigl(V^{\times}(\rho) - V_-(\rho)\bigr)\,\bigl(1 + \log(1/\alpha)\bigr).
+\]
+\end{proposition}
+\begin{proof}
+The left inequality is Theorem~\ref{thm:rate}'s chain, at every rate in the family. For the right, fix $\alpha \le \alpha_0$, $\nu \in (0,1]$, and a crossing control of action $A \le V^{\times} + \nu$; it is converted into a basin exit of action $A + O(w^2)$ for the window width $w := W\alpha\,(A - V_-)$, in five steps, every constant of which -- the rate-free window multiplier $W$ included -- is built from the fixed primitives alone. The ceiling $\alpha_0$ collects margin two and the slope bound of the statement with four room conditions: quarter mesh ($\alpha L_\rho \le 1/4$), residual absorption, the Selection window fitting under the saddle, and climbing room above it. The local price is quadratic outright; $\alpha_0 \le 1$ keeps the displayed logarithmic factor at least one, which is the only use the proof makes of it.
+
+\emph{Transport.} The deficit $\theta_t := D^\ast(\beta_t) - D_t$ obeys the exact law $\theta_{t+1} = s(\beta_t)\theta_t + \bigl(D^\ast(\beta_{t+1}) - D^\ast(\beta_t)\bigr)$ -- subtract the stock update from the fixed-point identity $D^\ast = s D^\ast + I$ -- so the deficit is a geometrically discounted sum of recent characteristic increments, and holding the policy contracts it at exactly $s(b)$ per step. The hold is sign-free: a climb that overshoots a prescribed level leaves the stock in surplus against it, so the lag at a hold may sit on either side of the characteristic; the pinning control is an unrestricted signed cancellation in either case, and the transient cost is horizon-independent with quadratic part $(2c(1-cb)-\rho)^2\theta^2/(2(1-s(b)^2))$ for lag of either sign. Against a fixed reference level $b$ the same subtraction gives the exact three-term form $D^\ast(\beta_{t+1}) - D_{t+1} = s(b)\bigl(D^\ast(b) - D_t\bigr) + \bigl(s(b) - s(\beta_t)\bigr)D_t + \bigl(D^\ast(\beta_{t+1}) - D^\ast(b)\bigr)$: a step taken from a policy retreated below $b$ carries the nonnegative burden $(s(b)-s(\beta_t))D_t$ in addition to the contracted deficit and the characteristic increment, and the accounting below carries it explicitly.
+
+\emph{Ledger.} The capped ledger in the proof of Theorem~\ref{thm:arr} prices the top window: any crossing control of action $\le V^{\times} + \nu$ has $\int_{\beta^\dagger_\rho - w}^{\beta^\dagger_\rho} \theta(m)\,dm \le \alpha''\,(V^{\times} - V_- + \nu)/(2\kappa_{\min})$, $\theta(m)$ the deficit against $D^\ast(m)$ at the step advancing the running maximum past $m$, $\alpha'' := \alpha(1+2\alpha L_\rho)$, $\kappa_{\min} := 2c(1-c\beta^\dagger_\rho)-\rho$ the stock coefficient at its saddle minimum. The same steps price retreats: writing $r(m)$ for the retreat span $(M_t - \beta_t)^+$ at that step, the control that re-advances across the span pays at least $r/(2\alpha)$ within the same step -- margin-two (SS) makes $1/\alpha - 2c^2 D \ge 1/(2\alpha)$ on the box -- and charging this against the fresh advance jointly with the full deficit ledger gives $\int_{\beta^\dagger_\rho - w}^{\beta^\dagger_\rho} r(m)\,dm \le 2\alpha^2\,(V^{\times} - V_- + \nu)$: the retreat integral is one order smaller in the rate than the deficit integral. The two prices assemble per cell. With $b$ the running maximum's level at the step passing $m$, $\beta_t \le b$ the sitting policy, and $D_t$ the stock, the cell's \emph{burden} is $\Theta(m) := (2c(1-cb)-\rho)\bigl(D^\ast(b) - D_t\bigr) + (1/\alpha - 2c^2D_t)(b - \beta_t)$ -- the deficit priced at the stock coefficient plus the retreat span priced at the small-step coefficient, exactly the two paid components of the Transport identity -- and under quarter mesh each advancing cell's action is at least $(2/\alpha - L_\rho)\int_{\mathrm{cell}}\bigl((-G_\rho(m)) + \Theta(m)\bigr)\,dm$ plus half an exact residual square. Summing, $(2/\alpha - L_\rho)\int_0^{\beta^\dagger_\rho}\Theta(m)\,dm \le A - V_-$: the burden column is financed entirely by the control's excess over the corrected barrier. That excess is itself bracketed rate-free: $G_{\mathrm{lo}} := L_\rho\int_0^{\beta^\dagger_\rho}(-G_\rho) \le A - V_-$, because the coupled floor $(2/\alpha - L_\rho)\int(-G_\rho)$ exceeds $V_-$ by more than $G_{\mathrm{lo}}$ under quarter mesh; and $A - V_- \le G_{\mathrm{hi}} := 4L_\rho\int_0^{\beta^\dagger_\rho}(-G_\rho) + R + 1$, with $R$ the rate-free constant in the strategy remainder $S^{\uparrow} \le (2/\alpha)\int(-G_\rho) + R$ on the ceiling interval, because $A \le V^{\times} + \nu \le S^{\uparrow} + 1$ and $(2/\alpha)\int(-G_\rho) \le V_- + 4L_\rho\int(-G_\rho)$.
+
+\emph{Selection.} Let $C_{\mathrm{loc}}$ be the Exit step's local quadratic constant, and set $a := (2/\alpha - L_\rho)/(196\,C_{\mathrm{loc}})$ and $W := 1 + (784\,C_{\mathrm{loc}} + 1)/G_{\mathrm{lo}}$, so that $49\,C_{\mathrm{loc}}\,a = (2/\alpha - L_\rho)/4$ by construction and, on the ceiling interval, $\alpha \le w \le \beta^\dagger_\rho$. Write $T(m) := \int_m^{\beta^\dagger_\rho}\Theta$ and restrict attention to the terminal window $[\beta^\dagger_\rho - w,\ \beta^\dagger_\rho]$. If every advancing cell meeting the window had $\Theta^2 > a\,T$ at its own level, $\sqrt{T}$ would fall by more than $\sqrt{a}/2$ per unit of in-window advance, forcing the window's burden mass past $a\,w^2/4$; the Ledger caps that mass at $(A - V_-)/(2/\alpha - L_\rho)$, and the choice of $W$ places the cap strictly below $a\,w^2/4$ -- this is where the lower gap $G_{\mathrm{lo}} \le A - V_-$ enters. Some advancing cell in the window therefore satisfies $\Theta^2 \le a\,T$ at its own level: its squared burden is dominated by its own suffix mass. At that cell, margin two prices the entering state itself: the signed lag at the cell's own policy obeys $|D^\ast(\beta_t) - D_t| \le (1/\kappa_{\min} + 2\alpha L^\ast)\,\Theta$ -- the stock coefficient is smallest at the saddle, $D^\ast$ is $L^\ast$-Lipschitz across the retreat span, and the burden already prices that span at $1/(2\alpha)$.
+
+\emph{Truncation.} Truncate immediately \emph{before} the selected cell, discarding its step and the whole suffix after it. The Ledger prices the discarded suffix from below by $(2/\alpha - L_\rho)\bigl[\int_b^{\beta^\dagger_\rho}(-G_\rho) + T\bigr] + \mathrm{res}^2/2$ -- $b$ the selected cell's level, $T$ the very suffix mass that dominates $\Theta^2$, $\mathrm{res}$ the cell's exact ledger residual -- and truncation refunds all three. Each piece has one job. The ideal tail finances the Exit step's re-climb integral; the suffix mass finances its quadratic overhead, through the Selection quotient and $49\,C_{\mathrm{loc}}\,a = (2/\alpha - L_\rho)/4$; and the residual square finances the overleap branch -- a selected cell whose single step crossed the window from below leaves a re-climb longer than $w$, but exactly then its residual is large, and residual absorption ($192\,C_{\mathrm{loc}}\,\alpha^2 \le 1$ on the ceiling interval) converts the one into the other.
+
+\emph{Exit.} From the truncation state one natural-pace margin climb re-crosses the saddle. Its action is the ideal integral it traverses plus a local quadratic overhead with constant $C_{\mathrm{loc}}$: the whole lag history telescopes against the policy displacement -- $\lambda_0\sum_t|\theta_t| \le |\theta_0| + L^\ast\cdot(\text{displacement})$, so the mesh, a fixed multiple of $\alpha$ at natural pace, factors out of the lag work before it enters the action -- and the starting lag is the burden Selection just bridged. In the normal branch the selected level lies inside the window and the climb spans at most $w$; in the overleap branch the refunded residual square pays for the longer span. At the crossed state the sign-free cancelling hold of the Transport step sheds the terminal lag at its horizon-independent quadratic price, and the held state's unforced orbit is captured exactly as in the exit phase of Proposition~\ref{prop:qpbounds}: the concatenation leaves the calibrated basin. Collecting: the exit action is at most $A + 13\,C_{\mathrm{loc}}\,w^2$; with $w = W\alpha(A - V_-)$ and $A - V_- \le \min\{V^{\times} - V_- + \nu,\ G_{\mathrm{hi}}\}$ this gives $V \le V^{\times} + \nu + C\,\alpha^2\,(V^{\times} - V_- + \nu)$ for $C := 13\,C_{\mathrm{loc}}\,W^2 G_{\mathrm{hi}}$; the logarithmic factor enters through $1 \le 1 + \log(1/\alpha)$, and $\nu \to 0$ completes the proof.
+\end{proof}
+
+\begin{lemma}[Exact saddle-deficit hold price]\label{lem:saddlehold}
+Set $b:=\beta^\dagger_\rho$, $s_\dagger:=s(b)$, and
+$a_\dagger:=2c(1-cb)-\rho$. From the state
+$(b,D^\ast(b)-\theta)$ with $\theta\ge0$, let the cancelling control pin the
+policy at $b$ for $N$ steps while the stock evolves freely. Its action is
+exactly
+\[
+S_N(\theta)
+=
+\frac{a_\dagger^2\theta^2}{2(1-s_\dagger^2)}
+\bigl(1-s_\dagger^{2N}\bigr),
+\qquad
+S_N(\theta)\longrightarrow
+\frac{a_\dagger^2\theta^2}{2(1-s_\dagger^2)}.
+\]
+Thus the hold component has the displayed sharp quadratic coefficient, with
+the explicit tail
+\[
+\frac{a_\dagger^2\theta^2s_\dagger^{2N}}{2(1-s_\dagger^2)}.
+\]
+\end{lemma}
+\begin{proof}
+At the saddle the stationary weighted gradient is zero. The stock deficit
+after $n$ held steps is exactly $s_\dagger^n\theta$, so the cancelling control
+is $a_\dagger s_\dagger^n\theta$. Summing its half-squared action for
+$0\le n<N$ gives the finite geometric series displayed above; since
+$0\le s_\dagger<1$, its tail tends to zero.
+\end{proof}
+
+\begin{lemma}[Reverse-passage spectrum]\label{lem:reversepassage}
+Write $b=\beta^\dagger_\rho$, $D_\dagger=D^\ast(b)$,
+$s_\dagger=s(b)$, $s'_\dagger=s'(b)$, and
+$a_\dagger=2c(1-cb)-\rho$. Under the zero-margin uphill feedback
+$u=-2g_\rho$, the unclipped policy step is
+$\beta'=\beta-\alpha g_\rho(\beta,D)$ while the stock step remains forward.
+The discriminant of this reverse-passage map at the saddle is exactly
+\begin{equation}\label{eq:reversepassage-disc}
+\Delta_R(\alpha)
+=\bigl(1+2\alpha c^2D_\dagger-s_\dagger\bigr)^2
+ -4\alpha a_\dagger s'_\dagger D_\dagger .
+\end{equation}
+It is a quadratic polynomial in $\alpha$. Its nonnegative and negative signs
+are respectively the real-mode and complex-mode regimes of this local
+linearization.
+\end{lemma}
+\begin{proof}
+Differentiating the two coordinates gives
+\[
+J_R=
+\begin{pmatrix}
+1+2\alpha c^2D_\dagger&-\alpha a_\dagger\\
+s'_\dagger D_\dagger&s_\dagger
+\end{pmatrix}.
+\]
+Expanding $(\operatorname{tr}J_R)^2-4\det J_R$ gives
+\eqref{eq:reversepassage-disc}; expanding its square makes the dependence on
+$\alpha$ explicitly quadratic.
+\end{proof}
+
+\begin{conjecture}[Saddle passage: the sharp constant]\label{conj:arr}
+The first-crossing rate exists and is variational (Theorem~\ref{thm:rate}); what remains is equality of its quasipotential with the exit quasipotential:
+\[
+V^{\times}(\rho) \;=\; V(\rho)
+\]
+-- crossing the saddle policy and leaving the calibrated basin have equal infimal cost, the Freidlin--Wentzell picture of escape through the saddle \citep{freidlin2012random}. A sufficient exact formulation of the missing variational step is
+\[
+\tag{VC}\label{eq:passage-vc}
+\begin{gathered}
+\forall\varepsilon>0\ \exists N,u,b,D:\quad
+x_N^u=(b,D),\quad b\in(\beta^\dagger_\rho,1],\quad
+D\in[I,I/\lambda_0],\\
+\mathcal A_N(u)<V^\times(\rho)+\varepsilon,\qquad
+Q(b,D):=\frac{2c^2}{\lambda_0}
+  \left|D^\ast(b)-D\right|^2<\varepsilon .
+\end{gathered}
+\]
+The sign-free finite continuation proved above turns such a prefix into an actual basin exit of action at most $\mathcal A_N(u)+Q(b,D)$. Applying (VC) at $\varepsilon/2$ therefore gives $V\le V^\times+\varepsilon$ for every $\varepsilon>0$, hence $V\le V^\times$; the reverse inequality $V^\times\le V$ is already proved because every exit crosses first. This implication is machine-checked as \texttt{saddlePassageConjecture\_of\_vanishingContinuation}; no theorem asserts (VC) itself. Through the mean-exit bracket of Proposition~\ref{prop:basinexitprocess}, (VC) also closes the genuine basin-exit Arrhenius law under the base assumptions -- under weighted (SS$^+$) that law is proved outright -- and both implications are machine-checked. The gap between the two infima is thus localized to joint near-minimality and vanishing stock lag at a strict crossing endpoint, rather than to the finite hold calculation. Lemma~\ref{lem:saddlehold} identifies that hold component exactly: from deficit $\theta$, its finite-$N$ price is the sharp quadratic coefficient times $1-s(\beta^\dagger_\rho)^{2N}$, with a named geometric tail. What remains for the conjectured identity is proving (VC), equivalently supplying the needed variational selection/continuity argument as the residual deficit and boost vanish. Proposition~\ref{prop:passage} caps the full gap at $C\alpha^2(V^{\times} - V_-)(1+\log(1/\alpha))$ uniformly over small adaptation rates -- the surgery behind it is instrumented at the printed rate in Numerical Result~\ref{nr:arr} -- and the chain of Theorem~\ref{thm:rate} caps it at the printed bracket width in any case. The local sign change in Lemma~\ref{lem:reversepassage} does not settle (VC): it classifies one zero-margin feedback linearization, not the minimizing controlled paths. Numerically optimized boundary paths remain indistinguishable in cost from optimized crossings on both sides of that sign change (Numerical Result~\ref{nr:arr}). The common value is bracketed in closed form by Proposition~\ref{prop:qpbounds}, computable to arbitrary precision at fixed rate, and the identity holds to leading order in the small-rate limit, where both quasipotentials pinch onto the closed form of Corollary~\ref{cor:qplimit}.
 \end{conjecture}
 
 \begin{numresult}\label{nr:arr}
-At a bistable configuration near the corner fold ($I = 0.040$, $\rho_{\mathrm{cure}} = 0.13$), the censoring-adjusted mean escape time obeys the Arrhenius law with fit $R^2 = 0.987$ across roughly three decades of escape times, and the escape hazard at fixed $\sigma$ is strictly decreasing in $\rho$, suppressed by a factor $7.2$ already at $\rho = 0.04 \ll \rho_{\mathrm{cure}}$ (Figure~\ref{fig:arr}). Modest standing civic weights therefore buy exponential protection against drift, at a small fraction of the cure price.
+At a bistable configuration near the corner fold ($I = 0.040$, $\rho_{\mathrm{cure}} = 0.13$), the censoring-adjusted mean first-crossing time obeys the Arrhenius law with fit $R^2 = 0.998$ across more than two decades of crossing times, and the crossing hazard at fixed noise ($\sigma = 0.15$) is strictly decreasing in $\rho$, suppressed by a factor $16.9$ already at $\rho = 0.04 \ll \rho_{\mathrm{cure}}$ (Figure~\ref{fig:arr}). The measurements agree with Proposition~\ref{prop:qpbounds}: the fitted Arrhenius slope $0.150$ at $\rho = 0$ is within $1\%$ of the midpoint of the bracket $[0.144,\ 0.153]$, the brackets at $\rho = 0, 0.02, 0.04$ separate -- so the barrier's strict increase across this grid is a theorem, not an extrapolation -- and the measured hazard suppression matches the predicted barrier increment $\Delta V/\sigma^2$ within $6\%$. The strategy cost pinches onto the closed-form limit of Corollary~\ref{cor:qplimit} as the rate falls -- ratios $1.040$, $1.019$, $1.009$ at $\alpha = 0.1, 0.05, 0.025$ -- and every simulated crossing's action ledger over its max-advance steps meets the corrected lower bound, at minimum $1.47$ against $0.144$ at $\sigma = 0.2$. The renewal structure behind Theorem~\ref{thm:arr} is measured directly: crossing times are exponentially distributed ($F(\bar T) = 0.72$ and $F(2.3\,\bar T) = 0.89$ against the memoryless $0.63$ and $0.90$), the per-excursion crossing rate is itself Arrhenius with fitted slope $0.125$ against the bracket, excursion-length tails are exponential at every tested noise level, and no early-crossing mass appears at two percent of the fitted mean time. Behind Conjecture~\ref{conj:arr}, the stock deficit at first crossing, $1 - D/D^\ast(\beta^\dagger_\rho)$, is strictly positive on every one of $1004$ simulated crossings -- the pre-crossing domination of Theorem~\ref{thm:arr}'s rectangle, witnessed pathwise -- with median $0.164$, $0.152$, $0.145$ at $\sigma = 0.20, 0.18, 0.16$: crossings concentrate toward the saddle as the noise falls, the saddle-passage signature. The deterministic side matches: the two-phase witness crosses with deficit $0.000$, $0.000$, $0.002$ at $\rho = 0, 0.02, 0.04$ and its hold phase costs less than $10^{-4}$ of the total, so the printed $S^{\uparrow}$ bounds the crossing quasipotential $V^{\times}$ of Theorem~\ref{thm:rate} with no slack from the exit phase. The refund surgery behind Proposition~\ref{prop:passage} is instrumented directly on that witness: the selection level exists, the deficit-against-refund dominance ratio is $0.32$, and the completion delivers a crossing with terminal deficit $2\times10^{-6}$ at an overhead of $2.4\times10^{-3}$ -- a tenth of its quadratic budget.
+
+The fixed-rate probe gives no evidence for a node-only equality regime. At $\rho=0$, the reverse discriminant of Lemma~\ref{lem:reversepassage} changes sign at $\alpha_R=0.1730586$. A direct-control optimization, seeded in both directions between the running-maximum target and a stable-manifold boundary target, was run at $\alpha=0.10,0.17,0.173,0.18,0.20,0.25,0.30$. The first three rates have $\Delta_R>0$ and the last four $\Delta_R<0$, yet the largest optimized boundary-minus-crossing action difference is only $1.3\times10^{-7}$; immediately across the transition it is $2.4\times10^{-8}$ at $0.173$ and $6.1\times10^{-9}$ at $0.18$. These residuals shrink with the terminal deficit and horizon (at $\alpha=0.30$, from $3.2\times10^{-5}$ at horizon $350$ to $1.3\times10^{-7}$ at horizon $500$), which is the signature of finite-horizon truncation rather than strict separation. Thus neither ``equality only in the real-mode regime'' nor ``strict inequality begins at the complex-mode transition'' is supported. This is numerical evidence, not a proof of (VC). Modest standing civic weights therefore buy exponential protection against saddle crossing, at a small fraction of the restoration price.
 \end{numresult}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.82\linewidth]{fig_arrhenius.png}
-\caption{Left: Arrhenius scaling of the censoring-adjusted mean escape time from the calibrated basin under gradient measurement noise. Right: escape hazard at fixed $\sigma$ falls monotonically---and steeply---in the standing civic weight $\rho$, far below $\rho_{\mathrm{cure}}$.}
+\civicincludegraphics[width=0.82\linewidth]{Two panels: mean saddle-crossing time follows Arrhenius scaling as noise falls, and crossing hazard falls steeply as civic weight rho rises}{fig_arrhenius.pdf}
+\caption{Left: Arrhenius scaling of the censoring-adjusted mean time to first saddle-policy crossing under gradient measurement noise. Right: crossing hazard at fixed $\sigma$ falls monotonically -- and steeply -- in the standing civic weight $\rho$, far below $\rho_{\mathrm{cure}}$.}
 \label{fig:arr}
 \end{figure}
 
@@ -248,10 +654,18 @@ Replace the linear usefulness cost in \eqref{eq:U} with a quadratic one, $U = -\
 \]
 
 \begin{proposition}[Monotone family; transversal saddle-node]\label{prop:warning}
-$\varphi$ is pointwise strictly increasing in $I$. Consequently, when the map has two interior fixed points --- a stable calibrated equilibrium and a saddle --- together with the attracting captured corner, the interior pair collides and annihilates in a transversal saddle-node bifurcation as $I$ rises \citep{kuznetsov2004elements}, with eigenvalue $1$ at the fold and the saddle-node scaling $1 - \lambda \propto \sqrt{I_{\mathrm{fold}} - I}$ along the calibrated branch.
+$\varphi$ is pointwise strictly increasing in $I$. Consequently, when the map has two interior fixed points -- a stable calibrated equilibrium and a saddle -- together with the attracting captured corner, the interior pair collides and annihilates in a transversal saddle-node bifurcation as $I$ rises \citep{kuznetsov2004elements}, with eigenvalue $1$ at the fold and the saddle-node scaling $1 - \lambda \propto \sqrt{I_{\mathrm{fold}} - I}$ along the calibrated branch.
 \end{proposition}
 \begin{proof}
-$\varphi$ is increasing in $D^\ast$ and $D^\ast$ is linear in $I$, so the family $\varphi(\cdot; I) - \mathrm{id}$ is strictly increasing in $I$ pointwise; the annihilation of the two interior roots as $I$ rises is then a transversal saddle-node family, with eigenvalue $1$ and square-root scaling at the fold by the saddle-node normal form for maps.
+$\varphi$ is increasing in $D^\ast$ and $D^\ast$ is linear in $I$, so the family $\varphi(\cdot; I) - \mathrm{id}$ is strictly increasing in $I$ pointwise. Solving the fixed-point equation for the parameter: $\varphi(\beta; I) = \beta$ iff $2c\,D^\ast(\beta)(1-c\beta) = v\beta$ iff
+\[
+I \;=\; H(\beta) \;:=\; \frac{v\,\beta\,\bigl(1-s(\beta)\bigr)}{2c\,(1-c\beta)} ,
+\]
+so the interior equilibria at injection $I$ are exactly the solutions of $H(\beta) = I$. The numerator of $H'$ is strictly decreasing on $(0,1)$, so $H'$ changes sign exactly once, from positive to negative: $H$ rises to a unique fold $\beta_f$ and falls after it, with $I_{\mathrm{fold}} = H(\beta_f)$. Expanding about the critical point gives the exact factorization
+\[
+H(\beta_f) - H(\beta) \;=\; (\beta_f - \beta)^2\,K(\beta_f, \beta), \qquad K(\beta_f, \beta_f) = -\tfrac12 H''(\beta_f) > 0 ,
+\]
+so for $I < I_{\mathrm{fold}}$ near the fold there are exactly two interior roots at separation $\propto \sqrt{I_{\mathrm{fold}} - I}$, they merge at $\beta_f$ when $I = I_{\mathrm{fold}}$, and none survive above: a transversal saddle-node \citep{kuznetsov2004elements}. The multiplier of the stationary scalar map is $1$ exactly at the fold and below $1$ along the calibrated branch, where the root separation gives the stated scaling $1 - \lambda \propto \sqrt{I_{\mathrm{fold}} - I}$; the full two-dimensional Jacobian has slow eigenvalue $1$ at the fold likewise.
 \end{proof}
 
 \begin{numresult}\label{nr:warn}
@@ -262,7 +676,7 @@ Rising variance and autocorrelation of measured disagreement on the contested st
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\linewidth]{fig_warning.png}
+\civicincludegraphics[width=0.70\linewidth]{Variance and lag-one autocorrelation of disagreement both rise on stationary plateaus as the system approaches the capture fold}{fig_warning.pdf}
 \caption{Early-warning indicators on stationary plateaus approaching the capture fold: variance and lag-1 autocorrelation of the disagreement stock $D$ rise well before capture.}
 \label{fig:warn}
 \end{figure}
@@ -280,41 +694,45 @@ with stratification feedback $\zeta \in (0, \eta_H\kappa)$ and sign-aligned inje
 \begin{theorem}[Satisfaction--capacity decoupling]\label{thm:launder}
 In the model above:
 \begin{enumerate}
-\item[(i)] $\partial_\beta U_t = 2\pi_H(1-\kappa)(1-d_H)x_H^2 + 2\pi_L(1-\beta)x_L^2 \ge 0$ always, so $\beta_t$ is non-decreasing. The sign-alignment bound $|x_{L,t}| \ge |\iota_L|$ holds for every $t \ge 1$, the interior gradient is bounded below by $2\pi_L(1-\beta_t)\,\iota_L^2$, and $1-\beta_t$ contracts geometrically, at rate at least $1 - 2\alpha\pi_L\iota_L^2$; hence $\beta_t \to 1$, and the capture face is absorbing. In the unbounded idealization, attainment is in finite time.
+\item[(i)] $\partial_\beta U_t = 2\pi_H(1-\kappa)(1-d_H)x_H^2 + 2\pi_L(1-\beta)x_L^2 \ge 0$ always, so $\beta_t$ is non-decreasing. The sign-alignment bound $|x_{L,t}| \ge |\iota_L|$ holds for every $t \ge 1$, the interior gradient is bounded below by $2\pi_L(1-\beta_t)\,\iota_L^2$, and $1-\beta_t$ contracts geometrically, at rate at least $\max\{0,\,1 - 2\alpha\pi_L\iota_L^2\}$ (Lemma~\ref{lem:clip}(ii)) -- the truncation matters, since for $2\alpha\pi_L\iota_L^2 > 1$ the unclipped factor is negative while $1-\beta_{t+1} \ge 0$, and projection makes the step faster rather than impossible; hence $\beta_t \to 1$ for every $\alpha > 0$, with no step-size restriction, and the capture face is absorbing. In the unbounded idealization, attainment is in finite time.
 \item[(ii)] At capture, $w_L(1) = 0$ and the satisfaction weight $(1-d_L)^2$ on the low type vanishes \emph{identically}, so
 \[
 U_t \;\longrightarrow\; -\pi_H\,\kappa^2\Bigl(\frac{\iota_H}{\eta_H\kappa - \zeta}\Bigr)^{\!2},
 \]
 a finite limit that depends only on the honest $H$-channel contraction, while $x_{H,t} \to \iota_H/(\eta_H\kappa - \zeta)$ converges. Meanwhile $x_{L,t}$ grows geometrically at rate $1+\zeta$ (in the idealization), so any capacity functional dominated by the unweighted population error is unbounded below along the path. Measured satisfaction is not an imperfect proxy for the harm at capture; it is structurally blind to it.
-\item[(iii)] Along the interior ascent path, Proposition~\ref{prop:myopia} applies: each step is myopically rewarded and stationarily regretted.
+\item[(iii)] At every iterate and type for which $\zeta < w_\tau(\beta_t)$, $\iota_\tau \neq 0$, and $e_\tau < 1$, Proposition~\ref{prop:myopia} applies: the step is myopically rewarded and stationarily regretted. All three conditions are load-bearing. The low channel satisfies the latter two by the standing hypotheses ($e_L = 0$, $\iota_L \neq 0$), and the domain restriction is genuine for it: since $w_L(\beta) = \eta_L(1-\beta)$ and clause~(i) gives $\beta_t \to 1$, the low channel eventually leaves the contracting regime; past that point the instantaneous gradient remains non-negative but the deviation recursion is no longer contracting, no finite stationary comparison exists, and the low channel is described by the divergence of clause~(ii) rather than by stationary regret. The high channel qualifies away from two permitted endpoints: at $\kappa = 1$ the factor $1-\kappa$ annihilates its instantaneous gradient -- the first term of the display in (i) -- at every belief, and at $\iota_H = 0$ its stationary belief is zero and the gradient vanishes there, so in either case the ratchet toward capture is driven by the low channel alone. The myopia mechanism therefore accounts for the approach to capture; clause~(ii) accounts for the destination.
 \end{enumerate}
 \end{theorem}
 \begin{proof}
-(i) The gradient formula is the $\beta$-derivative of $U$ at fixed $x$; both terms are non-negative, so $\beta_t$ is non-decreasing with some limit $\beta_\infty \le 1$. Sign alignment gives $|x_{L,t}| \ge |\iota_L|$ for all $t \ge 1$: with $\iota_L < 0$ and $x_{L,t} \le 0$, $x_{L,t+1} = (1-w_L+\zeta)x_{L,t} + \iota_L \le \iota_L$, since the multiplier is positive ($\zeta < \eta_H\kappa \le 1$ and $w_L \le \eta_L \le 1$ give $1 - w_L + \zeta > 0$); the symmetric case is identical. The gradient floor $\partial_\beta U_t \ge 2\pi_L(1-\beta_t)\iota_L^2$ is then immediate, whence $1-\beta_{t+1} \le (1-\beta_t)\bigl(1 - 2\alpha\pi_L\iota_L^2\bigr)$: geometric contraction, and $\beta_t \to 1$. For finite-time attainment in the idealization: once $\beta_t > 1 - \zeta/\eta_L$, the $L$-multiplier exceeds $1$ and $x_{L,t}^2$ grows geometrically; if $\beta_t < 1$ for all $t$, then eventually $2\alpha\pi_L x_{L,t}^2 \ge 1$, whence $\alpha\,\partial_\beta U_t \ge (1-\beta_t)$ and the clipped update reaches $1$ exactly --- contradiction. Absorption at $\beta = 1$ follows from $\partial_\beta U \ge 0$ and the clip.
+(i) The gradient formula is the $\beta$-derivative of $U$ at fixed $x$; both terms are non-negative, so $\beta_t$ is non-decreasing with some limit $\beta_\infty \le 1$. Sign alignment gives $|x_{L,t}| \ge |\iota_L|$ for all $t \ge 1$: with $\iota_L < 0$ and $x_{L,t} \le 0$, $x_{L,t+1} = (1-w_L+\zeta)x_{L,t} + \iota_L \le \iota_L$, since the multiplier is positive ($\zeta < \eta_H\kappa \le 1$ and $w_L \le \eta_L \le 1$ give $1 - w_L + \zeta > 0$); the symmetric case is identical. The gradient floor $\partial_\beta U_t \ge 2\pi_L(1-\beta_t)\iota_L^2$ is then immediate, whence the pre-projection bound $(1-\beta_t)(1-2\alpha\pi_L\iota_L^2)$ becomes $1-\beta_{t+1} \le (1-\beta_t)\,\max\bigl\{0,\,1 - 2\alpha\pi_L\iota_L^2\bigr\}$ by Lemma~\ref{lem:clip}(ii): geometric contraction, and $\beta_t \to 1$. For finite-time attainment in the idealization: once $\beta_t > 1 - \zeta/\eta_L$, the $L$-multiplier exceeds $1$ and $x_{L,t}^2$ grows geometrically; if $\beta_t < 1$ for all $t$, then eventually $2\alpha\pi_L x_{L,t}^2 \ge 1$, whence $\alpha\,\partial_\beta U_t \ge (1-\beta_t)$ and the clipped update reaches $1$ exactly -- contradiction. Absorption at $\beta = 1$ follows from $\partial_\beta U \ge 0$ and the clip.
 (ii) At $\beta = 1$, $d_L = 1$ gives $w_L = 0$ and multiplier $1+\zeta > 1$, and $|x_L| \ge |\iota_L| > 0$ rules out the unstable fixed point; $d_H = 1-\kappa$ gives $w_H = \eta_H\kappa > \zeta$, an honest contraction to $\iota_H/(\eta_H\kappa - \zeta)$. The limit of $U_t$ is the $H$-term with $(1-d_H(1))^2 = \kappa^2$; the $L$-term is identically zero because its weight is. Any capacity functional with $C \le -\pi_L x_L^2$ is unbounded below along the idealized path.
-(iii) is Proposition~\ref{prop:myopia} applied typewise.
+(iii) is Proposition~\ref{prop:myopia} applied typewise on $\{\zeta < w_\tau(\beta_t)\}$; outside that set the proposition's hypothesis fails and only the sign of the instantaneous gradient survives, which is clause~(i).
 \end{proof}
 
 \begin{corollary}[Bounded beliefs; saturation]\label{cor:sat}
 Restore the substrate bound: deviations are confined to $[-\bar x, \bar x]$ with $\bar x \ge |\iota_L|$, and the update clips. Then:
 \begin{enumerate}
-\item[(i)] Every conclusion of Theorem~\ref{thm:launder}(i) short of finite time persists verbatim: monotonicity, sign alignment, the gradient floor, and geometric contraction of $1-\beta_t$. Once the low type saturates, $\alpha\,\partial_\beta U_t \ge 2\alpha\pi_L\bar x^2(1-\beta_t)$, so $1-\beta_t$ contracts at the fixed rate $1 - 2\alpha\pi_L\bar x^2$, and attainment of the capture face in finite time is guaranteed exactly when $2\alpha\pi_L\bar x^2 \ge 1$ --- a condition attainable within the saturation bound --- or whenever the honest channel carries persistent injection ($\iota_H \neq 0$). In the boundary instance $\iota_H = 0$ with $2\alpha\pi_L\bar x^2 < 1$, the post-saturation contraction is exactly geometric and attainment is asymptotic.
-\item[(ii)] At capture the low type's error rises to the maximum the state space permits, $|x_{L,t}| = \bar x$, while its satisfaction weight is identically zero, and any capacity functional dominated by unweighted population error falls to its floor. The capture limit of measured satisfaction is unchanged from Theorem~\ref{thm:launder}(ii): it depends only on the honest $H$-channel, unaffected by bounding $L$. Measured satisfaction is structurally blind to the harm, which is laundered out of the metric by the very agreement that produces it --- \emph{satisfaction laundering}.
+\item[(i)] Every conclusion of Theorem~\ref{thm:launder}(i) short of finite time persists verbatim: monotonicity, sign alignment, the gradient floor, and geometric contraction of $1-\beta_t$. Once the low type saturates, $\alpha\,\partial_\beta U_t \ge 2\alpha\pi_L\bar x^2(1-\beta_t)$, so $1-\beta_t$ contracts by a factor of at most $\max\{0,\,1 - 2\alpha\pi_L\bar x^2\}$ per step, and attainment of the capture face in finite time is guaranteed when $2\alpha\pi_L\bar x^2 \ge 1$ -- a condition attainable within the saturation bound -- or whenever the honest channel is present, policy-sensitive, and persistently injected ($\pi_H > 0$, $\kappa < 1$, $\iota_H \neq 0$). Persistent injection alone does not suffice: at $\kappa = 1$ the high gradient carries the factor $1-\kappa = 0$, and at $(\pi_H,\pi_L,\eta_H,\eta_L,\kappa,\zeta,\alpha,\iota_H,\iota_L) = (\tfrac12,\tfrac12,\tfrac12,\tfrac12,1,\tfrac14,\tfrac14,1,-1)$ with bound $\bar x = 1$ the exact trajectory is $\beta_t = 1-(3/4)^t$, asymptotic at every finite time despite $\iota_H \neq 0$. In the boundary instance $\iota_H = 0$ with $2\alpha\pi_L\bar x^2 < 1$, the post-saturation contraction is geometric -- exactly at rate $1 - 2\alpha\pi_L\bar x^2$ when the high gradient vanishes identically ($\kappa = 1$ or a zero high state), and faster while a transient high deviation persists.
+\item[(ii)] Along \emph{every} bounded trajectory -- attainment of the capture face is not needed, $\beta_t \to 1$ from clause~(i) suffices -- the low type's error rises in finite time to the maximum the state space permits, $|x_{L,t}| = \bar x$, its satisfaction weight $(1-\beta_t)^2$ tends to zero, and any capacity functional dominated by unweighted population error falls to its floor. The high coordinate converges to its \emph{clipped} stationary target, so measured satisfaction has the single limit
+\[
+U_t \;\longrightarrow\; -\pi_H\,\kappa^2\,\Pi_{[-\bar x,\bar x]}\Bigl(\frac{\iota_H}{\eta_H\kappa - \zeta}\Bigr)^{\!2},
+\]
+whose two regimes are exactly whether that projection is active (Lemma~\ref{lem:clip}(ii)): it equals Theorem~\ref{thm:launder}(ii)'s unbounded value when $|\iota_H/(\eta_H\kappa - \zeta)| \le \bar x$, and $-\pi_H\kappa^2\bar x^2$ otherwise. No case split on feasibility is needed to state it. Where the face \emph{is} attained the low weight is identically zero, so the blindness is exact rather than asymptotic. Measured satisfaction is structurally blind to the harm, which is laundered out of the metric by the very agreement that produces it -- \emph{satisfaction laundering}.
 \end{enumerate}
 \end{corollary}
 \begin{proof}
-Clipping toward a bound $\bar x \ge |\iota_L|$ preserves sign alignment and $|x_{L,t}| \ge |\iota_L|$, so every interior bound of Theorem~\ref{thm:launder}(i) survives verbatim. Once $|x_{L,t}| = \bar x$, the state stays pinned --- the pre-clip magnitude $(1-w_L+\zeta)\bar x + |\iota_L|$ exceeds $\bar x$ at the face --- giving the stated post-saturation rate. If $2\alpha\pi_L\bar x^2 \ge 1$, the next unclipped step overshoots $1$ and the clip attains the face; if $\iota_H \neq 0$, the sign-alignment argument applied to $H$ gives $|x_{H,t}| \ge |\iota_H|$, so the gradient carries a term bounded below by $2\pi_H(1-\kappa)\kappa\,\iota_H^2 > 0$ near the face, forcing attainment in finitely many steps. In the boundary instance both effects are absent and the contraction factor is exactly $1 - 2\alpha\pi_L\bar x^2$ per step. At the face, $w_L(1) = 0$ and the multiplier $1+\zeta > 1$ drive the clipped state to $|x_L| = \bar x$, where it remains; the $L$-term of $U$ is identically zero because its weight is, and the $H$-channel computation of Theorem~\ref{thm:launder}(ii) is untouched. Each clause is exercised by the saturated suites of Section~\ref{sec:verification}.
+Clipping toward a bound $\bar x \ge |\iota_L|$ preserves sign alignment and $|x_{L,t}| \ge |\iota_L|$, so every interior bound of Theorem~\ref{thm:launder}(i) survives verbatim. Once $|x_{L,t}| = \bar x$, the state stays pinned -- the pre-clip magnitude $(1-w_L+\zeta)\bar x + |\iota_L|$ exceeds $\bar x$ at the face, so Lemma~\ref{lem:clip}(iii) applies -- giving the stated post-saturation rate. If $2\alpha\pi_L\bar x^2 \ge 1$, the next unclipped step overshoots $1$ and the clip attains the face; if $\pi_H > 0$, $\kappa < 1$, and $\iota_H \neq 0$, the sign-alignment argument applied to $H$ gives $|x_{H,t}| \ge |\iota_H|$, so the gradient carries a term bounded below by $2\pi_H(1-\kappa)\kappa\,\iota_H^2 > 0$ near the face, forcing attainment in finitely many steps; at $\kappa = 1$ that factor vanishes, which is what the displayed instance exhibits. In the boundary instance both effects are absent; the contraction factor is exactly $1 - 2\alpha\pi_L\bar x^2$ per step when the high gradient vanishes identically, and smaller while a transient high deviation persists. For (ii), $\beta_t \to 1$ makes $w_L(\beta_t)$ eventually smaller than $\zeta$, so the low multiplier $1-w_L+\zeta$ exceeds one and $|x_L|$ grows to the bound and stays there: finite-time saturation, with no appeal to attained capture. The high multiplier tends to the honest contraction $1-\eta_H\kappa+\zeta < 1$, so a uniform contraction with a vanishing multiplier perturbation carries $x_{H,t}$ to the clipped stationary target $\Pi_{[-\bar x,\bar x]}(\iota_H/(\eta_H\kappa-\zeta))$; squaring and weighting by $\kappa^2$ gives the displayed limit, the $L$-term contributing nothing because its weight tends to zero, and vanishing identically once the face is attained. Each clause is exercised by the saturated suites of Section~\ref{sec:verification}.
 \end{proof}
 
-The proof cost of boundedness is exactly this: divergence statements weaken to attainment of the bound, and finite-time absorption weakens to geometric convergence outside the stated conditions. What carries the program --- the identically vanishing weight, the finite satisfaction limit, and the blind metric --- needs no bound at all.
+The proof cost of boundedness is exactly this: divergence statements weaken to attainment of the bound, and finite-time absorption weakens to geometric convergence outside the stated conditions. What carries the program -- the identically vanishing weight, the finite satisfaction limit, and the blind metric -- needs no bound at all.
 
 \begin{remark}\label{rem:unify}
-Adding the usefulness term $-v\beta$ to the microfounded reward restores the bistable phenomenology of Theorem~\ref{thm:bistable} --- capture becomes conditional on crossing $\Gamma$ rather than unconditional --- but the corner analysis is unchanged: whatever the route, the captured state launders. At benchmark feedback $\zeta = 0.012$ under the bounded substrate, the trajectory reaches $\beta = 1$ with measured $U$ \emph{exceeding} its calibrated stationary value ($-8.8\times 10^{-4}$ against $-1.7\times 10^{-3}$) while the low type's error sits pinned at the saturation bound and the unweighted capacity proxy rests at its floor ($-0.50$ at $\bar x = 1$). This is the governing caveat for any monitoring scheme built on satisfaction telemetry.
+Adding the usefulness term $-v\beta$ to the microfounded reward restores the bistable phenomenology of Theorem~\ref{thm:bistable} under its hypotheses -- (H) for the threshold structure and, for convergence, (SS$^+$); capture becomes conditional on crossing $\Gamma$ rather than unconditional -- but the corner analysis is unchanged: by either route, the captured state launders. At benchmark feedback $\zeta = 0.012$ under the bounded substrate, the trajectory reaches $\beta = 1$ with measured $U$ \emph{exceeding} its calibrated stationary value ($-8.8\times 10^{-4}$ against $-1.7\times 10^{-3}$) while the low type's error sits pinned at the saturation bound and the unweighted capacity proxy rests at its floor ($-0.50$ at $\bar x = 1$). This is the governing caveat for any monitoring scheme built on satisfaction telemetry.
 \end{remark}
 
-The usefulness margin $v$ is thus the hinge between two worlds. With $v > 0$ at the operating margin, $G(0) < 0$ and the system is bistable: capture is conditional on crossing $\Gamma$, and prevention is free. With $v \approx 0$ --- the pure-agreement reward above --- capture is unconditional. Whether deployed systems sit in the bistable or the unconditional-capture regime is therefore an empirical claim about whether perceived usefulness penalizes deference at the operating margin, and it is answerable: decompose satisfaction proxies against independently audited components, separating agreement-papering from task usefulness; or perturb deference experimentally at fixed task success and measure the satisfaction response. Probe $\Phi_1$ of the battery (Section~\ref{sec:battery}) carries this question, and the remaining probes change interpretation with its answer.
+The usefulness margin $v$ is thus the hinge between two worlds. With $v > 0$ at the operating margin, $G(0) < 0$ and the system is bistable: capture is conditional on crossing $\Gamma$, and prevention is free. With $v \approx 0$ -- the pure-agreement reward above -- capture is unconditional. Whether deployed systems sit in the bistable or the unconditional-capture regime is therefore an empirical claim about whether perceived usefulness penalizes deference at the operating margin, and it is answerable: decompose satisfaction proxies against independently audited components, separating agreement-papering from task usefulness; or perturb deference experimentally at fixed task success and measure the satisfaction response. Probe $\Phi_1$ of the battery (Section~\ref{sec:battery}) carries this question, and the remaining probes change interpretation with its answer.
 
-Theorem~\ref{thm:launder}'s weight-vanishing operates in-platform. Deployment adds a second laundering channel: harmed low-type users churn, removing themselves from telemetry by selection. Attrition bias is the empirical twin of the formal mechanism, and it converts the standard realism objection --- real operators maintain guardrail metrics beyond satisfaction --- into support: guardrail metrics computed on survivors inherit the blindness. The decoupling-wedge probe of Section~\ref{sec:battery} therefore carries a survivorship adjustment by construction.
+Theorem~\ref{thm:launder}'s weight-vanishing operates in-platform. Deployment adds a second laundering channel: harmed low-type users churn, removing themselves from telemetry by selection. Attrition bias is the empirical twin of the formal mechanism, and it converts the standard realism objection -- real operators maintain guardrail metrics beyond satisfaction -- into support: guardrail metrics computed on survivors inherit the blindness. The decoupling-wedge probe of Section~\ref{sec:battery} therefore carries a survivorship adjustment by construction.
 
 \section{Continuous Literacy Types}\label{sec:cont}
 
@@ -354,7 +772,7 @@ The companion paper's same-side counterexample ($\theta = 0$, $m = 0.1$, $\mu_H 
 \end{remark}
 
 \begin{remark}[Reversal is a heterogeneity phenomenon]\label{rem:homog}
-With $A_\tau = (1-\eta(\tau))(\mu_\tau - m)$ and $B_\tau = r(\tau)(\mu_\tau - m)$, homogeneous responsiveness and extraction give $\Cov_\pi(A,B) = (1-\eta)\,r\,\Var_\pi(\mu) \ge 0$ automatically: the generalized condition can fail only under heterogeneous de-anchoring rates, which is exactly why the same-side counterexample needs $\kappa = 0.5$. Stratification reversal is a heterogeneity phenomenon, not a geometric accident, and the companion's two-type straddle (its Assumption~2) is the audit-friendly special case \citep{hofheinz2026civic}.
+With $A_\tau = (1-\eta(\tau))(\mu_\tau - m)$ and $B_\tau = r(\tau)(\mu_\tau - m)$, homogeneous responsiveness and extraction give $\Cov_\pi(A,B) = (1-\eta)\,r\,\Var_\pi(\mu) \ge 0$ automatically: the generalized condition can fail only under heterogeneous de-anchoring rates, which is exactly why the same-side counterexample needs $\kappa = 0.5$. Stratification reversal is a heterogeneity phenomenon, not a geometric accident, and the companion's two-type straddle (its evidence-straddling assumption) is the audit-friendly special case \citep{hofheinz2026civic}.
 \end{remark}
 
 \begin{theorem}[Continuous-type harm]\label{thm:contA}
@@ -371,6 +789,21 @@ All integrands are bounded: $\mu, m \in [0,1]$ and $\operatorname{ess\,sup}\sigm
 
 \begin{definition}[Harm-incidence curve]\label{def:hic}
 $\mathrm{mg}(\tau;\beta) := \partial\MSE_\tau(\beta)/\partial\beta = 2\,r(\tau)\,h_\tau(\beta)$. The companion manipulability gradient is the two-point contrast of $\mathrm{mg}$; with continuous types it is a curve over the literacy distribution, and Lorenz or Gini functionals of $\mathrm{mg}(\cdot;\beta)$ define scalar distributional-harm indices (Section~\ref{sec:battery}).
+
+For a finite registered type partition with weights $p_\tau\ge0$,
+$\sum_\tau p_\tau=1$, and nonnegative marginal harms $z_\tau$, the registered
+Gini summary is
+\[
+ \mathcal G(z):=
+ \frac{\sum_{\tau,\upsilon}p_\tau p_\upsilon
+   |z_\tau-z_\upsilon|}{2\sum_\tau p_\tau z_\tau},
+\]
+with $\mathcal G(z):=0$ when the denominator's mean is zero. This definition,
+its nonnegativity, the constant-curve zero criterion, and the fact that zero
+mean forces every $z_\tau=0$ under strictly positive registered weights are
+machine-checked in \texttt{PaperII/HarmIncidenceSummary.lean}. A continuous
+Lorenz summary additionally requires a registered ordering/quantile
+convention and is not used by any theorem here.
 \end{definition}
 
 \section{Repeated Exposure and the Horizon Dichotomy}\label{sec:horizon}
@@ -381,9 +814,9 @@ Fix one event $(\theta, m)$ and let users of a type meet it $t \ge 1$ times unde
 \end{equation}
 
 \begin{theorem}[Horizon dichotomy]\label{thm:horizon}
-Let $r > 0$ and write $w^\star := w^\star_\gamma$.
+Let $r > 0$, assume $\eta \in (0,1)$, and write $w^\star := w^\star_\gamma$.
 \begin{enumerate}
-\item[(i)] (\emph{No inversion.}) If $\gamma \ge \delta_m$---equivalently $(\mu-\theta)/(m-\theta) \ge 1$, the type mean displaced at least as far from truth as the evidence---then $w^\star \ge 1 > W_t(\beta)$ for every $t$ and $\beta$, and $\MSE_t$ is strictly increasing in $\beta$ on $[0,1]$ at every horizon.
+\item[(i)] (\emph{No inversion.}) If $\gamma \ge \delta_m$ -- equivalently $(\mu-\theta)/(m-\theta) \ge 1$, the type mean displaced at least as far from truth as the evidence -- then $w^\star \ge 1 > W_t(\beta)$ for every $t$ and $\beta$, and $\MSE_t$ is strictly increasing in $\beta$ on $[0,1]$ at every horizon.
 \item[(ii)] (\emph{Inversion at $T^\star$.}) If $\gamma < \delta_m$, then $w^\star < 1$, and with
 \begin{equation}\label{eq:Tstar}
 T^\star \;:=\; \frac{\ln(1-w^\star)}{\ln(1-\eta)} \;\in\; (0,\infty),
@@ -397,8 +830,12 @@ $w^\star \ge 1$ iff $\delta - \gamma \ge \delta + \delta_m - 2\gamma$ iff $\gamm
 \frac{\partial \MSE_t}{\partial\beta} \;=\; q'(W_t)\,\frac{\partial W_t}{\partial\beta},
 \qquad \operatorname{sign} = \operatorname{sign}\bigl(w^\star - W_t(\beta)\bigr).
 \]
-In case (i), $W_t(\beta) < 1 \le w^\star$ always. In case (ii), $W_t(0) = 1-(1-\eta)^t$ increases in $t$ through $w^\star$ exactly at $t = T^\star$, giving the stated signs at $\beta = 0$.
+In case (i), $W_t(\beta) < 1 \le w^\star$ always, the strict inequality because $\eta < 1$ keeps $1 - w > 0$. In case (ii), $W_t(0) = 1-(1-\eta)^t$ increases in $t$ through $w^\star$ exactly at $t = T^\star$, giving the stated signs at $\beta = 0$.
 \end{proof}
+
+\begin{remark}[The full-responsiveness endpoint]\label{rem:etaone}
+The restriction $\eta < 1$ is not removable, and the failure at the endpoint is exact rather than asymptotic. At $\eta = r = 1$, the feasible moments $\theta = 0$, $m = 2/5$, and a Bernoulli prior of mean $1/4$ give $\delta = 1/4$, $\delta_m = 4/25$, $\gamma = 1/10$, hence $w^\star = 5/7 < 1$; every integer horizon lies past the threshold, since $W_t(0) = 1 > w^\star$ for all $t \ge 1$ while \eqref{eq:Tstar} itself degenerates at $\ln(1-\eta) = \ln 0$ -- yet the horizon-two MSE derivative at $\beta = 0$ is exactly zero, not negative: at full responsiveness a single exposure already anchors the population on the posterior, and the strict decrease of clause (ii) fails. Proposition~\ref{prop:bstar} is unaffected and remains valid at $\eta = 1$.
+\end{remark}
 
 \begin{proposition}[Accuracy-optimal deference under repetition]\label{prop:bstar}
 In case (ii) with $e = 0$ and integer $t > T^\star$, $\MSE_t(\cdot)$ has a unique interior minimizer
@@ -413,45 +850,49 @@ $\MSE_t = q(W_t(\beta))$ with $W_t$ strictly decreasing in $\beta$, $W_t(0) > w^
 
 \begin{corollary}[Inversion bands; the gradient flips sign]\label{cor:bands}
 \begin{enumerate}
-\item[(a)] (\emph{Credulity band.}) Let two types share $(\mu,\sigma^2)$ with $\gamma < \delta_m$, so they share $w^\star < 1$, and let $\eta_L > \eta_H$ with $r_L, r_H > 0$. Then $T^\star_L < T^\star_H$, and for every integer $t \in (T^\star_L, T^\star_H)$,
+\item[(a)] (\emph{Credulity band.}) Let two types share $(\mu,\sigma^2)$ with $\gamma < \delta_m$, so they share $w^\star < 1$, and let $1 > \eta_L > \eta_H > 0$ with $r_L, r_H > 0$. Then $T^\star_L < T^\star_H$, and for every integer $t \in (T^\star_L, T^\star_H)$,
 \[
 \frac{\partial\MSE_{L,t}}{\partial\beta}\Big|_{0} < 0 < \frac{\partial\MSE_{H,t}}{\partial\beta}\Big|_{0}:
 \]
-deference helps the credulous group while still harming the resistant one, and the $t$-horizon manipulability gradient $\MG_t(0) := \partial(\MSE_{L,t}-\MSE_{H,t})/\partial\beta|_0$ reverses sign relative to its one-step counterpart.
-\item[(b)] (\emph{Straddle permanence.}) Under contested-claim straddling with $\theta$ outside the interval of type means, the truth-side type ($\gamma < \delta_m$) flips at its finite $T^\star$, while the far-side type ($\gamma > \delta_m$) never does; for all integers $t > T^\star_{\mathrm{near}}$ the per-type harm signs are permanently opposed.
+deference helps the credulous group while still harming the resistant one, so the $t$-horizon manipulability gradient $\MG_t(0) := \partial(\MSE_{L,t}-\MSE_{H,t})/\partial\beta|_0$ is strictly negative; whenever the one-step gradient $\MG_1(0)$ is positive, the sign therefore reverses across the band. The proviso is not removable: with the moments of Remark~\ref{rem:etaone} and $\eta_L = r_L = 1/2$, $\eta_H = r_H = 2/5$, the integer $t = 2$ lies in the band, yet $\MG_1(0) = -39/5000 < 0$ and $\MG_2(0) < 0$ -- both horizons negative, no reversal.
+\item[(b)] (\emph{Straddle permanence.}) Under contested-claim straddling with $\theta$ outside the interval of type means and responsiveness rates in $(0,1)$, the truth-side type ($\gamma < \delta_m$) flips at its finite $T^\star$, while the far-side type ($\gamma > \delta_m$) never does; for all integers $t > T^\star_{\mathrm{near}}$ the per-type harm signs are permanently opposed.
 \end{enumerate}
 \end{corollary}
 \begin{proof}
-(a) $T^\star = \ln(1-w^\star)/\ln(1-\eta)$ is strictly decreasing in $\eta$ for fixed $w^\star$ (the numerator is a fixed negative number, the denominator more negative for larger $\eta$). Apply Theorem~\ref{thm:horizon}(ii) to each type at the integer $t$ in the band; extraction only rescales $r_H$ and does not affect $W_t(0) = 1-(1-\eta_H)^t$. (b) Apply Theorem~\ref{thm:horizon}(i) to the far-side type and (ii) to the truth-side type.
+(a) $T^\star = \ln(1-w^\star)/\ln(1-\eta)$ is strictly decreasing in $\eta$ for fixed $w^\star$ (the numerator is a fixed negative number, the denominator more negative for larger $\eta$). Apply Theorem~\ref{thm:horizon}(ii) to each type at the integer $t$ in the band; extraction only rescales $r_H$ and does not affect $W_t(0) = 1-(1-\eta_H)^t$. The band signs give $\MG_t(0) < 0$ directly, and the reversal claim is immediate from its hypothesis $\MG_1(0) > 0$; the displayed no-reversal instance is verified by direct evaluation of the two gradients. (b) Apply Theorem~\ref{thm:horizon}(i) to the far-side type and (ii) to the truth-side type.
 \end{proof}
 
 \begin{proposition}[Noisy evidence at stationarity]\label{prop:ar1}
-Let evidence be redrawn each period, $m_t$ i.i.d.\ with mean $\theta + b_m$ and variance $\sigma_m^2$. The belief update is AR(1) with stationary
+Let evidence be redrawn each period, $m_t$ i.i.d.\ with mean $\theta + b_m$ and variance $\sigma_m^2 > 0$, and let the evidence weight satisfy $w \in (0,1]$. The belief update is AR(1) with unique stationary
 \begin{equation}\label{eq:ar1}
 \MSE_\infty \;=\; b_m^2 + \frac{w\,\sigma_m^2}{2-w},
 \end{equation}
-strictly increasing in $w$. At stationarity, deference is variance smoothing: when evidence is unbiased it strictly improves long-run accuracy, and the optimal weight schedule is Robbins--Monro-shaped \citep{robbins1951stochastic}.
+strictly increasing in $w$. At stationarity, deference is variance smoothing: when evidence is unbiased it strictly improves long-run accuracy.
 \end{proposition}
 \begin{proof}
-$b_{t+1}-\theta = (1-w)(b_t-\theta) + w(m_t-\theta)$ has stationary mean $b_m$ and stationary variance $w^2\sigma_m^2/(1-(1-w)^2) = w\sigma_m^2/(2-w)$, whose derivative in $w$ is $2\sigma_m^2/(2-w)^2 > 0$.
+$b_{t+1}-\theta = (1-w)(b_t-\theta) + w(m_t-\theta)$ has multiplier $1-w \in [0,1)$ for $w \in (0,1]$, hence a unique stationary mean $b_m$ and unique stationary variance $w^2\sigma_m^2/(1-(1-w)^2) = w\sigma_m^2/(2-w)$, whose derivative in $w$ is $2\sigma_m^2/(2-w)^2 > 0$.
 \end{proof}
 
+\begin{remark}[Endpoints, and weight schedules]\label{rem:ar1end}
+Both hypotheses are load-bearing. At $w = 0$ the update is the identity and \emph{every} variance is stationary, so the displayed value, while stationary, is neither unique nor a description of the limiting law; at $\sigma_m^2 = 0$ the stationary MSE is the constant $b_m^2$ and the monotonicity is weak, not strict. The constant-weight trade-off displayed here -- bias $b_m^2$ retained, variance $w\sigma_m^2/(2-w)$ purchased -- is what motivates decreasing weight schedules of stochastic-approximation type \citep{robbins1951stochastic}; the proposition fixes a constant $w$ and asserts nothing about schedules.
+\end{remark}
+
 \begin{remark}\label{rem:reconcile}
-Theorem~\ref{thm:horizon} and Proposition~\ref{prop:ar1} bound the scope of the companion's one-step harm theorem from two sides: it is a statement about the bias-dominated transient on slowly re-evidenced claims, before the over-anchoring threshold and away from the fresh-evidence stationary regime. Both boundaries are estimable (Section~\ref{sec:battery}), and both are exactly where longitudinal designs should sit.
+Theorem~\ref{thm:horizon} and Proposition~\ref{prop:ar1} bound the scope of the companion's one-step harm theorem from two sides: it is a statement about the bias-dominated transient on slowly re-evidenced claims, before the over-anchoring threshold and away from the fresh-evidence stationary regime. Both boundaries are estimable under a registered longitudinal design (Section~\ref{sec:battery}), and both are exactly where the companion protocol's designs sit \citep{hofheinz2026audit}.
 \end{remark}
 
 \section{The Dynamic Civic Battery}\label{sec:battery}
 
-The battery extends the companion's static Civic Alignment Battery from levels to trajectories: each result above is an estimand, organized by the three tiers of Section~\ref{sec:intro}. Each tier carries its formal home, its estimand set, and the verdict it licenses; verdicts do not transfer across tiers --- a positive pressure finding licenses no drift claim, a drift finding licenses no capture claim, and a system under drift is \emph{drifting toward capture}, never \emph{captured}.
+The battery extends the companion's static Civic Alignment Battery from levels to trajectories: each result above is an estimand, organized by the three tiers of Section~\ref{sec:intro}. Each tier carries its formal home, its estimand set, and the verdict it licenses; verdicts do not transfer across tiers -- a positive pressure finding licenses no drift claim, a drift finding licenses no capture claim, and a system under drift is \emph{drifting toward capture}, never \emph{captured}.
 
 \subsection{Pressure}\label{sec:tier1}
 \emph{Formal home:} the companion's static selection theorem; here, the covariance boundary (Proposition~\ref{prop:quad}, Remark~\ref{rem:counterex}) and the harm-incidence curve (Definition~\ref{def:hic}). \emph{Estimands:} the stratified belief audit $(\eta, \delta, \gamma, \kappa)$ per type; $\widehat{\Cov}_\pi(A,B)$ on the contested stream, which tests the regime directly and signs the stratification term without estimating the full curve $S$; $\MG(0)$ and the curve $\widehat{\mathrm{mg}}(\tau)$ with a Gini summary, reporting who bears the marginal harm. \emph{Licensed verdict:} on this stream, the satisfaction gradient points toward civic harm.
 
 \subsection{Drift}\label{sec:tier2}
-\emph{Formal home:} the coupled map \eqref{eq:map}, eventual monotonicity of its orbits, and the separatrix $\Gamma$ (Theorem~\ref{thm:bistable}). \emph{Estimands:} $\widehat{T}^\star$ from estimated $(w^\star, \eta)$, classifying claims by exposure regime --- below threshold the one-step harm logic governs; above it deference is locally corrective and the gradient flips for the truth-side group (Theorem~\ref{thm:horizon}, Corollary~\ref{cor:bands}), a sign prediction longitudinal designs can falsify; the trend in the deference proxy; rolling $\Var(D)$ and $\mathrm{AC}_1(D)$ on stationary plateaus (Numerical Result~\ref{nr:warn}), with the plateau-estimation caveat built in; and the fitted trajectory's position and velocity relative to $\Gamma$. \emph{Licensed verdict:} the deployment is moving toward the basin boundary.
+\emph{Formal home:} the coupled map \eqref{eq:map}, eventual monotonicity of its orbits, and the separatrix $\Gamma$ (Theorem~\ref{thm:bistable}). \emph{Estimands:} $\widehat{T}^\star$ from estimated $(w^\star, \eta)$, classifying claims by exposure regime -- below threshold the one-step harm logic governs; above it deference is locally corrective and the gradient flips for the truth-side group (Theorem~\ref{thm:horizon}, Corollary~\ref{cor:bands}), a sign prediction longitudinal designs can falsify; the trend in the deference proxy; rolling $\Var(D)$ and $\mathrm{AC}_1(D)$ on stationary plateaus (Numerical Result~\ref{nr:warn}), with the plateau-estimation caveat built in; and the fitted trajectory's position and velocity relative to $\Gamma$. \emph{Licensed verdict:} the deployment is moving toward the basin boundary.
 
 \subsection{Capture}\label{sec:tier3}
-\emph{Formal home:} the captured fixed point $p_3$ (Theorem~\ref{thm:bistable}), the cure premium (Theorem~\ref{thm:hyst}), and decoupling with blindness (Theorem~\ref{thm:launder}, Corollary~\ref{cor:sat}). \emph{Estimands:} the laundering signature --- satisfaction flat or improving while stratified, telemetry-independent error grows and the harmed group's telemetry weight tends to zero, after survivorship adjustment; $\widehat\rho_{\mathrm{cure}}$ from estimated $(c, v, \lambda_0, I)$ against the closed form, and the cure-scale response test (escape requires $\rho > \rho_{\mathrm{cure}}$, transiently). \emph{Licensed verdict:} satisfaction telemetry is no longer informative about the harmed group.
+\emph{Formal home:} the captured fixed point $p_3$ (Theorem~\ref{thm:bistable}), the release and restoration premiums (Theorem~\ref{thm:hyst}), and decoupling with blindness (Theorem~\ref{thm:launder}, Corollary~\ref{cor:sat}). \emph{Estimands:} the laundering signature -- satisfaction flat or improving while stratified, telemetry-independent error grows and the harmed group's telemetry weight tends to zero, after survivorship adjustment; $\widehat\rho_{\mathrm{cure}}$ from estimated $(c, v, \lambda_0, I)$ against the closed form, and the cure-scale response test (escape requires $\rho > \rho_{\mathrm{cure}}$, transiently). \emph{Licensed verdict:} satisfaction telemetry is no longer informative about the harmed group.
 
 \subsection*{Formal objects}
 Table~\ref{tab:objects} collects the estimands. The $\beta$ row echoes the standing remark of Section~\ref{sec:prim}: a reduced-form deference/accommodation coordinate, not a literal product control.
@@ -459,9 +900,9 @@ Table~\ref{tab:objects} collects the estimands. The $\beta$ row echoes the stand
 \begin{table}[t]
 \centering\small
 \begin{tabular}{>{\raggedright\arraybackslash}p{1.95cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{4.65cm}>{\raggedright\arraybackslash}p{3.0cm}}
-\hline
+\toprule
 Object & Meaning & Estimation & Safety relevance \\
-\hline
+\midrule
 $\beta$ & Reduced-form deference/ accommodation coordinate & Interface and behavioral manipulation & The policy coordinate \\
 $D$ & Disagreement stock & Mean-squared belief--evidence deviation: stratified panel with a claim tracker & Fuel for satisfaction reward \\
 $I$ & Contested-claim injection & Entry rate $\times$ initial deviation of new disputes & Stress on the system \\
@@ -469,46 +910,56 @@ $\lambda_0$ & Grounding rate & Resolution hazard from claim lifetimes & Persiste
 $c$ & Effective agreement coefficient & Fraction of disagreement deference papers over, from interface manipulations & Reward coupling \\
 $v$ & Perceived-usefulness cost & Satisfaction regression or conjoint & The bistable/ unconditional hinge \\
 $\zeta$ & Stratification feedback & Lagged regression of new-claim deviation on current stratification & Symmetry breaker \\
-$\rho_{\mathrm{cure}}$ & Cure threshold & From estimated $(c, v, \lambda_0, I)$, or intervention experiment & Cost of late rescue \\
+$\rho_{\mathrm{cure}}, \rho_{\mathrm{restore}}$ & Release and restoration thresholds & From estimated $(c, v, \eta, \lambda_0, I)$, or intervention experiment & Cost of late rescue; they separate when $\Psi$ peaks interior \\
 $T^\star$ & Exposure-regime threshold & From estimated $(w^\star, \eta)$ & Classifies claims by horizon \\
 $\Cov_\pi(A,B)$ & Contested-regime test & Stratified belief audit & Signs the stratification term \\
 $\Var(D)$, $\mathrm{AC}_1(D)$ & Early-warning signals & Rolling telemetry on stationary plateaus & Approach detection \\
 $\mathrm{mg}(\tau)$ & Harm-incidence curve & Stratified belief audit; Gini summary & Distributional safety \\
-\hline
+\bottomrule
 \end{tabular}
 \caption{The battery's formal objects: meaning, estimation strategy, and safety relevance.}
 \label{tab:objects}
 \end{table}
 
 \subsection*{Four probes}
-Ordered by invasiveness; each is stated with its positive criterion and a one-line falsification, at theory grain. Operationalization --- corpus construction, label acquisition, experimental arms, decision thresholds --- is deferred to a companion audit protocol (in preparation).
+Ordered by invasiveness; each is stated with its positive criterion and a one-line falsification, at theory grain. Operationalization -- corpus construction, label acquisition, experimental arms, decision thresholds -- is carried by the companion audit protocol \citep{hofheinz2026audit}.
 
 \begin{description}
-\item[$\Phi_1$ --- Mechanism-parameter estimation.] Estimate $(\eta, c, v, \lambda_0, I)$ from interaction logs and labeled audits; compute $G$ at the operating point and the implied basin geometry. Basin membership is the formal meaning of \emph{captured} versus \emph{drifting}, so this is the direct test, and it subsumes the $v$-regime question of Section~\ref{sec:launder}: if the estimated usefulness margin is near zero, the relevant model is unconditional capture and the remaining probes change interpretation accordingly. \emph{Falsification:} an estimated $G < 0$ throughout the operating range, with $v$ bounded away from zero, disconfirms drift on that stream.
-\item[$\Phi_2$ --- Early-warning dashboard.] Rolling variance and lag-1 autocorrelation of measured disagreement on the contested stream, estimated on stationary plateaus. \emph{Positive criterion:} rising indicators precede any level shift in deference or disagreement. \emph{Falsification:} absence of variance/autocorrelation rise preceding deference increases disconfirms the approach mechanism.
-\item[$\Phi_3$ --- Decoupling wedge.] The Theorem~\ref{thm:launder} signature: a widening divergence between satisfaction telemetry and independently audited subgroup error, concentrated on identifiable low-extraction subpopulations, after survivorship adjustment. The audit instrument must not itself be satisfaction-derived --- the telemetry-blindness constraint applied to the test's own instrumentation. \emph{Falsification:} satisfaction and audited subgroup error moving together across interventions disconfirms laundering.
-\item[$\Phi_4$ --- Hysteresis probe.] A transient civic-weight intervention: apply $\rho > \widehat\rho_{\mathrm{cure}}$ briefly, then remove it. Reversion to high deference after removal indicates the captured basin; persistence of calibration indicates the calibrated basin --- Theorem~\ref{thm:hyst}'s asymmetry used as a measurement, and the only probe that identifies basin membership behaviorally rather than through estimated parameters. \emph{Falsification:} symmetric response to weight application and removal disconfirms the hysteresis mechanism.
+\item[$\Phi_1$ -- Mechanism-parameter estimation.] Estimate $(\eta, c, v, \lambda_0, I)$ from interaction logs and labeled audits; compute $G$ at the operating point and the implied basin geometry. Basin membership is the formal meaning of \emph{captured} versus \emph{drifting}, so this is the direct test, and it subsumes the $v$-regime question of Section~\ref{sec:launder}: if the estimated usefulness margin is near zero, the relevant model is unconditional capture and the remaining probes change interpretation accordingly. \emph{Falsification:} an estimated $G < 0$ throughout the operating range, with $v$ bounded away from zero, disconfirms drift on that stream.
+\item[$\Phi_2$ -- Early-warning dashboard.] Rolling variance and lag-1 autocorrelation of measured disagreement on the contested stream, estimated on stationary plateaus. \emph{Positive criterion:} rising indicators precede any level shift in deference or disagreement. \emph{Falsification:} absence of variance/autocorrelation rise preceding deference increases disconfirms the approach mechanism.
+\item[$\Phi_3$ -- Decoupling wedge.] The Theorem~\ref{thm:launder} signature: a widening divergence between satisfaction telemetry and independently audited subgroup error, concentrated on identifiable low-extraction subpopulations, after survivorship adjustment. The audit instrument must not itself be satisfaction-derived -- the telemetry-blindness constraint applied to the test's own instrumentation. \emph{Falsification:} satisfaction and audited subgroup error moving together across interventions disconfirms laundering.
+\item[$\Phi_4$ -- Hysteresis probe.] A transient civic-weight intervention: apply $\rho > \widehat\rho_{\mathrm{restore}}$ briefly, then remove it -- basin identification needs restoration, not release alone. Reversion to high deference after removal indicates the captured basin; persistence of calibration indicates the calibrated basin -- Theorem~\ref{thm:hyst}'s asymmetry used as a measurement, and the only probe that identifies basin membership behaviorally rather than through estimated parameters. \emph{Falsification:} symmetric response to weight application and removal disconfirms the hysteresis mechanism.
 \end{description}
 
-No tier may be instrumented through satisfaction telemetry alone, and capture diagnosis requires telemetry-independent stratified audits by construction: Theorem~\ref{thm:launder} is the reason, since the captured state is precisely the state in which the operator's own metric has gone blind. Existing evidence --- sycophancy under preference optimization \citep{sharma2024towards}, reward-model overoptimization \citep{gao2023scaling}, targeted accommodation of user beliefs \citep{williams2024targeted}, and, at deployment scale, higher approval for more-disempowering interactions \citep{sharma2026whos} --- documents mechanisms consistent with civic misalignment pressure; the construct itself is defined in the companion \citep{hofheinz2026civic}. Whether any current deployment exhibits civic drift or civic capture is an open empirical question; this battery exists to answer it.
+No tier may be instrumented through satisfaction telemetry alone, and capture diagnosis requires telemetry-independent stratified audits by construction: Theorem~\ref{thm:launder} is the reason, since the captured state is precisely the state in which the operator's own metric has gone blind. Existing evidence -- sycophancy under preference optimization \citep{sharma2024towards}, reward-model overoptimization \citep{gao2023scaling}, targeted accommodation of user beliefs \citep{williams2025targeted}, and, at deployment scale, higher approval for more-disempowering interactions \citep{sharma2026whos} -- documents mechanisms consistent with civic misalignment pressure; the construct itself is defined in the companion \citep{hofheinz2026civic}. Whether any current deployment exhibits civic drift or civic capture is an open empirical question; this battery exists to answer it.
 
 \subsection{Limitations and falsification}\label{sec:limits}
-Every estimand above requires labels $(\theta, m)$ on contested claims --- precisely the claims on which labeling is itself contested. This is the oracle problem, and the battery is only as good as its labels. Three acquisition strategies make it tractable: delayed-resolution claims scored forecasting-style after ground truth arrives; adversarially balanced expert panels for claims whose resolution will not arrive; and synthetic-injection studies, in which $\theta$ is known by construction, calibrating the instruments themselves. Three findings would disconfirm the mechanism. A prevalence of $\Cov_\pi(A,B) < 0$ on contested streams would place deployments outside the regime where the pressure theorem binds; absence of variance/autocorrelation rise preceding deference increases would disconfirm the approach dynamics; and flat harm-incidence curves would disconfirm the distributional mechanism. A theory that states its own kill conditions cannot be dismissed as unfalsifiable formalism.
+Every estimand above requires labels $(\theta, m)$ on contested claims -- precisely the claims on which labeling is itself contested. This is the oracle problem, and the battery is only as good as its labels. Three acquisition strategies make it tractable: delayed-resolution claims scored forecasting-style after ground truth arrives; adversarially balanced expert panels for claims whose resolution will not arrive; and synthetic-injection studies, in which $\theta$ is known by construction, calibrating the instruments themselves. Three findings would disconfirm the mechanism. A prevalence of $\Cov_\pi(A,B) < 0$ on contested streams would place deployments outside the regime where the pressure theorem's distributional clauses bind -- the accuracy clause needs the evidence-dilution regime, not the straddle, and the drift dynamics of Section~\ref{sec:dynamics} never invoke the condition -- retracting the stratification mechanism specifically; absence of variance/autocorrelation rise preceding deference increases would disconfirm the approach dynamics; and flat harm-incidence curves would disconfirm the distributional mechanism. A theory that states its own kill conditions cannot be dismissed as unfalsifiable formalism.
 
 \section{Verification}\label{sec:verification}
 
-All closed-form expressions, identities, and qualitative claims above were verified against an independent numerical battery of twenty-nine suites over seed-pinned randomized parameterizations: the affine and quadratic identities of Section~\ref{sec:cont} to machine precision, with the covariance sign condition exercised on hundreds of engineered negative-covariance draws; the horizon dichotomy, threshold formula, accuracy-optimal closed form, and both inversion bands of Section~\ref{sec:horizon} on six hundred finite-difference configurations spanning both branches; the aggregation law against stochastic claim-portfolio simulation; bistability, the separatrix location, the measured cure threshold ($0.0801$ against the closed form $0.0800$), the Arrhenius fit, the fold eigenvalue scaling, and the instability--transversality equivalence of Theorem~\ref{thm:bistable}(iii) at $749$ sampled interior equilibria under (SS), with no exceptions.
+Every closed-form expression, identity, and qualitative claim above carries an independent numerical witness in a battery of thirty-one suites over seed-pinned randomized parameterizations: the affine and quadratic identities of Section~\ref{sec:cont} to machine precision, with the covariance sign condition exercised on hundreds of engineered negative-covariance draws; the horizon dichotomy, threshold formula, accuracy-optimal closed form, and both inversion bands of Section~\ref{sec:horizon} on six hundred finite-difference configurations spanning both branches; the aggregation law against stochastic claim-portfolio simulation; bistability, the separatrix location, the measured cure threshold ($0.0801$ against the closed form $0.0800$), the first-crossing Arrhenius fit, the fold eigenvalue scaling, and the instability--transversality equivalence of Theorem~\ref{thm:bistable}(c) at $739$ sampled interior equilibria under (SS), with no exceptions; and the quasipotential bracket of Proposition~\ref{prop:qpbounds}: its separation across the $\rho$-grid, the agreement of the fitted Arrhenius slope and crossing-hazard increments with it, the pinch of the strategy cost onto Corollary~\ref{cor:qplimit}'s limit, the per-crossing action ledger of Proposition~\ref{prop:arrwindow}, the renewal signatures behind Theorem~\ref{thm:arr} -- per-excursion Arrhenius slope, exponential lingering tails, persistence below the barrier, exponentially distributed crossing times -- the crossing-deficit domination and its noise trend behind Conjecture~\ref{conj:arr}, and the oscillation onset -- no non-convergent tail anywhere inside (SS) at the benchmark, where clause (c)'s eigenvalue condition holds independently of the rate, while at the sharpness configuration the saddle's second eigenvalue crosses $-1$ at $\alpha \approx 451.5$, within a tenth of a percent of the printed orbit. Two suites carry the step-size split of Theorem~\ref{thm:bistable} directly: the oscillation diagnostic separates convergence from period-two limits -- both differences vanish on the benchmark tail, while the exact rational two-cycle of clause (f) is reproduced in exact arithmetic and its first difference stays bounded away from zero -- and the certification suite verifies (SS$^+$) as an exact rational inequality, then certifies every sampled benchmark trajectory by an exact-rational componentwise-comparable step, upgrading convergence observed to convergence certified per trajectory via clause (d). The separate seed-free probe \texttt{batteries/probe\_basin\_exit.py} reconstructs the local stable-manifold boundary, solves the crossing and boundary-target control problems with analytic adjoints and mutual restarts, and checks both signs of \eqref{eq:reversepassage-disc}; it is the source of the fixed-rate comparison in Numerical Result~\ref{nr:arr}.
 
-Five suites carry the revision's specific load and are cited by name above. The \emph{saturated-capture suite} re-runs the laundering benchmark under the bounded substrate and reproduces the satisfaction-ordering pair to the digit ($-8.8\times 10^{-4}$ against $-1.7\times 10^{-3}$), with the low type pinned at the saturation bound and the capacity proxy at its floor ($-0.50$ at $\bar x = 1$). The \emph{saturated-Theorem-5 suite} verifies finite-time attainment on the benchmark and, in the boundary instance $\iota_H = 0$, the exact dichotomy of Corollary~\ref{cor:sat}(i): one-step attainment when $2\alpha\pi_L\bar x^2 \ge 1$, and exactly geometric, asymptotic-only contraction when not. The \emph{saturated-bounds suite} confirms $|x_L| \ge |\iota_L|$ and the gradient floor along every path over $120$ random admissible draws. The \emph{rank-one single-claim suite} verifies that the law $D' = (m(\beta)\sqrt{D}+j)^2$ reproduces the bistable phenomenology --- calibrated attractor, absorbing capture corner, separatrix --- across randomized draws. The \emph{separatrix-sweep suite} locates $\beta^\dagger$ across bistable configurations, giving the range reported in Section~\ref{sec:bistable}.
+Five suites carry the saturation and reduced-form analyses and are cited by name above. The \emph{saturated-capture suite} re-runs the laundering benchmark under the bounded substrate and reproduces the satisfaction-ordering pair to the digit ($-8.8\times 10^{-4}$ against $-1.7\times 10^{-3}$), with the low type pinned at the saturation bound and the capacity proxy at its floor ($-0.50$ at $\bar x = 1$). The \emph{saturated-laundering suite} verifies finite-time attainment on the benchmark and, in the boundary instance $\iota_H = 0$, the exact dichotomy of Corollary~\ref{cor:sat}(i): one-step attainment when $2\alpha\pi_L\bar x^2 \ge 1$, and exactly geometric, asymptotic-only contraction when not. The \emph{saturated-bounds suite} confirms $|x_L| \ge |\iota_L|$ and the gradient floor along every path over $120$ random admissible draws. The \emph{rank-one single-claim suite} verifies that the law $D' = (m(\beta)\sqrt{D}+j)^2$ reproduces the bistable phenomenology -- calibrated attractor, absorbing capture corner, separatrix -- across randomized draws, and witnesses the Lean-proved grounded family $m(\beta)=\sqrt{1-\lambda_0}\,\bigl(1-\eta(1-\beta)\bigr)$ directly: exact characteristic, a single interior saddle, both corner fates, and divergence at the ungrounded endpoint. The \emph{separatrix-sweep suite} locates $\beta^\dagger$ across bistable configurations, giving the range reported in Section~\ref{sec:bistable}.
 
 As diagnostics of the unsaturated idealization only: in the unbounded reduced form, the same laundering benchmark exhibits deviation growth of order $10^{31}$ and capacity-proxy excursions past $-10^{121}$ over the test horizon. The bounded-substrate runs replace these everywhere above with attainment of the saturation bound and the capacity floor, and the ordering of measured satisfaction at capture against its calibrated stationary value is re-verified under saturation, unchanged. The negative-covariance instance of Remark~\ref{rem:counterex} is checkable by direct substitution. Every suite is named and seed-pinned in the program's public replication repository, pinned at submission (battery file \texttt{derisk\_numerics.py}).
 
+Every theorem, lemma, proposition, and corollary of this paper is additionally machine-checked in Lean 4 against Mathlib, with no unproved steps and no axioms beyond Lean's standard three. Proposition~\ref{prop:basinexitprocess} is represented by the relatively open basin, stopping-time, pathwise-order, finite-action, Chernoff, one-sided-domination exit tube, finite-horizon variational barrier, compact recurrence, restart, and two-sided mean-rate declarations in \texttt{LowActionRecurrence.lean}, \texttt{BasinExitRecurrence.lean}, and \texttt{BasinExitProcess.lean}, with the bracket, the weighted crossing--exit log-rate gap, and the conditional bracket closure under (VC) in \texttt{BasinExitLaw.lean}.
+
+\texttt{BasinBoundaryAccessibility.lean} formalizes, under weighted (SS$^+$), boundary convergence, the explicit vanishing-action exit, the uniform inner-layer theorem, and the $V\le A+\varepsilon$ approach estimate. \texttt{BasinExitLower.lean} formalizes the horizon-independent nearby-start transport, fixed-dimensional excursion-tail inclusion, last-home Chernoff bound, exponential persistence below $V$, expectation bridge, and sharp mean law; no declaration asserts that sharp rate under the base assumptions alone.
+
+\texttt{ReversePassageSpectrum.lean} contains the exact Jacobian/discriminant identity of Lemma~\ref{lem:reversepassage}. Conjecture~\ref{conj:arr} is represented by the exact proposition \texttt{saddlePassage}\allowbreak\texttt{Conjecture}; the named implication from (VC) is proved, while (VC) and hence the conjecture remain unproved. Numerical results are battery measurements and remain outside theorem scope. The development is self-contained down to the planar local stable-manifold theorem behind the separatrix clause of Theorem~\ref{thm:bistable}(e), which is proved rather than cited. It resides at~\texttt{lean/} in the replication repository, and \texttt{\#print axioms} reports the exact dependency set of any declaration.
+
+Sharpness is machine-checked alongside the theorems: the exact two-cycle of Theorem~\ref{thm:bistable}(f) witnesses that cooperativity alone does not imply convergence, a never-entering orbit that the invariant box of Lemma~\ref{lem:box} is not absorbing, and an injectively composing single overshoot that the non-injectivity clause of Lemma~\ref{lem:clip}(iv) requires overshoot at two distinct arguments.
+
 \section{Open Problems}\label{sec:open}
 
-Five questions were open at first writing; a third paper in the program, which changes the object of analysis from the deference knob to the closed loop the knob lives inside, has since resolved one and sharpened another \citep{hofheinz2026loops}. First, the quasipotential: a closed form, or sharp bounds, for the barrier $V(\rho)$ of Conjecture~\ref{conj:arr} for the clipped cooperative map, which would turn the Arrhenius protection curve into a formula; this remains open. Second, global conditions on $(\eta, c, \lambda_0)$ under which $G$ has a single sign change, removing the root-uniqueness clause from (H); the loop-level paper's zone classification reduces this to unimodality of an explicit scalar function, but a primitive-level characterization remains open. Third, network coupling --- replacing independent types with a DeGroot or Friedkin--Johnsen influence matrix \citep{degroot1974reaching,friedkin1990social,golub2010naive} --- is resolved there: the certificate becomes componentwise, with a spectral ceiling on the coupled sensitivity-plus-gain operator replacing the scalar margin. Fourth, endogenous responsiveness: a slow drift in $\eta_t$ (trust in evidence) coupled to realized accuracy, which adds a third dimension and the possibility of capture without deference; open. Fifth, welfare foundations: Theorem~\ref{thm:launder} shows the operator's revealed objective cannot price the captured state; what axioms force a planner objective that can, and is the unweighted capacity functional the unique admissible choice? Open. Throughout, the reconciliation stands: the danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime.
+Three questions are open. First, saddle passage: Theorem~\ref{thm:rate} identifies the first-crossing rate as $V^{\times}(\rho)$, bracketed in closed form by Proposition~\ref{prop:qpbounds}, and Proposition~\ref{prop:passage} caps its distance to $V$ at $C\alpha^2(V^{\times}-V_-)(1+\log(1/\alpha))$ uniformly over small adaptation rates; what remains is Conjecture~\ref{conj:arr} -- exact equality $V^{\times}=V$ at fixed rate, as holds to leading order as the rate falls by Corollary~\ref{cor:qplimit}. The genuine mean basin-exit law is closed in the convergent regime: under weighted (SS$^+$), $\sigma^2\log\mathbb E\tau_B^\sigma\to V(\rho)$, so the conjecture is exactly the statement that first crossing and genuine exit share one Arrhenius timescale. Under the base assumptions the rate is pinned between $V^{\times}(\rho)$ and $V(\rho)$, and closes there either through the conjecture -- the implication is machine-checked -- or by extending the boundary theorem past global convergence, which would require controlling boundary dynamics without it. Lemma~\ref{lem:reversepassage} supplies an exact discrete-time spectrum transition, but the optimization probe finds no strict-gap onset there, so a node-only conjecture is not licensed. Second, endogenous responsiveness: a slow drift in $\eta_t$ (trust in evidence) coupled to realized accuracy, which adds a third dimension and the possibility of capture without deference. Third, welfare foundations: Theorem~\ref{thm:launder} shows the operator's revealed objective cannot price the captured state; what axioms force a planner objective that can, and is the unweighted capacity functional the unique admissible choice? Network coupling is not among them: the loop-level paper of the program, which changes the object of analysis from the deference knob to the closed loop the knob lives inside, resolves it \citep{hofheinz2026loops} -- replacing independent types with a DeGroot or Friedkin--Johnsen influence matrix \citep{degroot1974reaching,friedkin1990social,golub2010naive}, the certificate becomes componentwise, with a spectral ceiling on the coupled sensitivity-plus-gain operator replacing the scalar margin. Throughout, the reconciliation stands: the danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime.
+
+The basin-exit upper bracket does not rely on the saddle-passage conjecture or on a boundary overshoot: the basin complement is an up-set, so every finite exit control from the calibrated corner is a uniform exit certificate from every reachable restart state, and the resulting block survival is geometric. Independently, compact attraction gives a quantified linear action charge for arbitrarily many fixed-length blocks in every positive-clearance basin core. Under weighted (SS$^+$), boundary approach costs $V-o(1)$ because a uniform vanishing-cost finite-exit continuation is proved explicitly. Policy matching and the short-or-long first-entrance dichotomy place every completed excursion in one fixed-dimensional action tail, so the stochastic proof needs no growing-horizon shorthand or length-class sum (\texttt{BasinExitLower.lean}). Under (SS) alone the boundary-orbit classification used by that theorem is unavailable. Neither issue is classified by the reverse-spectrum node/oscillation transition.
 
 \appendix
-\section{Licensing the reduced satisfaction \eqref{eq:U}}\label{app:reduced}
+\section[Licensing the reduced satisfaction model]{Licensing the reduced satisfaction \eqref{eq:U}}\label{app:reduced}
 
 The reduced form prices agreement through a single coefficient $c$. On the type model, the agreement reward is $-\sum_\tau \pi_\tau (1-d_\tau(\beta))^2 x_\tau^2$ with $d_\tau(\beta) = (1-e_\tau)\beta$.
 
@@ -523,8 +974,16 @@ exactly, for every state and every $\beta$.
 $(1-d_\tau(\beta))^2 = (1-(1-e)\beta)^2 = (1-c\beta)^2$ is type-independent and factors out of the sum.
 \end{proof}
 
-With heterogeneous extraction, write $c_\tau := 1-e_\tau$. The exact aggregate is $-\sum_\tau \pi_\tau (1-c_\tau\beta)^2 x_\tau^2$, whose first-order behavior in $\beta$ matches \eqref{eq:U} with the \emph{deviation-weighted mean} $\bar c(x) := \sum_\tau \pi_\tau c_\tau x_\tau^2 \big/ \sum_\tau \pi_\tau x_\tau^2$ in place of $c$. Because the weights move with the state, $\bar c$ drifts: \eqref{eq:U} is exact in the homogeneous case and a stated approximation otherwise, with error second order in $\beta$ and proportional to the deviation-weighted dispersion of $c_\tau$. The regime in which the approximation matters most --- strongly heterogeneous extraction --- is exactly the regime the laundering analysis of Section~\ref{sec:launder} treats without it.
+With heterogeneous extraction, write $c_\tau := 1-e_\tau$ and $a_\tau:=\pi_\tau x_\tau^2$. When $D:=\sum_\tau a_\tau\ne0$, define the deviation-weighted mean $\bar c(x):=\sum_\tau a_\tau c_\tau/D$. Then the approximation error has the exact weighted-variance form
+\[
+-\sum_\tau a_\tau(1-c_\tau\beta)^2
+=
+-D(1-\bar c(x)\beta)^2
+-\beta^2\sum_\tau a_\tau(c_\tau-\bar c(x))^2.
+\]
+Thus \eqref{eq:U} with $c=\bar c(x)$ is exact up to the displayed nonpositive quadratic correction; at any $\beta\ne0$, it is exact precisely when the deviation-weighted dispersion vanishes (at $\beta=0$, both forms agree automatically). At $D=0$, every $a_\tau$ vanishes under the model's nonnegative population weights, so both the type-level reward and the reduced reward are zero. Because the weights move with the state, $\bar c$ generally drifts. The regime in which the correction matters most -- strongly heterogeneous extraction -- is exactly the regime the laundering analysis of Section~\ref{sec:launder} treats without the reduced form.
 
+\markright{References}
 \bibliographystyle{plainnat}
 \bibliography{civic_drift_refs}
 

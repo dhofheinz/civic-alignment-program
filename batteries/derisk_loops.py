@@ -5,6 +5,7 @@ N0: aggregation-conservation map.  N1: knob-free certificate (small gain).
 N2: gain ceilings.  N3: observability/laundering.  N4: rate separation.
 N5: identification pipeline.
 """
+import sys
 import numpy as np
 rng = np.random.default_rng(23)
 PASS = []
@@ -12,6 +13,14 @@ PASS = []
 def report(name, ok, detail=""):
     PASS.append(ok)
     print(f"{'PASS' if ok else 'FAIL'}  {name}" + (f"  [{detail}]" if detail else ""))
+
+def wilson_interval(successes, trials, z=1.959963984540054):
+    """Two-sided 95% Wilson interval for a seed-sampled Bernoulli frequency."""
+    p = successes / trials
+    denominator = 1 + z ** 2 / trials
+    center = (p + z ** 2 / (2 * trials)) / denominator
+    half_width = z * np.sqrt(p * (1 - p) / trials + z ** 2 / (4 * trials ** 2)) / denominator
+    return center - half_width, center + half_width
 
 # ============================================================================
 # N0: AGGREGATION-CONSERVATION MAP
@@ -356,7 +365,9 @@ for k in range(30):
     lh, eh, gh, I0h = simulate_panel(eta, lam0, g, I0, seed=k)
     errs.append((abs(lh - lam0) / lam0, abs(eh - eta) / eta,
                  abs(gh - g) / lam0, abs(I0h - I0) / I0))
-e = np.array(errs).mean(axis=0)
+err_array = np.array(errs)
+e = err_array.mean(axis=0)
+q90 = np.quantile(err_array, 0.90, axis=0)
 ok_id = e[0] < 0.15 and e[1] < 0.05 and e[2] < 0.25 and e[3] < 0.25
 # certificate pipeline: estimates -> margin -> out-of-sample fate prediction
 ok_pred, n_pred = True, 0
@@ -382,7 +393,9 @@ for k in range(40):
         n_pred += 1
 report("N5   identification: (lam0, eta, g) recovered from panels; estimated certificate "
        "predicts true fate out of sample", ok_id and ok_pred,
-       f"mean errs lam0/eta/g/I0 = {e[0]:.2f}/{e[1]:.3f}/{e[2]:.2f}/{e[3]:.2f}; {n_pred} fate predictions")
+       f"30-panel mean errs lam0/eta/g/I0 = {e[0]:.2f}/{e[1]:.3f}/{e[2]:.2f}/{e[3]:.2f}; "
+       f"90th pct = {q90[0]:.2f}/{q90[1]:.3f}/{q90[2]:.2f}/{q90[3]:.2f}; "
+       f"{n_pred} fate predictions")
 
 # ============================================================================
 # N6: SINGULAR-PERTURBATION LIMIT OF THE SEPARATRIX
@@ -391,7 +404,7 @@ report("N5   identification: (lam0, eta, g) recovered from panels; estimated cer
 # A = 2c(1-c beta), sigma = s + g.  kappa*(beta0) = separatrix scale of the
 # jump map; then  alpha (D_sep - D*(beta0)) -> kappa*.  The continuum integral
 #   K(beta0) = int_{beta0}^{beta_saddle} (1 - s - g) / (2c(1-cb)) db
-# is an upper bound, tight when jumps are small (beta0 near the saddle).
+# is an approximation, tight when jumps are small (beta0 near the saddle).
 # ============================================================================
 from scipy.integrate import quad
 from scipy.optimize import brentq
@@ -537,7 +550,7 @@ slopes = [np.polyfit(np.log(Ts8), np.log(rmse[:, j]), 1)[0] for j in range(4)]
 # assert exactness directly, and the T^(-1/2) law for the three noisy estimators.
 ok8a = all(-0.75 < slopes[j] < -0.3 for j in (0, 2, 3)) and bool(np.all(rmse[:, 1] < 1e-10))
 # safe-side rule
-false_cert, n_cap, power, n_safe = 0, 0, 0, 0
+false_cert, n_cap, power, n_safe, coverage_hits = 0, 0, 0, 0, 0
 for k in range(40):
     eta = rng.uniform(0.35, 0.7); lam0 = rng.uniform(0.08, 0.18)
     g = rng.uniform(0, 0.5 * lam0); I0 = rng.uniform(0.04, 0.12); c = rng.uniform(0.6, 0.9)
@@ -548,21 +561,26 @@ for k in range(40):
         v = rng.uniform(1.6, 2.6) * 2 * c * I0 / (lam0 - g)             # comfortably certified
     lh, eh, gh, Ih, se_lam, cov = simulate_panel_se(eta, lam0, g, I0, 600, seed=777 + k)
     m_hat = v * (lh - gh) - 2 * c * Ih
+    m_true = v * (lam0 - g) - 2 * c * I0
     var_m = (v ** 2) * (se_lam ** 2 + cov[0, 0]) + (2 * c) ** 2 * cov[1, 1]             + 2 * (-v) * (2 * c) * (-1) * cov[0, 1]
     se_m = np.sqrt(max(var_m, 0))
     certify = m_hat - 2 * se_m > 0
+    coverage_hits += int(abs(m_hat - m_true) <= 2 * se_m)
     if danger:
         n_cap += 1
         if certify: false_cert += 1
     else:
         n_safe += 1
         if certify: power += 1
-ok8b = false_cert == 0 and power / max(n_safe, 1) >= 0.8
+coverage_interval = wilson_interval(coverage_hits, 40)
+ok8b = (false_cert == 0 and power / max(n_safe, 1) >= 0.8
+        and coverage_hits / 40 >= 0.8)
 report("N8   inference: RMSE ~ T^(-1/2); safe-side rule (certify iff m - 2SE > 0): zero false"
        " certifications, power retained", ok8a and ok8b,
        f"slopes (lam0,g,I0) = {slopes[0]:.2f}, {slopes[2]:.2f}, {slopes[3]:.2f};"
        f" eta exact (max RMSE {rmse[:, 1].max():.1e}); false certs {false_cert}/{n_cap},"
-       f" power {power}/{n_safe}")
+       f" power {power}/{n_safe}; 2SE coverage {coverage_hits}/40,"
+       f" 95% Wilson [{coverage_interval[0]:.3f}, {coverage_interval[1]:.3f}]")
 
 # ============================================================================
 # N9: NETWORK CERTIFICATE (spectral generalization)
@@ -630,6 +648,125 @@ ok9 = ok9 and abs(Rs - Is_ / (lam0s - gs_)) < 1e-12
 report("N9   network certificate: D <= (Id-Sbar-Gm)^{-1} I policy-free; v_k >= 2 c_k R_k"
        " calibrates all rules; divergence iff rho(Sbar+Gm) >= 1; scalar case recovered", ok9)
 
+# ================================================================ N10: burn decomposition, K-bounds, upper half-limit
+# prop:burn / lem:charcap / prop:sephalf witnesses at the benchmark (g = 0).
+_eta, _c, _l0, _I, _v = 0.5, 0.9, 0.02, 0.02, 0.10
+def _s10(b):   return (1 - _l0) * (1 - _eta * (1 - b)) ** 2
+def _Dst10(b): return _I / (1 - _s10(b))
+def _A10(b):   return 2 * _c * (1 - _c * b)
+def _w10(b):   return (1 - _s10(b)) / _A10(b)
+_qa = _v * (1 - _l0) * _eta ** 2
+_qb = _v * 2 * (1 - _l0) * (1 - _eta) * _eta - 2 * _c * _c * _I
+_qc = _v * (1 - _l0) * (1 - _eta) ** 2 - _v + 2 * _c * _I
+_bdd = (-_qb + np.sqrt(_qb * _qb - 4 * _qa * _qc)) / (2 * _qa)
+
+def _jump10(b0, E0, track=False):
+    b, E = b0, E0; tr = [(b, E)]
+    for _ in range(4000):
+        b2 = min(1.0, b + _A10(b) * E); E = _s10(b) * E; b = b2
+        if track: tr.append((b, E))
+        if E < 1e-18: break
+    return (b, tr) if track else b
+
+def _kap10(b0):
+    lo, hi = 0.0, 0.6
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if _jump10(b0, mid) > _bdd: hi = mid
+        else: lo = mid
+    return 0.5 * (lo + hi)
+
+_ok10 = True; _det10 = []
+for _b0 in [0.4, 0.6, 0.8, 0.9, 0.97]:
+    _ks = _kap10(_b0); _, _tr = _jump10(_b0, _ks, track=True)
+    _riem = sum(_w10(_tr[t][0]) * (_tr[t + 1][0] - _tr[t][0]) for t in range(len(_tr) - 1))
+    _hs = [_A10(_tr[t][0]) * _tr[t][1] for t in range(min(len(_tr) - 1, 200))]
+    _bs = np.linspace(_b0, _bdd, 200001)
+    _K = np.trapezoid(_w10(_bs), _bs); _V = np.abs(np.diff(_w10(_bs))).sum()
+    _ok10 &= abs(_riem - _ks) < 1e-12                                # exact identity
+    _ok10 &= all(_hs[i + 1] < _hs[i] for i in range(len(_hs) - 1))   # jumps strictly decrease
+    _ok10 &= 0 <= _ks - _K <= _hs[0] * _V + 1e-15                    # K <= k* <= K + h0*V (w decreasing)
+    _det10.append((_b0, _ks, _K, _ks / _K - 1))
+_ok10 &= _det10[-1][3] < _det10[0][3] and _det10[-1][3] < 2e-3       # ratio -> 1 near the saddle
+
+# prop:burn(ii), repaired trichotomy: beta_inf is strictly increasing on the
+# unclipped initial segment and identically one above it, and the plateau sits
+# strictly above kappa* -- which is why prop:seplimit is unaffected.
+def _clips10(b0, E0):
+    b, E = b0, E0
+    for _ in range(4000):
+        if b + _A10(b) * E > 1.0: return True
+        E, b = _s10(b) * E, b + _A10(b) * E
+        if E < 1e-18: break
+    return False
+
+def _eclip10(b0):                                                    # sup of the unclipped segment
+    lo, hi = 0.0, 1.0 / (2 * _c ** 2)
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if _clips10(b0, mid): hi = mid
+        else: lo = mid
+    return lo
+
+_top10 = 1.0 / (2 * _c ** 2); _plat10 = []
+for _b0 in [0.0, 0.4, 0.9]:
+    _ec, _ks = _eclip10(_b0), _kap10(_b0)
+    _ok10 &= _ks < _ec                                               # plateau strictly above kappa*
+    _ok10 &= all(_jump10(_b0, x) == 1.0
+                 for x in np.linspace(_ec + 1e-6, _top10 - 1e-9, 40))  # beta_inf == 1 there
+    _sub = [_jump10(_b0, x) for x in np.linspace(0.0, _ec * (1 - 1e-6), 400)]
+    _ok10 &= all(_sub[i] < _sub[i + 1] for i in range(len(_sub) - 1))  # strict below the plateau
+    _plat10.append((_b0, _ks, _ec, (_top10 - _ec) / _top10))
+_ok10 &= _clips10(0.0, 0.6) and _clips10(0.0, 0.61) and 0.61 < _top10  # printed sharpness witness
+_ok10 &= _jump10(0.0, 0.6) == 1.0 and _jump10(0.0, 0.61) == 1.0        # same limit, distinct excesses
+_ok10 &= abs(_plat10[1][3] - 0.61) < 0.01                              # printed 61% at beta_0 = 0.4
+
+def _fate10(b0, D0, al, T):
+    b, D = b0, D0
+    for _ in range(T):
+        b2 = min(1.0, max(0.0, b + al * (-_v + _A10(b) * D))); D = _s10(b) * D + _I; b = b2
+        if b > 0.995 and abs(D - _Dst10(1)) < 1e-4: return True
+        if b < 0.005 and abs(D - _Dst10(0)) < 1e-4: return False
+    return b > 0.5
+_ok10 &= _fate10(_bdd + 0.005, _Dst10(_bdd + 0.005), 0.01, 400000)            # lem:charcap
+_ks4 = _kap10(0.4)
+_ok10 &= _fate10(0.4, _Dst10(0.4) + (_ks4 + 0.02) / 0.005, 0.005, 500000)     # prop:seplimit, above
+_ok10 &= not _fate10(0.4, _Dst10(0.4) + (_ks4 - 0.02) / 0.005, 0.005, 500000) # below: calibrates
+
+# lem:trap at its printed constants (rho = 0.2): the orbit from
+# (bdd - rho, D* + eps*/alpha0) never reaches bdd - rho/2 and calibrates.
+_rho = 0.2
+_grid = np.linspace(0.0, _bdd - _rho / 2, 100001)
+_m10 = -(-_v + _A10(_grid) * _Dst10(_grid)).max()
+_L10 = (_I * (2 * _eta * (1 - _l0) * (1 - _eta * (1 - _grid))) / (1 - _s10(_grid)) ** 2).max()
+_gr1 = np.linspace(0.0, 1.0, 100001)
+_Gb10 = np.abs(-_v + _A10(_gr1) * _Dst10(_gr1)).max()
+_sb10 = 1 - _l0
+_eps10 = _rho * (1 - _sb10) / (16 * _c)
+_a010 = min((1 - _sb10) / (4 * _c * _L10), _m10 * (1 - _sb10) / (16 * _c * _L10 * _Gb10))
+while _a010 * _m10 * (np.log(8 * _c * (_eps10 / _a010) / _m10)
+                      / np.log(1 / (_sb10 + 2 * _c * _a010 * _L10)) + 1) > _rho / 2:
+    _a010 *= 0.8
+_bt, _Dt = _bdd - _rho, _Dst10(_bdd - _rho) + _eps10 / _a010
+_bmax10 = _bt; _calib10 = False
+for _ in range(int(6 * _bdd / (_a010 * _m10)) + 500000):
+    _b2 = min(1.0, max(0.0, _bt + _a010 * (-_v + _A10(_bt) * _Dt)))
+    _Dt = _s10(_bt) * _Dt + _I; _bt = _b2
+    _bmax10 = max(_bmax10, _bt)
+    if _bt < 0.005 and abs(_Dt - _Dst10(0)) < 1e-4: _calib10 = True; break
+_ok10 &= _calib10 and _bmax10 <= _bdd - _rho / 2
+
+report("N10  burn decomposition: kappa* = exact left Riemann sum of the K-integrand; "
+       "K <= kappa* <= K + h0*V; ratio -> 1 near the saddle; beta_inf strictly increasing "
+       "below the clipping plateau and identically one on it, plateau strictly above kappa*; "
+       "characteristic capture; separatrix limit both sides at small alpha; "
+       "sub-saddle trap at printed constants", _ok10,
+       "; ".join(f"b0={b:.2f}: k*={k:.6f}, K={K:.6f}, k*/K-1={r:.1e}" for b, k, K, r in _det10[:3])
+       + "; " + "; ".join(f"b0={b:.1f}: E_clip={e:.6f}, plateau={s:.1%}" for b, k, e, s in _plat10)
+       + f"; trap(rho={_rho}): alpha0={_a010:.1e}, sup_beta={_bmax10:.4f} < {_bdd - _rho/2:.4f}, calibrated={_calib10}")
+
 print()
 print(f"{'='*70}")
 print(f"LOOPS DE-RISK RESULT: {sum(PASS)}/{len(PASS)} suites pass")
+
+sys.exit(0 if all(PASS) else 1)

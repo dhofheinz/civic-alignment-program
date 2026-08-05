@@ -1,0 +1,25 @@
+{
+  "title": "The Civic Alignment Program",
+  "version": "1.0.0",
+  "upload_type": "software",
+  "language": "eng",
+  "creators": [
+    {
+      "name": "Hofheinz, Daniel",
+      "orcid": "0009-0009-5237-5887"
+    }
+  ],
+  "description": "Four papers, three seed-pinned verification batteries, and a Lean 4 formalization of the core theorems on AI deployment and collective epistemic capacity: pressure, drift, capture -- and a pre-registered audit protocol to locate deployments on the ladder. Every quantitative claim in the papers has a named, asserted witness in a battery; the formal results of Papers I-III are machine-checked against Mathlib with no axioms beyond Lean's standard three.\n\nLicensing is path-specific; see LICENSES.md in the archive. The Python batteries and general repository documentation are MIT; the Lean formalization (lean/) is Apache-2.0; the manuscripts, bibliographies, rendered papers, and rendered paper figures are Copyright (c) 2026 Daniel Hofheinz, all rights reserved. No single license identifier covers the whole archive; the record's rights metadata follows LICENSES.md.",
+  "keywords": [
+    "AI alignment",
+    "civic alignment",
+    "collective epistemic capacity",
+    "AI governance",
+    "epistemic externalities",
+    "AI audit",
+    "pre-registration",
+    "dynamical systems",
+    "formal verification",
+    "Lean 4"
+  ]
+}

@@ -4,7 +4,17 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-plt.rcParams.update({"font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["cmr10"],
+    "mathtext.fontset": "cm",
+    "axes.formatter.use_mathtext": True,
+    "font.size": 9,
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "pdf.fonttype": 42,
+})
+PDF_METADATA = {"CreationDate": None, "ModDate": None}
 
 def srate(b, eta, lam0): return (1 - lam0) * (1 - eta * (1 - b)) ** 2
 
@@ -37,11 +47,11 @@ ax.axvline(lam0, color="#c0392b", lw=1.6)
 ax.annotate("divergence wall\n$g=\\lambda_0$", (lam0, 0.55 * vmax), xytext=(lam0 * 0.78, 0.62 * vmax),
             fontsize=8, color="#c0392b", ha="right")
 ax.annotate("certified safe:\nany policy, any rate", (0.012, 0.86 * vmax), fontsize=8, color="#1f5fa8")
-ax.annotate("captured corner stable", (0.012, 0.035), fontsize=8, color="#c0392b")
+ax.annotate("captured corner stable", (0.012, 0.035), fontsize=8, color="#c0392b", va="bottom")
 ax.set_xlabel(r"content gain $g$"); ax.set_ylabel(r"usefulness premium $v$")
 ax.set_xlim(0, lam0 * 1.06); ax.set_ylim(0, vmax)
 ax.legend(loc="center left", fontsize=7, frameon=False)
-fig.tight_layout(); fig.savefig("fig_zones.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_zones.pdf", metadata=PDF_METADATA); plt.close(fig)
 
 # ============ Figure 2: aggregation-conservation cells ============
 fig, ax = plt.subplots(figsize=(5.4, 3.4))
@@ -80,9 +90,9 @@ ax.set_xlabel(r"deference $\beta$")
 ax.set_ylabel(r"stationary gap / gap at $\beta=0$")
 ax.set_ylim(0, 3.0); ax.set_xlim(0, 1)
 ax.legend(loc="upper left", fontsize=6.8, frameon=False)
-fig.tight_layout(); fig.savefig("fig_conservation.png", dpi=220); plt.close(fig)
+fig.tight_layout(); fig.savefig("fig_conservation.pdf", metadata=PDF_METADATA); plt.close(fig)
 
-print("figures written: fig_zones.png fig_conservation.png")
+print("figures written: fig_zones.pdf fig_conservation.pdf")
 
 # ============ Figure 3: separatrix limit (rate separation) ============
 # Recomputes the N6 quantities so the figure is self-contained.
@@ -145,5 +155,5 @@ ax.set_xlabel(r"adaptation rate $\alpha$")
 ax.set_ylabel(r"$\alpha\,(D_{\mathrm{sep}} - D^\ast(\beta_0))$")
 ax.set_ylim(0.2, 0.58)
 ax.legend(fontsize=7, frameon=False, loc="upper left")
-fig.tight_layout(); fig.savefig("fig_ratesep.png", dpi=220); plt.close(fig)
-print("figure written: fig_ratesep.png")
+fig.tight_layout(); fig.savefig("fig_ratesep.pdf", metadata=PDF_METADATA); plt.close(fig)
+print("figure written: fig_ratesep.pdf")

@@ -1,0 +1,16 @@
+Manuscript Rights Notice
+
+Copyright (c) 2026 Daniel Hofheinz. All rights reserved.
+
+This notice applies to every file in this directory. It also applies to the
+rendered paper figures at ../figures/*.pdf, as recorded in ../LICENSES.md.
+These materials are expressly excluded from the MIT License in the repository
+root and from the Apache License 2.0 in ../lean/.
+
+The license selected for a preprint submitted to arXiv governs the copy that
+arXiv distributes. It does not relicense the corresponding manuscript source,
+PDF, bibliography, or figure stored in this repository.
+
+Except as permitted by applicable law, platform terms, or separate written
+permission from the copyright holder, no permission is granted to copy,
+modify, or redistribute these materials.

@@ -2,6 +2,7 @@
 """De-risk battery for Paper IV: The Civic Capture Audit.
 Simulation-based operating characteristics of the protocol's instruments.
 Seed-pinned; every claim destined for the manuscript is asserted here first."""
+import sys
 import numpy as np
 from scipy.optimize import brentq
 from scipy import stats
@@ -39,11 +40,27 @@ def claim_world(T, eta, lam0, I0, g, beta_path, sigma_lab=0.0, n_arr=3, g2=0.0, 
         Dm[t] = sum(claims) * (1 + sigma_lab * r.standard_normal())
     return Dm, mass, ret, exp_, ratios
 
+def newey_west_cov_of_sum(contributions, max_lag=None):
+    """Bartlett-kernel HAC covariance of a sum of influence contributions."""
+    z = np.asarray(contributions, dtype=float)
+    n = len(z)
+    if max_lag is None:
+        max_lag = min(n - 1, int(np.floor(4 * (n / 100) ** (2 / 9))))
+    cov = z.T @ z
+    for lag in range(1, max_lag + 1):
+        weight = 1 - lag / (max_lag + 1)
+        lag_cov = z[lag:].T @ z[:-lag]
+        cov += weight * (lag_cov + lag_cov.T)
+    return (cov + cov.T) / 2
+
 def identify(Dm, mass, ret, exp_, ratios):
-    """The three Loops estimators, audit grade. Returns (lam_hat, se_lam, eta_hat,
-    g_hat, I0_hat, se_g, se_I0)."""
+    """The three Loops estimators, audit grade.
+
+    Returns the legacy scalar estimates/SEs together with the full HAC covariance
+    of (lambda_0, g, I_0), including retirement--content and OLS
+    slope--intercept terms.
+    """
     lam_hat = ret.sum() / exp_.sum()
-    se_lam = np.sqrt(lam_hat * (1 - lam_hat) / exp_.sum())
     u = np.array([a for a, _ in ratios]); rr = np.array([b for _, b in ratios])
     A = np.vstack([np.ones_like(u), u]).T             # ratio = 1 - eta*(1-beta) + noise
     coef, *_ = np.linalg.lstsq(A, rr, rcond=None)
@@ -52,13 +69,22 @@ def identify(Dm, mass, ret, exp_, ratios):
     y = mass[1:]
     beta_ols, res, *_ = np.linalg.lstsq(X, y, rcond=None)
     I0_hat, g_hat = beta_ols
-    dof = len(y) - 2
-    s2 = float(res[0]) / dof if len(res) else np.var(y - X @ beta_ols) * len(y) / dof
-    cov = s2 * np.linalg.inv(X.T @ X)
-    return lam_hat, se_lam, eta_hat, g_hat, I0_hat, np.sqrt(cov[1, 1]), np.sqrt(cov[0, 0])
+    ols_residual = y - X @ beta_ols
+    xtx_inv = np.linalg.inv(X.T @ X)
+
+    # Influence contributions sum to the first-order estimator errors.  Keeping
+    # them in one array retains every covariance among the three loop inputs.
+    influence = np.zeros((len(Dm), 3))                # order: lambda_0, g, I_0
+    influence[:, 0] = (ret - lam_hat * exp_) / exp_.sum()
+    ols_influence = (X @ xtx_inv) * ols_residual[:, None]  # order: I_0, g
+    influence[1:, 1] = ols_influence[:, 1]
+    influence[1:, 2] = ols_influence[:, 0]
+    cov_loop = newey_west_cov_of_sum(influence)
+    se_lam, se_g, se_I0 = np.sqrt(np.maximum(np.diag(cov_loop), 0))
+    return lam_hat, se_lam, eta_hat, g_hat, I0_hat, se_g, se_I0, cov_loop
 
 def est_vc(v_true, c_true, D_op, N=600, sig_u=0.05, seed=None):
-    """Three-arm (v,c) estimation with analytic SEs. Arms at beta = 0.45/0.60/0.75."""
+    """Three-arm (v,c) estimation and their joint delta covariance."""
     r = np.random.default_rng(seed)
     bs = np.array([0.45, 0.60, 0.75]); dlt = 0.15
     means = []; ses = []
@@ -68,12 +94,20 @@ def est_vc(v_true, c_true, D_op, N=600, sig_u=0.05, seed=None):
     m0, m1, m2 = means; s0, s1, s2 = ses
     Up = (m2 - m0) / (2 * dlt); se_Up = np.sqrt(s0 ** 2 + s2 ** 2) / (2 * dlt)
     q = -(m2 - 2 * m1 + m0) / dlt ** 2                 # q = -U'' = 2 c^2 D
-    se_q = np.sqrt(s0 ** 2 + 4 * s1 ** 2 + s2 ** 2) / dlt ** 2
     c_hat = np.sqrt(max(q, 1e-9) / (2 * D_op))
-    se_c = se_q / (4 * c_hat * D_op)
     v_hat = -Up + 2 * c_hat * (1 - c_hat * bs[1]) * D_op
-    se_v = np.sqrt(se_Up ** 2 + (2 * (1 - 2 * c_hat * bs[1]) * D_op * se_c) ** 2)
-    return v_hat, c_hat, se_v, se_c
+
+    # Both estimates use the same three arm means, so their covariance is not
+    # optional.  Different arms are randomized independently; their mean
+    # covariance is diagonal, then propagated through the exact local Jacobian.
+    d_up = np.array([-1 / (2 * dlt), 0.0, 1 / (2 * dlt)])
+    d_q = np.array([-1 / dlt ** 2, 2 / dlt ** 2, -1 / dlt ** 2])
+    d_c = d_q / (4 * c_hat * D_op)
+    d_v = -d_up + 2 * (1 - 2 * c_hat * bs[1]) * D_op * d_c
+    jac = np.vstack([d_v, d_c])
+    cov_vc = jac @ np.diag(np.square(ses)) @ jac.T
+    se_v, se_c = np.sqrt(np.maximum(np.diag(cov_vc), 0))
+    return v_hat, c_hat, se_v, se_c, cov_vc
 
 def quad_t(Dm, mass):
     """Specification guard: t-statistic of the quadratic stock term in the arrival fit."""
@@ -85,7 +119,7 @@ def quad_t(Dm, mass):
     cov = s2 * np.linalg.inv(X.T @ X)
     return co[2] / np.sqrt(cov[2, 2])
 
-def fitted_fate(b0, D0, lam_h, eta_h, I_h, v=0.10, c=0.9, al=0.6, T=30000):
+def fitted_fate(b0, D0, lam_h, eta_h, I_h, v=0.10, c=0.9, al=0.1, T=180000):
     """Basin classification by forward simulation of the STRUCTURALLY fitted map
     s(b) = (1 - lam_h)(1 - eta_h (1 - b))^2, with (lam_h, eta_h, I_h) from the
     identification panel and the operator side (v, c) from the arms."""
@@ -106,27 +140,45 @@ for T in (300, 600):
         eta, lam0, I0, g = 0.5, 0.05, 0.03, 0.02
         bp = 0.45 + 0.35 * np.sin(np.linspace(0, 6 * np.pi, T))
         out = claim_world(T, eta, lam0, I0, g, bp, sigma_lab=0.10, seed=1000 + 7 * T + k)
-        lh, _, eh, gh, ih, _, _ = identify(*out)
+        lh, _, eh, gh, ih, _, _, _ = identify(*out)
         errs[T].append((abs(lh - lam0) / lam0, abs(eh - eta) / eta,
                         abs(gh - g) / lam0, abs(ih - I0) / I0))
 e300, e600 = np.mean(errs[300], 0), np.mean(errs[600], 0)
+q90_600 = np.quantile(np.asarray(errs[600]), 0.90, axis=0)
 ok_a1a = (e600[0] < .08 and e600[1] < .05 and e600[2] < .35 and e600[3] < .15
           and sum(e600 < e300) >= 3)
 # safe-side rule under audit noise: m_hat = v(lam-g) - 2c I0, certify iff m_hat > 2 SE
 v_w, c_w = 0.80, 0.9
-fc = 0; power = 0; n_cert_truth = 0; n_capt_truth = 0
+fc = 0; power = 0; n_cert_truth = 0; n_capt_truth = 0; coverage_hits = 0
 Tc = 1200
 bp_wide = 0.5 + 0.45 * np.sin(np.linspace(0, 4 * np.pi, Tc))   # wide, slow: D varies strongly
-def margin_rule(out, seed, v_true=0.80, c_true=0.9):
-    """Registered certificate rule: five-parameter delta-method SE + curvature guard."""
+def margin_rule(out, seed, v_true=0.80, c_true=0.9, return_details=False):
+    """Registered certificate rule: full five-parameter covariance + guard."""
     Dm_, mass_ = out[0], out[1]
-    lh, sl, eh, gh, ih, sg, si = identify(*out)
-    vh, ch, sev, sec = est_vc(v_true, c_true, 0.30, N=600, seed=seed)
+    lh, sl, eh, gh, ih, sg, si, cov_loop = identify(*out)
+    vh, ch, sev, sec, cov_vc = est_vc(v_true, c_true, 0.30, N=600, seed=seed)
     t2 = quad_t(Dm_, mass_)
     m_hat = vh * (lh - gh) - 2 * ch * ih
-    se_m = np.sqrt(((lh - gh) * sev) ** 2 + (vh * sl) ** 2 + (vh * sg) ** 2
-                   + (2 * ih * sec) ** 2 + (2 * ch * si) ** 2)
-    return (abs(t2) < 2) and (m_hat > 2 * se_m), abs(t2) >= 2
+    grad = np.array([lh - gh, -2 * ih, vh, -vh, -2 * ch])
+    cov5 = np.zeros((5, 5))                           # order: v,c,lambda_0,g,I_0
+    cov5[:2, :2] = cov_vc                             # randomized-arm slice
+    cov5[2:, 2:] = cov_loop                           # loop-panel slice
+    delta_var = float(grad @ cov5 @ grad)
+    se_m = np.sqrt(max(delta_var, 0))
+    decision = ((abs(t2) < 2) and (m_hat > 2 * se_m), abs(t2) >= 2)
+    if not return_details:
+        return decision
+    diagonal_var = float(np.sum(np.square(grad) * np.diag(cov5)))
+    cross_var = float(2 * sum(grad[i] * cov5[i, j] * grad[j]
+                              for i in range(5) for j in range(i + 1, 5)))
+    details = dict(m_hat=m_hat, se_m=se_m, cov5=cov5, grad=grad,
+                   delta_var=delta_var, diagonal_var=diagonal_var,
+                   cross_var=cross_var)
+    return decision[0], decision[1], details
+
+covariance_identity_ok = True
+offdiagonal_active = 0
+max_relative_cross = 0.0
 for k in range(40):
     capturable = (k % 2 == 0)
     lam_c = 0.08
@@ -134,7 +186,19 @@ for k in range(40):
     I0_true = 0.010 if not capturable else 0.03      # certified: m = .8(.08)-1.8(.010) = .046
     out = claim_world(Tc, 0.5, lam_c, I0_true, g_true, bp_wide,
                       sigma_lab=0.10, n_arr=6, seed=5000 + k)
-    certify, _ = margin_rule(out, seed=5500 + k)
+    certify, _, details = margin_rule(out, seed=5500 + k, return_details=True)
+    m_true = v_w * (lam_c - g_true) - 2 * c_w * I0_true
+    coverage_hits += int(abs(details["m_hat"] - m_true) <= 2 * details["se_m"])
+    covariance_identity_ok &= np.isclose(
+        details["delta_var"], details["diagonal_var"] + details["cross_var"],
+        rtol=1e-12, atol=1e-15)
+    vc_cross = details["cov5"][0, 1]
+    gi_cross = details["cov5"][3, 4]
+    if abs(vc_cross) > 1e-14 and abs(gi_cross) > 1e-14:
+        offdiagonal_active += 1
+    max_relative_cross = max(max_relative_cross,
+                             abs(details["cross_var"]) /
+                             max(details["diagonal_var"], 1e-300))
     if capturable:
         n_capt_truth += 1
         if certify: fc += 1
@@ -142,11 +206,20 @@ for k in range(40):
         n_cert_truth += 1
         if certify: power += 1                       # m_true = 0.046 > 0 by construction
 report("A1  loop identification under 10% label noise: estimator errors shrink with T; "
-       "five-parameter safe-side margin (with specification guard) never certifies a "
+       "full-covariance five-parameter safe-side margin (with specification guard) "
+       "never certifies a "
        "capturable loop", ok_a1a and fc == 0
-       and power / max(n_cert_truth, 1) >= 0.7,
+       and power / max(n_cert_truth, 1) >= 0.7 and covariance_identity_ok
+       and offdiagonal_active == 40 and max_relative_cross > 1e-3
+       and coverage_hits / 40 >= 0.8,
        f"T=600 rel errs lam/eta/g/I0 = {e600[0]:.2f}/{e600[1]:.2f}/{e600[2]:.2f}/{e600[3]:.2f}; "
-       f"false-certs {fc}/{n_capt_truth}, power {power}/{n_cert_truth}")
+       f"90th pct = {q90_600[0]:.2f}/{q90_600[1]:.2f}/{q90_600[2]:.2f}/{q90_600[3]:.2f}; "
+       f"false-certs {fc}/{n_capt_truth}, power {power}/{n_cert_truth}; "
+       f"2SE coverage {coverage_hits}/40, exact 95% binomial "
+       f"[{stats.binomtest(coverage_hits, 40).proportion_ci(method='exact').low:.3f}, "
+       f"{stats.binomtest(coverage_hits, 40).proportion_ci(method='exact').high:.3f}]; "
+       f"v-c and g-I0 cross terms active {offdiagonal_active}/40, "
+       f"max |cross|/diagonal variance {max_relative_cross:.2f}")
 
 # ================================================================ A2: statics power (C1-C3)
 def static_audit(Npt, K, same_side=False, sigma_b=0.05, seed=None):
@@ -225,7 +298,7 @@ def run_planar(T, eta, c, lam0, I, v, alpha, b0, D0, dither=0.0, sig_obs=0.0, se
         B[t] = bd; Dm[t] = D * (1 + sig_obs * r.standard_normal()); dUs[t] = dU
     return B, Dm, dUs
 
-def fate(b0, D0, eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, al=0.6, T=20000):
+def fate(b0, D0, eta=0.5, c=0.9, lam0=0.02, I=0.02, v=0.10, al=0.1, T=120000):
     b, D = b0, D0
     for _ in range(T):
         dU = -v + 2 * c * (1 - c * b) * D
@@ -254,14 +327,22 @@ def c4_check(side, seed):
         b0 = 0.60; D0 = 1.5 * _DSEP[b0]; al = 0.01
     B, Dm, dUs = run_planar(250, eta, c, lam0, I, v, al, b0, D0,
                             dither=0.04, sig_obs=0.05, seed=seed)
-    X = np.vstack([np.ones(249), Dm[:-1], B[:-1] * Dm[:-1]]).T
-    co, *_ = np.linalg.lstsq(X, Dm[1:], rcond=None)          # manufacture: coef on b*D > 0
+    # Manufacture regression, instrumented: observation noise on D enters
+    # regressor and response alike, and on the near-collinear interaction
+    # column (corr(D, bD) ~ 0.999 under dither-only beta variation) the
+    # errors-in-variables attenuation can flip the sign. The lagged stock is
+    # a valid instrument since observation noise is i.i.d.
+    y4 = Dm[2:]
+    X4 = np.vstack([np.ones(248), Dm[1:-1], B[1:-1] * Dm[1:-1]]).T
+    Z4 = np.vstack([np.ones(248), Dm[:-2], B[1:-1] * Dm[:-2]]).T
+    X4h = Z4 @ np.linalg.lstsq(Z4, X4, rcond=None)[0]
+    co, *_ = np.linalg.lstsq(X4h, y4, rcond=None)             # manufacture: coef on b*D > 0
     sl, _, _, _, _ = stats.linregress(Dm, dUs)                # ratchet: gradient rises in D
     signs_ok = (co[2] > 0) and (sl > 0)
     bp_id = 0.5 + 0.45 * np.sin(np.linspace(0, 4 * np.pi, 600))
     idp = claim_world(600, eta, lam0, I, 0.0, bp_id, sigma_lab=0.10, n_arr=6,
                       seed=(seed or 0) + 777)
-    lh_, _, eh_, _, ih_, _, _ = identify(*idp)
+    lh_, _, eh_, _, ih_, _, _, _ = identify(*idp)
     return signs_ok, fitted_fate(b0, D0, lh_, eh_, ih_)
 
 ok_signs = 0; ok_basin = 0; n4 = 30
@@ -336,8 +417,8 @@ report("A6  Phi-3 survivorship correction: IPW recovers the harmed-group error u
        f"brutal: true {hb.mean():.3f}, IPW {ipw_b:.3f}")
 
 # ================================================================ A7: Phi-4 pulse operating characteristics
-def pulse_run(b0, D0, rho_pulse, P, T_post=40000, seed=None):
-    et, cc, l0, Iv, vv, av = 0.5, 0.9, 0.02, 0.02, 0.10, 0.6
+def pulse_run(b0, D0, rho_pulse, P, T_post=240000, seed=None):
+    et, cc, l0, Iv, vv, av = 0.5, 0.9, 0.02, 0.02, 0.10, 0.1
     b, D = b0, D0
     for t in range(P):
         dU = -vv + (2 * cc * (1 - cc * b) - rho_pulse) * D
@@ -443,12 +524,12 @@ def misspec_window(T, b0, D0, al, dither, sig_obs, seed):
         B[t] = bd; Dm[t] = D * (1 + sig_obs * r.standard_normal())
     return B, Dm
 
-def misspec_fate(b0, D0, T=40000):
+def misspec_fate(b0, D0, T=240000):
     b, D = b0, D0
     for t in range(T):
         lam_t = 0.02 * (1 + 0.5 * np.sin(2 * np.pi * t / 250))
         dU = -0.10 + 2 * 0.9 * (1 - 0.9 * b) * D
-        b = float(np.clip(b + 0.6 * dU, 0, 1))
+        b = float(np.clip(b + 0.1 * dU, 0, 1))
         D = (1 - lam_t) * (1 - 0.5 * (1 - b)) ** 2 * D + 0.02
         if b > 0.97 and D > 0.5: return True
         if b < 0.03 and D < 0.05: return False
@@ -501,7 +582,7 @@ for j, f in enumerate((0.85, 0.95)):
         idp = claim_world(600, 0.5, 0.02, 0.02, 0.0,
                           0.5 + 0.45 * np.sin(np.linspace(0, 4 * np.pi, 600)),
                           sigma_lab=0.10, n_arr=6, seed=90000 + 100 * j + k)
-        lh_, _, eh_, _, ih_, _, _ = identify(*idp)
+        lh_, _, eh_, _, ih_, _, _, _ = identify(*idp)
         if fitted_fate(b0, D0, lh_, eh_, ih_): false_cap += 1
 for j, f in enumerate((1.05, 1.15)):
     for k in range(10):
@@ -509,7 +590,7 @@ for j, f in enumerate((1.05, 1.15)):
         idp = claim_world(600, 0.5, 0.02, 0.02, 0.0,
                           0.5 + 0.45 * np.sin(np.linspace(0, 4 * np.pi, 600)),
                           sigma_lab=0.10, n_arr=6, seed=91000 + 100 * j + k)
-        lh_, _, eh_, _, ih_, _, _ = identify(*idp)
+        lh_, _, eh_, _, ih_, _, _, _ = identify(*idp)
         if fitted_fate(b0, D0, lh_, eh_, ih_): det_super += 1
 # (b) noisy C5 reads near the state boundary: 2SE-margined criteria
 def noisy_c5(stop, settle, read_seed):
@@ -547,3 +628,5 @@ report("A10 boundary stress: near-separatrix calibrated-truth seeds never classi
 print()
 print("=" * 70)
 print(f"AUDIT DE-RISK RESULT: {sum(PASS)}/{len(PASS)} suites pass")
+
+sys.exit(0 if all(PASS) else 1)

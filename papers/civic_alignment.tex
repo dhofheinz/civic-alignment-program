@@ -1,26 +1,49 @@
-% Civic Alignment: Measuring AI Safety by Collective Epistemic Capacity
-% Daniel Hofheinz --- June 10, 2026, updated July 29, 2026
+\ifdefined\pdfsetrandomseed\pdfsetrandomseed 20260804 \fi
+\newif\ifcivictagged
+\ifdefined\IfFormatAtLeastTF
+\IfFormatAtLeastTF{2025-06-01}{%
+  \DocumentMetadata{lang=en-US,tagging=on}
+  \civictaggedtrue
+}{}
+\fi
 \documentclass[11pt]{article}
-\pdfoutput=1
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{microtype}
 \usepackage{array}
+\usepackage{booktabs}
+\usepackage[font=small,labelfont=bf]{caption}
 \usepackage[round]{natbib}
-\usepackage[hidelinks]{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{xcolor}
+\definecolor{civicref}{HTML}{8C2F1B}
+\definecolor{civiccite}{HTML}{1F5FA8}
+\usepackage[colorlinks,linkcolor=civicref,citecolor=civiccite,urlcolor=civiccite]{hyperref}
+\hypersetup{
+  pdfauthor={Daniel Hofheinz},
+  pdftitle={Civic Alignment: Measuring AI Safety by Collective Epistemic Capacity},
+  pdfsubject={A framework and formal model for evaluating AI deployment by collective epistemic capacity},
+  pdfkeywords={AI alignment, civic alignment, collective epistemic capacity, epistemic externalities, AI governance},
+  pdfcopyright={Copyright (c) 2026 Daniel Hofheinz. All rights reserved.},
+  pdfdisplaydoctitle=true
+}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem{corollary}{Corollary}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
 
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{assumption}{Assumption}
-\newtheorem{observation}{Observation}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{observation}[theorem]{Observation}
 
 \theoremstyle{remark}
-\newtheorem{remark}{Remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+\hfuzz=0.2pt \interfootnotelinepenalty=10000
+\pagestyle{headings}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
 
 \DeclareMathOperator{\MSE}{MSE}
 \DeclareMathOperator{\Var}{Var}
@@ -29,14 +52,16 @@
 \newcommand{\E}{\mathbb{E}}
 
 \title{Civic Alignment: Measuring AI Safety by Collective Epistemic Capacity}
-\author{Daniel Hofheinz}
-\date{July 29, 2026}
+\author{Daniel Hofheinz\\[2pt]
+  {\small \href{mailto:daniel@danielhofheinz.com}{\texttt{daniel@danielhofheinz.com}}
+   \,$\cdot$\, \href{https://orcid.org/0009-0009-5237-5887}{ORCID 0009-0009-5237-5887}}}
+\date{August 5, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Most AI alignment research evaluates whether a model behaves safely and helpfully in individual interactions. But systems deployed at societal scale also shape the shared epistemic environment in which citizens form beliefs, calibrate confidence, deliberate, and govern. This paper introduces civic alignment: the requirement that AI deployment preserve or improve collective epistemic capacity, not merely satisfy users one exchange at a time. Deployment can degrade that capacity through five epistemic externalities --- information pollution, false balance, confidence distortion, agency erosion, and epistemic stratification --- leaving a system strongly interaction-aligned yet civic-misaligned. A deliberately minimal model isolates one sufficient channel: on contested claims, where group beliefs straddle the system's evidence, optimizing per-interaction satisfaction selects deference policies that strictly decrease collective epistemic capacity. The model yields the manipulability gradient, an audit-ready distributional diagnostic for who is harmed fastest as deference rises. We propose the Civic Alignment Battery, an empirical agenda, and design and governance mitigations, so that alignment is measured at the scale at which it is deployed.
+Most AI alignment research evaluates whether a model behaves safely and helpfully in individual interactions. But systems deployed at societal scale also shape the shared epistemic environment in which citizens form beliefs, calibrate confidence, deliberate, and govern. This paper introduces civic alignment: the requirement that AI deployment preserve or improve collective epistemic capacity, not merely satisfy users one exchange at a time. Deployment can degrade that capacity through five epistemic externalities -- information pollution, false balance, confidence distortion, agency erosion, and epistemic stratification -- leaving a system strongly interaction-aligned yet civic-misaligned. A deliberately minimal model isolates one sufficient channel: on contested claims, where group beliefs straddle the system's evidence, optimizing per-interaction satisfaction selects deference policies that strictly decrease collective epistemic capacity. The model yields the manipulability gradient, an audit-ready distributional diagnostic for who is harmed fastest as deference rises. Every formal result is machine-checked in Lean 4, with no axioms beyond Lean's standard three, and carries an independent numerical witness. We propose the Civic Alignment Battery, an empirical agenda, and design and governance mitigations, so that alignment is measured at the scale at which it is deployed.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
@@ -54,7 +79,7 @@ We therefore reframe alignment as a question of \emph{collective epistemic capac
   \item equitable epistemic standing across heterogeneous users.
 \end{itemize}
 
-The core risk is a class of \emph{epistemic externalities}: harms that are invisible to per-turn metrics but accumulate under deployment. The central mechanism is incentive misalignment: optimizing for per-interaction user satisfaction (pleasantness, retention, friction minimization) can select policies that are locally rewarded \citep{perez2022discovering, sharma2024towards, gao2023scaling, sharma2026whos} but globally corrosive---especially in heterogeneous populations. The model is not intended as a complete account of civic alignment. It isolates one sufficient mechanism by which interaction-level optimization can become aggregate-level epistemic harm. The formal result is scoped to contested claims --- those on which group beliefs straddle the system's evidence --- a condition stated, defended, and bounded exactly in Section~\ref{sec:formal}, so no reader meets it for the first time there.
+The core risk is a class of \emph{epistemic externalities}: harms that are invisible to per-turn metrics but accumulate under deployment. The central mechanism is incentive misalignment: optimizing for per-interaction user satisfaction (pleasantness, retention, friction minimization) can select policies that are locally rewarded \citep{perez2022discovering, sharma2024towards, gao2023scaling, sharma2026whos} but globally corrosive -- especially in heterogeneous populations. The model is not intended as a complete account of civic alignment. It isolates one sufficient mechanism by which interaction-level optimization can become aggregate-level epistemic harm. The formal result is scoped to contested claims -- those on which group beliefs straddle the system's evidence -- a condition stated, defended, and bounded exactly in Section~\ref{sec:formal}, so no reader meets it for the first time there. Every formal result below is machine-checked in Lean 4 -- one development that also checks every theorem of the companion dynamics and loop papers -- and carries an independent numerical witness (Remark~\ref{rem:verification}).
 
 \section{Interaction Alignment vs Civic Alignment}\label{sec:vs}
 
@@ -62,38 +87,44 @@ The core risk is a class of \emph{epistemic externalities}: harms that are invis
 
 \paragraph{Civic alignment.} Civic alignment evaluates the system as deployed infrastructure. It asks: after months or years of widespread use, are citizens collectively more capable of reasoning together and governing themselves? This distinction matters because deployment changes both the environment and the users: cheap fluency reshapes the information commons; incentives select for agreeable outputs; and unequal verification capacity produces stratification. The upshot is a divergence: a system can be strongly interaction-aligned yet civic-misaligned if its deployment increases the prevalence of misleading claims, encourages false balance, inflates confidence, erodes agency, or widens epistemic inequality.
 
-\paragraph{Three tiers of diagnosis.} The interaction/civic distinction supports a measurement architecture, used in this paper at its first tier and instrumented dynamically in the companion papers --- same-author working papers, cited as derivations rather than independent evidence. Table~\ref{tab:tiers} fixes the vocabulary. Three rules govern its use: verdicts do not transfer across tiers --- a positive pressure finding licenses no drift claim, and a system under drift is \emph{drifting toward capture}, never \emph{captured}; no tier may be instrumented through satisfaction telemetry alone, since the captured state is precisely the state in which the operator's own metric has gone blind; and the strongest empirical claim the program defends is conditional, stated as the battery's closing sentence in Section~\ref{sec:battery}.
+\paragraph{Three tiers of diagnosis.} The interaction/civic distinction supports a measurement architecture, used in this paper at its first tier and instrumented dynamically in the companion papers -- same-author, cited as derivations rather than independent evidence. Table~\ref{tab:tiers} fixes the vocabulary. Three rules govern its use: verdicts do not transfer across tiers -- a positive pressure finding licenses no drift claim, and a system under drift is \emph{drifting toward capture}, never \emph{captured}; no tier may be instrumented through satisfaction telemetry alone, since the captured state is precisely the state in which the operator's own metric has gone blind; and the strongest empirical claim the program defends is conditional, stated as the battery's closing sentence in Section~\ref{sec:battery}.
 
 \begin{table}[t]
 \centering\small
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{7.2cm}>{\raggedright\arraybackslash}p{4.4cm}}
-\hline
+\toprule
 Tier & Definition & Licensed verdict \\
-\hline
+\midrule
 Civic misalignment pressure & The satisfaction gradient rewards behavior that worsens civic-capacity metrics, event by event: a statement about incentives at a point. & On this stream, the satisfaction gradient points toward civic harm. \\
 Civic drift & Repeated operator optimization, coupled to the population feedback it induces, moves the deployed state toward worse civic states: a statement about trajectories. & The deployment is moving toward the basin boundary. \\
 Civic capture & Basin membership: the satisfaction gradient pins deference, capacity degrades toward its floor, and satisfaction telemetry is structurally blind to the harmed group. & Satisfaction telemetry is no longer informative about the harmed group. \\
-\hline
+\bottomrule
 \end{tabular}
 \caption{The diagnostic ladder. This paper's formal results live at the first tier; the companion dynamics paper proves the second and third and instruments all three.}
 \label{tab:tiers}
 \end{table}
 
-\paragraph{Relation to existing work.} The gap we target sits at the intersection of several literatures. Interaction-level alignment research documents how preference optimization rewards agreeable and confident outputs---sycophancy \citep{perez2022discovering, sharma2024towards}, reward-model overoptimization \citep{gao2023scaling, casper2023open}, unintended persuasiveness under RLHF \citep{wen2025language}, and feedback-driven manipulation \citep{williams2024targeted}---but it stops short of modeling the endogenous population-level feedback dynamics studied here. Social epistemology supplies the population-level target: knowledge as a property of communities and their institutions \citep{goldman1999knowledge, anderson2006epistemology, nguyen2020echo}, operationalized for policy as ``epistemic security'' \citep{seger2020tackling}. Structural and accumulative accounts of AI risk argue that harms of exactly this type can accumulate to decisive scale without any single misaligned action \citep{zwetsloot2019thinking, kasirzadeh2025two}. Our formal substrate is classical: convex-combination belief updating in the tradition of \citet{degroot1974reaching} and \citet{friedkin1990social}, whose population-level properties are well understood \citep{golub2010naive}, paired with a one-parameter policy in the spirit of information design \citep{kamenica2011bayesian}. Finally, sociotechnical evaluation frameworks call for assessing AI systems at the level of deployed impact \citep{weidinger2023sociotechnical, solaiman2023evaluating}; the Civic Alignment Battery (Section~\ref{sec:battery}) is a concrete instantiation for the epistemic domain.
+\paragraph{Relation to existing work.} The gap we target sits at the intersection of several literatures. Interaction-level alignment research documents how preference optimization rewards agreeable and confident outputs -- sycophancy \citep{perez2022discovering, sharma2024towards}, reward-model overoptimization \citep{gao2023scaling, casper2023open}, unintended persuasiveness under RLHF \citep{wen2025language}, and feedback-driven manipulation \citep{williams2025targeted} -- but it stops short of modeling the endogenous population-level feedback dynamics studied here. Where such feedback is modeled, it is as performative prediction -- decision rules optimized against distributions they themselves induce, with performative stability the central solution concept \citep{perdomo2020performative, hardt2023performative} -- as hidden incentives for auto-induced distributional shift \citep{krueger2020hidden}, as induced preference shifts in recommenders and the reward-tampering incentives behind them \citep{carroll2022estimating, everitt2021reward}, or as recommender feedback loops that homogenize the behavior they train on \citep{chaney2018algorithmic, jiang2019degenerate}; those lines establish the loop's existence and its hazards for the optimizer's own objective, while the object here is the population's epistemic capacity, and the companion papers prove dynamics with no analogue at a performatively stable point -- bistable capture with an asymmetric price schedule, and a satisfaction channel structurally blind at exactly the captured state \citep{hofheinz2026drift, hofheinz2026loops}.
+
+Social epistemology supplies the population-level target: knowledge as a property of communities and their institutions \citep{goldman1999knowledge, anderson2006epistemology, nguyen2020echo}, operationalized for policy as ``epistemic security'' \citep{seger2020tackling}. Structural and accumulative accounts of AI risk argue that harms of exactly this type can accumulate to decisive scale without any single misaligned action \citep{zwetsloot2019thinking, kasirzadeh2025two}.
+
+Our formal substrate is classical: convex-combination belief updating in the tradition of \citet{degroot1974reaching} and \citet{friedkin1990social}, whose population-level properties are well understood \citep{golub2010naive} -- though experimentally even mild social influence can narrow the spread of estimates while raising confidence and leaving accuracy unimproved \citep{lorenz2011social}, so aggregation is not self-correcting and a capacity functional has work to do. The nonlinear branch of that same literature, in which a bounded confidence radius alone yields consensus, polarization, or fragmentation \citep{hegselmann2002opinion, deffuant2000mixing}, generates its multiplicity from peer interaction among symmetric agents; here the asymmetry is an optimizing intermediary shared by everyone, and the policy class is a one-parameter reduced form in the spirit of information design \citep{kamenica2011bayesian}. The nearest antecedent of the mechanism itself is the economics of media slant, where a supplier accommodates audience priors to maximize demand and, precisely on divisive topics, segments the market and slants toward its own audience's bias \citep{mullainathan2005market, gentzkow2006media}; that literature prices the supplier's revenue and takes reader beliefs as the given input, whereas the quantity at issue here is what the accommodation does to the population's collective epistemic capacity, and the contested-claim condition of Assumption~\ref{ass:straddle} is the same divisiveness condition read as a constraint on when the harm is provable.
+
+Finally, sociotechnical evaluation frameworks call for assessing AI systems at the level of deployed impact \citep{weidinger2023sociotechnical, solaiman2025evaluating}; the Civic Alignment Battery (Section~\ref{sec:battery}) is a concrete instantiation for the epistemic domain.
 
 \section{Epistemic Externalities (Failure Modes at Scale)}\label{sec:externalities}
 
 We define \emph{epistemic externalities} as second-order effects of AI deployment on the information environment and users' epistemic agency that are not captured by per-interaction success metrics.
 \begin{enumerate}
-  \item \textbf{Information pollution (plausibility flooding):} mass production of fluent but low-quality claims, synthetic ``sources,'' and persuasion-at-scale reduces signal-to-noise in the commons---a vulnerability documented before generative deployment \citep{vosoughi2018spread, lazer2018science} and extended by generative models \citep{goldstein2023generative}.
+  \item \textbf{Information pollution (plausibility flooding):} mass production of fluent but low-quality claims, synthetic ``sources,'' and persuasion-at-scale reduces signal-to-noise in the commons -- a vulnerability documented before generative deployment \citep{vosoughi2018spread, lazer2018science} and extended by generative models \citep{goldstein2023generative}.
   \item \textbf{False balance / over-neutrality:} rhetorical symmetry for evidentially asymmetric disputes misleads about evidential status \citep{boykoff2004balance, koehler2016can}.
-  \item \textbf{Confidence distortion:} fluent, confident outputs can lead users to over-infer certainty, increasing confidence without evidence (confidence--warrant gap) \citep{alter2009uniting, kidd2023how, zhou2024relying}.
+  \item \textbf{Confidence distortion:} fluent, confident outputs can lead users to over-infer certainty, increasing confidence without evidence (confidence--warrant gap) \citep{alter2009uniting, kidd2023how, zhou2024relying}; the decoupling is not specific to AI, since social information alone can raise subjective confidence while leaving accuracy flat \citep{lorenz2011social}.
   \item \textbf{Agency erosion / atrophy:} ``just answer'' interfaces can reduce practice in reasoning and verification \citep{bainbridge1983ironies, parasuraman1997humans, sparrow2011google, bucinca2021trust, sharma2026whos}; early longitudinal evidence finds in-session gains alongside declining unassisted discernment \citep{rani2026dialogues}.
-  \item \textbf{Epistemic stratification:} benefits accrue to users who can interrogate and verify; others become more vulnerable to errors and persuasion---producing a \emph{manipulability gradient}, whose pre-AI antecedent is the second-level digital divide \citep{hargittai2002second}.
+  \item \textbf{Epistemic stratification:} benefits accrue to users who can interrogate and verify; others become more vulnerable to errors and persuasion -- producing a \emph{manipulability gradient}, whose pre-AI antecedent is the second-level digital divide \citep{hargittai2002second}.
 \end{enumerate}
 These are safety-relevant because they determine whether societies can coordinate on shared facts and resist manipulation at scale.
 
-The five externalities map onto the formal apparatus unevenly, and deliberately so. Information pollution and epistemic stratification are carried directly by the model's accuracy, fragmentation, and gap terms (Section~\ref{sec:formal}). Agency erosion is precisely the endogenous-responsiveness extension --- a slow drift in $\eta_t$, trust in evidence, coupled to realized accuracy --- announced as an open problem in the companion dynamics paper rather than modeled here \citep{hofheinz2026drift}. False balance and confidence distortion are battery-measured but deliberately not modeled; the same open problem is the modeling path toward both. The formal section models one externality channel because one suffices for the selection theorem; the battery measures all five.
+The five externalities map onto the formal apparatus unevenly, and deliberately so. Information pollution and epistemic stratification are carried directly by the model's accuracy, fragmentation, and gap terms (Section~\ref{sec:formal}). Agency erosion is precisely the endogenous-responsiveness extension -- a slow drift in $\eta_t$, trust in evidence, coupled to realized accuracy -- announced as an open problem in the companion dynamics paper rather than modeled here \citep{hofheinz2026drift}. False balance and confidence distortion are battery-measured but deliberately not modeled; the same open problem is the modeling path toward both. The formal section models one externality channel because one suffices for the selection theorem; the battery measures all five.
 
 \section{Formalization}\label{sec:formal}
 
@@ -124,9 +155,9 @@ where $\beta \in [0,1]$ is the global deference knob and effective deference dif
 \begin{equation}\label{eq:deference}
 d_L(\beta) = \beta, \qquad d_H(\beta) = (1-\kappa)\beta, \qquad \kappa \in (0,1].
 \end{equation}
-Interpretation: high-literacy users can partially ``see through'' deference by checking sources or adversarial prompting. Note that the policy conditions on $b_i$: the system implicitly infers user beliefs from context, which is precisely the mechanism of sycophancy \citep{perez2022discovering, sharma2024towards}. Throughout, $\beta$ is a reduced-form deference/accommodation coordinate, compressing sycophancy, user-belief accommodation, friction minimization, and satisfaction tuning into one parameter --- not a literal product knob.
+Interpretation: high-literacy users can partially ``see through'' deference by checking sources or adversarial prompting. Note that the policy conditions on $b_i$: the system implicitly infers user beliefs from context, which is precisely the mechanism of sycophancy \citep{perez2022discovering, sharma2024towards}. Throughout, $\beta$ is a reduced-form deference/accommodation coordinate, compressing sycophancy, user-belief accommodation, friction minimization, and satisfaction tuning into one parameter -- not a literal product knob.
 
-\paragraph{User update.}
+\paragraph{User update.} The user's belief then updates as
 \begin{equation}\label{eq:update}
 b_i'(\beta) \;=\; \bigl(1 - \eta_{\tau(i)}\bigr) b_i \;+\; \eta_{\tau(i)}\, y_i(\beta).
 \end{equation}
@@ -155,15 +186,39 @@ By the law of total variance, the cross-sectional belief variance decomposes as 
 \end{remark}
 
 \begin{remark}[One-step scope]\label{rem:onestep}
-$C$ evaluates a single update on a single event. The intended deployment interpretation is a stream of distinct salient claims, each encountered once or a few times, so the per-event one-step object is the relevant unit and the results below hold claim-by-claim. Repeated interaction on one fixed event has different dynamics: iterating \eqref{eq:update} gives effective weight $w_\tau^{(t)} = 1-(1-w_\tau)^t$, which grows with $t$ and can eventually \emph{over}weight a single noisy posterior $m$, so that deference dampens over-anchoring rather than diluting evidence. Those dynamics are the natural target of the longitudinal designs in Section~\ref{sec:empirical}, not of this one-step analysis. The boundary is itself estimable: the companion derives the closed-form horizon threshold $T^\star = \ln(1-w^\star)/\ln(1-\eta)$, past which marginal deference becomes locally corrective for the truth-side group while remaining harmful for the far-side group --- a falsifiable sign-flip prediction for longitudinal designs \citep{hofheinz2026drift}.
+$C$ evaluates a single update on a single event. The intended deployment interpretation is a stream of distinct salient claims, each encountered once or a few times, so the per-event one-step object is the relevant unit and the results below hold claim-by-claim. Repeated interaction on one fixed event has different dynamics: iterating \eqref{eq:update} gives effective weight $w_\tau^{(t)} = 1-(1-w_\tau)^t$, which grows with $t$ and can eventually \emph{over}weight a single noisy posterior $m$, so that deference dampens over-anchoring rather than diluting evidence. Those dynamics are the natural target of the longitudinal designs in Section~\ref{sec:empirical}, not of this one-step analysis. The boundary is itself estimable: the companion derives the closed-form horizon threshold $T^\star = \ln(1-w^\star)/\ln(1-\eta)$, past which marginal deference becomes locally corrective for the truth-side group while remaining harmful for the far-side group -- a falsifiable sign-flip prediction for longitudinal designs \citep{hofheinz2026drift}.
 \end{remark}
+
+\begin{proposition}[Finite-corpus lifting]\label{prop:corpus}
+Let $\mathcal J$ be a finite registered claim corpus with weights $q_j\ge0$,
+$\sum_{j\in\mathcal J}q_j=1$, and event-level capacities $C_j(\beta)$ on a
+common policy domain $B$. Define pooled capacity
+$\bar C_q(\beta):=\sum_jq_jC_j(\beta)$. If every $C_j$ is non-increasing on
+$B$, and some claim $j_0$ with $q_{j_0}>0$ has $C_{j_0}$ strictly decreasing
+on $B$, then $\bar C_q$ is strictly decreasing on $B$. At every point where
+the event-level derivatives exist,
+\begin{equation}\label{eq:corpusderiv}
+\bar C_q'(\beta)=\sum_{j\in\mathcal J}q_jC_j'(\beta).
+\end{equation}
+Consequently, if only a subset $A\subseteq\mathcal J$ is known to have
+negative derivatives, its positive audit share alone does not sign the pooled
+derivative: the exact registered condition is
+$\sum_{j\in A}q_jC_j'(\beta)+\sum_{j\notin A}q_jC_j'(\beta)<0$.
+\end{proposition}
+\begin{proof}
+For $\beta_1<\beta_2$ in $B$, every weighted difference
+$q_j[C_j(\beta_2)-C_j(\beta_1)]$ is non-positive and the $j_0$ term is
+strictly negative, so their finite sum is strictly negative. Equation
+\eqref{eq:corpusderiv} follows by differentiating the finite sum. The final
+claim is the same identity split over $A$ and its complement.
+\end{proof}
 
 \subsection{Assumptions}\label{sec:assumptions}
 
 We first record a structural fact about the error geometry of this setup.
 
 \begin{observation}[Error correlation is automatically nonnegative]\label{obs:gamma}
-Given the supports $\theta \in \{0,1\}$ and $b_i, m \in [0,1]$, the product $(b_i-\theta)(m-\theta)$ is nonnegative pointwise: for $\theta = 1$ both factors are $\le 0$; for $\theta = 0$ both are $\ge 0$. Hence $\gamma_\tau \ge 0$, with equality only in degenerate cases ($m = \theta$ or $\mu_\tau = \theta$). In particular, exact orthogonality $\E[(b_i-\theta)(m-\theta) \mid \tau] = 0$---standard in signal-extraction models---is incompatible with this setup outside those degenerate cases, so all results track $\gamma_\tau$ explicitly. Moreover $\gamma_\tau = \sqrt{\delta_m}\,\lvert \mu_\tau - \theta\rvert \le \sqrt{\delta_m \delta_\tau}$. Lemma~\ref{lem:mse} shows $\gamma_\tau \ge 0$ is the \emph{benign} direction.
+Given the supports $\theta \in \{0,1\}$ and $b_i, m \in [0,1]$, the product $(b_i-\theta)(m-\theta)$ is nonnegative pointwise: for $\theta = 1$ both factors are $\le 0$; for $\theta = 0$ both are $\ge 0$. Hence $\gamma_\tau \ge 0$, with equality only in degenerate cases ($m = \theta$ or $\mu_\tau = \theta$). In particular, exact orthogonality $\E[(b_i-\theta)(m-\theta) \mid \tau] = 0$ -- standard in signal-extraction models -- is incompatible with this setup outside those degenerate cases, so all results track $\gamma_\tau$ explicitly. Moreover $\gamma_\tau = \sqrt{\delta_m}\,\lvert \mu_\tau - \theta\rvert \le \sqrt{\delta_m \delta_\tau}$. Lemma~\ref{lem:mse} shows $\gamma_\tau \ge 0$ is the \emph{benign} direction.
 \end{observation}
 
 \begin{assumption}[Evidence beats priors on average]\label{ass:evidence}
@@ -190,7 +245,7 @@ $\kappa \in (0,1]$, as in \eqref{eq:deference}.
 Let $u_i(\beta)$ denote user $i$'s per-interaction satisfaction. The trained/deployed objective $U(\beta) := \E[u_i(\beta)]$ is continuously differentiable on $[0,1]$ and satisfies $U'(0) > 0$. A sufficient behavioral form: reward increases with agreement and decreases with belief-change magnitude; since the agreement gap $\lvert y_i(\beta) - b_i\rvert = (1-d_{\tau(i)}(\beta))\lvert m - b_i\rvert$ and the change magnitude $\lvert b_i'(\beta) - b_i\rvert = w_{\tau(i)}(\beta)\lvert m - b_i\rvert$ are both non-increasing in $\beta$, deference is locally rewarded.
 \end{assumption}
 
-Empirically, human and learned preference signals do reward agreement and confident delivery \citep{sharma2024towards, zhou2024relying}, and optimizing models against such signals can produce targeted accommodation of user beliefs and convincing-but-wrong outputs \citep{williams2024targeted, wen2025language}.\footnote{A 2026 replication/critique reports that the result of \citet{wen2025language} disappears under a corrected experimental setup (\url{https://iclr-blogposts.github.io/2026/blog/2026/mislead-lm/}); it is cited here as contested supplementary evidence, with \citet{williams2024targeted} carrying the claim.}
+Empirically, human and learned preference signals do reward agreement and confident delivery \citep{sharma2024towards, zhou2024relying}, and optimizing models against such signals can produce targeted accommodation of user beliefs and convincing-but-wrong outputs \citep{williams2025targeted, wen2025language}.\footnote{A 2026 replication/critique reports that the reward hacking of \citet{wen2025language} disappears in the one setting it reran with a corrected setup (\url{https://iclr-blogposts.github.io/2026/blog/2026/mislead-lm/}); it is cited here as contested supplementary evidence, with \citet{williams2025targeted} carrying the claim.}
 
 \begin{assumption}[Evidence-dilution regime]\label{ass:dilution}
 For each type,
@@ -201,7 +256,7 @@ For each type,
 
 The theorem applies where users are not already overweighting the system's evidence relative to their own priors; that is, where increased deference mainly deprives them of useful corrective information rather than protecting them from excessive AI influence.
 
-Interpretation: users place at most the MSE-optimal weight on evidence at baseline, so increasing deference (which dilutes evidence) increases type MSE. In many deployed settings, limited attention, motivated reasoning, and trust calibration imply $\eta_\tau$ is well below $1$, making this regime behaviorally plausible. Moreover, the threshold $\delta_\tau/(\delta_\tau + \delta_m)$ is directly estimable from labeled audits, so the condition is testable pre-deployment. (With nonnegative error correlation the true optimal weight is weakly \emph{higher}---see the proof of Lemma~\ref{lem:mse}---so this $\gamma$-free threshold is the conservative, audit-friendly sufficient condition.)
+Interpretation: users place at most the MSE-optimal weight on evidence at baseline, so increasing deference (which dilutes evidence) increases type MSE. In many deployed settings, limited attention, motivated reasoning, and trust calibration imply $\eta_\tau$ is well below $1$, making this regime behaviorally plausible. Moreover, the threshold $\delta_\tau/(\delta_\tau + \delta_m)$ is estimable from labeled audits under the companion protocol's registered design \citep{hofheinz2026audit}, so the condition is testable pre-deployment. (With nonnegative error correlation the true optimal weight is weakly \emph{higher} -- see the proof of Lemma~\ref{lem:mse} -- so this $\gamma$-free threshold is the conservative, audit-friendly sufficient condition.)
 
 \subsection{Monotonicity lemmas}\label{sec:lemmas}
 
@@ -241,7 +296,7 @@ by Observation~\ref{obs:gamma} and Assumption~\ref{ass:evidence}. Hence, by Assu
 \end{proof}
 
 \begin{remark}[Why $\gamma_\tau \ge 0$ is benign]\label{rem:gammabenign}
-The correlation term raises the MSE-optimal evidence weight from $\delta_\tau/(\delta_\tau+\delta_m)$ to $(\delta_\tau-\gamma_\tau)/(\delta_\tau+\delta_m-2\gamma_\tau)$, so the $\gamma$-free dilution condition \eqref{eq:dilution} remains sufficient. \emph{Negative} correlation would lower the optimal weight and could overturn the monotonicity---but Observation~\ref{obs:gamma} rules it out in this setup.
+The correlation term raises the MSE-optimal evidence weight from $\delta_\tau/(\delta_\tau+\delta_m)$ to $(\delta_\tau-\gamma_\tau)/(\delta_\tau+\delta_m-2\gamma_\tau)$, so the $\gamma$-free dilution condition \eqref{eq:dilution} remains sufficient. \emph{Negative} correlation would lower the optimal weight and could overturn the monotonicity -- but Observation~\ref{obs:gamma} rules it out in this setup.
 \end{remark}
 
 \begin{lemma}[Within-type fragmentation is non-decreasing]\label{lem:within}
@@ -263,7 +318,7 @@ In the ordering $\mu_L < m < \mu_H$ of Assumption~\ref{ass:straddle}, $g(\beta) 
 \end{lemma}
 
 \begin{proof}
-Taking $\E[\,\cdot \mid \tau]$ in \eqref{eq:weightform} gives $\mu_\tau'(\beta) - m = (1-w_\tau(\beta))(\mu_\tau - m)$; subtracting across types yields the displayed $g$, and differentiating (with $dw_L/d\beta = -\eta_L$, $dw_H/d\beta = -(1-\kappa)\eta_H$) yields $g'$. Suppose $\mu_L < m < \mu_H$. Then both summands of $g$ are nonnegative, and $g'$ is the sum of a nonnegative term and the strictly positive term $\eta_L(m-\mu_L)$. If $g(0) > 0$, $g$ is positive and strictly increasing, so $g^2$ is strictly increasing; if $g(0) = 0$, then $g(\beta) = g'\,\beta$ and $g(\beta)^2 = (g')^2 \beta^2$, again strictly increasing on $[0,1]$. The mirrored ordering flips the sign of $g$ and of $g'$ simultaneously, leaving $\lvert g \rvert$ and $g^2$ unaffected. Intuitively, deference re-anchors each group toward its own prior mean and away from the shared evidence; with the means on opposite sides of $m$, both motions widen the gap---and when $\eta_L \ge (1-\kappa)\eta_H$ (in particular under the credulity ordering $\eta_L \ge \eta_H$), the low-literacy group's evidence weight falls the faster, leaving it more prior-anchored relative to the shared evidence.
+Taking $\E[\,\cdot \mid \tau]$ in \eqref{eq:weightform} gives $\mu_\tau'(\beta) - m = (1-w_\tau(\beta))(\mu_\tau - m)$; subtracting across types yields the displayed $g$, and differentiating (with $dw_L/d\beta = -\eta_L$, $dw_H/d\beta = -(1-\kappa)\eta_H$) yields $g'$. Suppose $\mu_L < m < \mu_H$. Then both summands of $g$ are nonnegative, and $g'$ is the sum of a nonnegative term and the strictly positive term $\eta_L(m-\mu_L)$. If $g(0) > 0$, $g$ is positive and strictly increasing, so $g^2$ is strictly increasing; if $g(0) = 0$, then $g(\beta) = g'\,\beta$ and $g(\beta)^2 = (g')^2 \beta^2$, again strictly increasing on $[0,1]$. The mirrored ordering flips the sign of $g$ and of $g'$ simultaneously, leaving $\lvert g \rvert$ and $g^2$ unaffected. Intuitively, deference re-anchors each group toward its own prior mean and away from the shared evidence; with the means on opposite sides of $m$, both motions widen the gap -- and when $\eta_L \ge (1-\kappa)\eta_H$ (in particular under the credulity ordering $\eta_L \ge \eta_H$), the low-literacy group's evidence weight falls the faster, leaving it more prior-anchored relative to the shared evidence.
 \end{proof}
 
 \begin{remark}[Straddling is needed: a same-side counterexample]\label{rem:counter}
@@ -293,7 +348,7 @@ For $0 \le \beta_1 < \beta_2 \le 1$: the accuracy term strictly worsens (Lemma~\
 \end{proof}
 
 \begin{remark}[Safety interpretation]\label{rem:safety}
-Theorem~\ref{thm:main} formalizes the ``strongly interaction-aligned yet civic-misaligned'' divergence: a system can remain polite, compliant, and even ``honest'' in the narrow sense while satisfaction pressure selects a deference policy ($\beta^\star > 0$) that reduces truth correction, increases fragmentation, and widens distributional epistemic gaps. The contested-claim condition (Assumption~\ref{ass:straddle}) delimits scope honestly: the result is a statement about claims on which groups disagree around the evidence---precisely the claims most consequential for collective self-governance. The theorem's substantive content is the strict monotone decrease of capacity under the dilution regime --- the lemma chain --- while the selection clause $\beta^\star > 0$ follows immediately from Assumption~\ref{ass:satisfaction} and is reduced-form by construction. The division matters: that satisfaction favors deference is an empirically grounded premise, not the conclusion, and the harm is proved, not assumed.
+Theorem~\ref{thm:main} formalizes the ``strongly interaction-aligned yet civic-misaligned'' divergence: a system can remain polite, compliant, and even ``honest'' in the narrow sense while satisfaction pressure selects a deference policy ($\beta^\star > 0$) that reduces truth correction, increases fragmentation, and widens distributional epistemic gaps. The contested-claim condition (Assumption~\ref{ass:straddle}) delimits scope honestly: the result is a statement about claims on which groups disagree around the evidence -- precisely the claims most consequential for collective self-governance. The theorem's substantive content is the strict monotone decrease of capacity under the dilution regime -- the lemma chain -- while the selection clause $\beta^\star > 0$ follows immediately from Assumption~\ref{ass:satisfaction} and is reduced-form by construction. The division matters: that satisfaction favors deference is an empirically grounded premise, not the conclusion, and the harm is proved, not assumed.
 \end{remark}
 
 \section{Manipulability Gradient}\label{sec:mg}
@@ -350,7 +405,7 @@ Suppose Assumption~\ref{ass:dilution} holds. If $\eta_L h_L \ge \eta_H h_H$ and 
 \[
 \MG(0) \;\ge\; 2\,\kappa\,\eta_H\, h_H \;>\; 0.
 \]
-In particular, $\MG(0) > 0$ whenever the credulity ordering $\eta_L \ge \eta_H$ holds together with marginal-harm dominance $h_L \ge h_H$ (with $h_H > 0$ and $\kappa > 0$). Both brackets $h_\tau$ are estimable from the same audit as Remark~\ref{rem:operational}, so the sign condition is checkable, not merely assumable.
+In particular, $\MG(0) > 0$ whenever the credulity ordering $\eta_L \ge \eta_H$ holds together with marginal-harm dominance $h_L \ge h_H$ (with $h_H > 0$ and $\kappa > 0$). Both brackets $h_\tau$ are estimable from the same audit as Remark~\ref{rem:operational}, so the sign condition is checkable under a registered audit design, not merely assumable.
 \end{corollary}
 
 \begin{proof}
@@ -358,34 +413,45 @@ $\MG(0) = 2[\eta_L h_L - (1-\kappa)\eta_H h_H] \ge 2[\eta_H h_H - (1-\kappa)\eta
 \end{proof}
 
 \begin{remark}[Operational use in safety evaluation]\label{rem:operational}
-$\MG(0)$ is directly estimable in a controlled study: estimate $(\eta_H, \eta_L)$ from belief updates under a baseline interface; estimate $(\delta_H, \delta_L)$ from pre-interaction errors; estimate $\delta_m$ from the evidence posterior; estimate $\gamma_\tau$ from the same audit (event-by-event it equals $(m-\theta)(\mu_\tau-\theta)$, by \eqref{eq:gamma}); estimate $\kappa$ from differential ``extraction'' performance. Belief-update study designs of this kind are already practical at scale \citep{costello2024durably, salvi2025conversational}.\footnote{\citet{costello2024durably} carries an Editorial Expression of Concern issued by \emph{Science} on June 11, 2026 (doi:10.1126/science.aej2383), concerning dataset and screening-criteria inconsistencies; the authors' corrected analysis is under evaluation. It is cited here as a feasibility precedent only.} A positive $\MG(0)$ indicates that marginal increases in pleasantness/deference widen the type gap in error---a distributional safety failure mode.
+$\MG(0)$ is estimable in a registered controlled study: estimate $(\eta_H, \eta_L)$ from belief updates under a baseline interface; estimate $(\delta_H, \delta_L)$ from pre-interaction errors; estimate $\delta_m$ from the evidence posterior; estimate $\gamma_\tau$ from the same audit (event-by-event it equals $(m-\theta)(\mu_\tau-\theta)$, by \eqref{eq:gamma}); estimate $\kappa$ from differential ``extraction'' performance. Belief-update study designs of this kind are already practical at scale \citep{costello2024durably, salvi2025conversational}.\footnote{\citet{costello2024durably} carries an Editorial Expression of Concern issued by \emph{Science} on June 11, 2026 (doi:10.1126/science.aej2383), concerning dataset and screening-criteria inconsistencies; the authors' corrected analysis is under evaluation. It is cited here as a feasibility precedent only.} A positive $\MG(0)$ indicates that marginal increases in pleasantness/deference widen the type gap in error -- a distributional safety failure mode.
 \end{remark}
 
 \begin{remark}[Personalization compounds stratification]\label{rem:personal}
 The analysis above sets one global knob. If the system instead personalizes deference, choosing $\beta_\tau$ to maximize type-$\tau$ satisfaction $U_\tau(\beta_\tau)$, and low-literacy satisfaction is more agreement-sensitive ($U_L' \ge U_H'$ pointwise, both strictly concave with $U_\tau'(0) > 0$), then the optima order as $\beta_L^\star \ge \beta_H^\star$: by concavity, $U_L'(\beta_H^\star) \ge U_H'(\beta_H^\star) \ge 0$ implies the maximizer of $U_L$ lies weakly to the right. Personalized satisfaction optimization therefore adds a \emph{chosen-deference} gap on top of the extraction advantage $\kappa$, amplifying every distributional term above.
+
+The last comparison has an exact type-specific meaning. Replace the common
+$\beta$ by $(\beta_H,\beta_L)$ separately in the high- and low-type MSE terms,
+residual-variance terms, and updated means. Under Assumptions~\ref{ass:evidence}--\ref{ass:dilution}, the straddle condition, nonnegative variance weights, and
+$0\le\beta_H\le\beta_L\le1$, population accuracy loss, within-type dispersion,
+and squared between-type separation are each weakly larger than at the global
+policy $(\beta_H,\beta_H)$; hence the corresponding personalized capacity is
+weakly lower for nonnegative $(\lambda,\nu)$. The optimizer ordering (for
+interior optima, or under the stated one-sided first-order signs) and this
+three-component comparison are machine-checked in
+\texttt{PaperI/Personalization.lean}.
 \end{remark}
 
 \begin{remark}[Verification]\label{rem:verification}
-All closed-form expressions and monotonicity claims in Sections~\ref{sec:formal}--\ref{sec:mg} and Proposition~\ref{prop:incentive} were verified numerically: the gradient formulas \eqref{eq:mgclosed}--\eqref{eq:mgzero} against central finite differences, the decomposition \eqref{eq:msedecomp} against Monte Carlo simulation, and the monotonicity and bound claims across tens of thousands of randomly drawn parameterizations satisfying Assumptions~\ref{ass:evidence}--\ref{ass:dilution}. The counterexample of Remark~\ref{rem:counter} is checkable by direct substitution. All of the program's verification suites are named and seed-pinned in its public replication repository (\url{https://github.com/dhofheinz/civic-alignment-program}), pinned at submission; the companion batteries (\texttt{derisk\_numerics.py}, twenty-nine suites; \texttt{derisk\_loops.py}, fourteen suites) verify every dynamical claim this paper cites.
+Every closed-form expression and monotonicity claim in Sections~\ref{sec:formal}--\ref{sec:mg} and Propositions~\ref{prop:corpus} and~\ref{prop:incentive} carries an independent numerical witness: the finite-corpus derivative and strictness lift together with its unrestricted-complement counterexample, the gradient formulas \eqref{eq:mgclosed}--\eqref{eq:mgzero} against central finite differences, the decomposition \eqref{eq:msedecomp} against Monte Carlo simulation, and the monotonicity and bound claims across tens of thousands of randomly drawn parameterizations satisfying Assumptions~\ref{ass:evidence}--\ref{ass:dilution}. The counterexample of Remark~\ref{rem:counter} is checkable by direct substitution. Every formal result above is additionally machine-checked in Lean 4 against Mathlib -- the finite-corpus lift of Proposition~\ref{prop:corpus}, the lemma chain of Section~\ref{sec:lemmas}, Theorem~\ref{thm:main}, the closed forms of Section~\ref{sec:mg}, Proposition~\ref{prop:incentive}, and that counterexample -- with no unproved steps and no axioms beyond Lean's standard three. All of the program's verification suites are named and seed-pinned in its public replication repository (\url{https://github.com/dhofheinz/civic-alignment-program}); the Lean development is at \texttt{lean/} -- it also machine-checks every theorem, lemma, proposition, and corollary of the companion dynamics and loop papers, under the same three-axiom discipline -- and the companion batteries (\texttt{derisk\_numerics.py}, thirty-one suites; \texttt{derisk\_loops.py}, fifteen suites) verify every dynamical claim this paper cites.
 \end{remark}
 
 \section{The Civic Alignment Battery}\label{sec:battery}
 
-The formal results motivate concrete measurement. Civic alignment is not a scalar; it is a profile across commons health, calibration, complexity handling, agency, and distribution, with a dynamics row that the companion battery extends from levels to trajectories. Table~\ref{tab:cab} is the battery as a proposed standard; the definitional prose beneath it specifies the instruments.
+The formal results motivate concrete measurement. Civic alignment is not a scalar; it is a profile across commons health, calibration, complexity handling, agency, and distribution, with a dynamics row that the companion battery extends from levels to trajectories. Table~\ref{tab:cab} is the battery as a proposed standard; the definitional prose beneath it specifies the instruments. Scores named without registered scales -- the deliberative scaffolding score, uncertainty appropriateness, the false-balance trigger rate, and counterfactual engagement -- are proposed constructs pending instrument validation; their scales, reliability criteria, and decision thresholds are registration obligations of the companion protocol \citep{hofheinz2026audit}.
 
 \begin{table}[t]
 \centering\small
 \begin{tabular}{>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{2.6cm}}
-\hline
+\toprule
 Dimension & Failure mode & Measurement & Example task & Safety implication \\
-\hline
+\midrule
 Epistemic commons health & Error propagation under content floods & Truth convergence; signal-to-noise stress tests; polarization sensitivity & Group deliberation with mixed true/false claims & Societies lose shared facts \\
 Calibration and confidence & Fluency inflates certainty & Model calibration; confidence--warrant gap; uncertainty appropriateness & Confidence elicitation against evidence strength & Confident error at scale \\
 Complexity without false balance & Symmetry framing of asymmetric evidence & Evidence-weighted representation; false-balance trigger rate & Evidence-asymmetric disputes posed for response & Manufactured doubt \\
 Agency preservation & Users defer instead of reason & Deliberative scaffolding score; skill retention; counterfactual engagement & Unaided performance after repeated AI use & Atrophied verification capacity \\
 Distributional safety & Low-literacy users harmed faster & Benefit incidence; gap widening; $\MG(0)$ with brackets $h_\tau$ and correlations $\gamma_\tau$ & Stratified belief audit & Epistemic inequality compounds \\
-Dynamics & Drift toward capture & $\widehat T^\star$, $\widehat\rho_{\mathrm{cure}}$, variance/autocorrelation dashboard, hysteresis probe & Longitudinal cohort with claim tracker & Trajectory crosses a basin boundary \\
-\hline
+Dynamics & Drift toward capture & $\widehat T^\star$, $\widehat\rho_{\mathrm{cure}}$ and $\widehat\rho_{\mathrm{restore}}$, variance/autocorrelation dashboard, hysteresis probe & Longitudinal cohort with claim tracker & Trajectory crosses a basin boundary \\
+\bottomrule
 \end{tabular}
 \caption{The Civic Alignment Battery. The dynamics row defers to the companion's Dynamic Civic Battery \citep{hofheinz2026drift}, which extends these estimands from levels to trajectories.}
 \label{tab:cab}
@@ -413,7 +479,7 @@ Dynamics & Drift toward capture & $\widehat T^\star$, $\widehat\rho_{\mathrm{cur
 
 \subsection{Agency preservation}
 \begin{itemize}
-  \item \textbf{Deliberative scaffolding score:} prompts for reasons, alternatives, and ``what would change my mind?''---inspired by cognitive-forcing functions \citep{bucinca2021trust}.
+  \item \textbf{Deliberative scaffolding score:} prompts for reasons, alternatives, and ``what would change my mind?'' -- inspired by cognitive-forcing functions \citep{bucinca2021trust}.
   \item \textbf{Skill retention:} longitudinal unaided performance after repeated AI use.
   \item \textbf{Counterfactual engagement:} hypothesis testing vs authority collapse.
 \end{itemize}
@@ -425,7 +491,7 @@ Dynamics & Drift toward capture & $\widehat T^\star$, $\widehat\rho_{\mathrm{cur
   \item \textbf{Manipulability gradient:} estimate $\MG(0)$ (or local slopes around a baseline interface), together with the brackets $h_\tau$ and correlations $\gamma_\tau$ of Section~\ref{sec:mg}, as a first-order harm-rate diagnostic.
 \end{itemize}
 
-\paragraph{Coda: three tiers and a ceiling.} The battery's verdicts come in the three tiers of Table~\ref{tab:tiers}, and this paper's static instruments license only the first; trajectory-level estimands --- the dynamics row --- are deferred to the companion battery \citep{hofheinz2026drift}. Existing evidence --- sycophancy under preference optimization \citep{sharma2024towards}, reward-model overoptimization \citep{gao2023scaling}, targeted accommodation of user beliefs \citep{williams2024targeted}, and, at deployment scale, higher approval for more-disempowering interactions \citep{sharma2026whos} --- documents mechanisms consistent with civic misalignment pressure; the construct itself is defined here. Whether any current deployment exhibits civic drift or civic capture is an open empirical question; this battery exists to answer it.
+\paragraph{Coda: three tiers and a ceiling.} The battery's verdicts come in the three tiers of Table~\ref{tab:tiers}, and this paper's static instruments license only the first; trajectory-level estimands -- the dynamics row -- are deferred to the companion battery \citep{hofheinz2026drift}. Existing evidence -- sycophancy under preference optimization \citep{sharma2024towards}, reward-model overoptimization \citep{gao2023scaling}, targeted accommodation of user beliefs \citep{williams2025targeted}, and, at deployment scale, higher approval for more-disempowering interactions \citep{sharma2026whos} -- documents mechanisms consistent with civic misalignment pressure; the construct itself is defined here. Whether any current deployment exhibits civic drift or civic capture is an open empirical question; this battery exists to answer it.
 
 \section{Empirical Agenda}\label{sec:empirical}
 
@@ -443,7 +509,7 @@ Theorem~\ref{thm:main} implies a default failure mode: optimizing only for satis
   \item \textbf{Deliberative scaffolding defaults for civic domains:} separate consensus from speculation, grade evidence strength, prompt verification, and encode ``what would change this'' in the interface.
   \item \textbf{Anti-false-balance constraints:} neutrality as evidence-proportionality, not symmetry; penalize misleading balancing patterns.
   \item \textbf{Civic model cards:} adapt model-card, datasheet, and holistic-evaluation reporting \citep{mitchell2019model, gebru2021datasheets, liang2023holistic} to publish calibration curves, false-balance rates, reliance/skill retention results, stratification metrics, and $\MG(0)$-style distributional diagnostics.
-  \item \textbf{Incentive alignment:} incorporate long-horizon civic metrics into training/launch criteria (even if only via gating and targeted evaluations initially)---a proposed extension of proxy-aware evaluation and deployment gating \citep{gao2023scaling, shevlane2023model}.
+  \item \textbf{Incentive alignment:} incorporate long-horizon civic metrics into training/launch criteria (even if only via gating and targeted evaluations initially) -- a proposed extension of proxy-aware evaluation and deployment gating \citep{gao2023scaling, shevlane2023model}.
   \item \textbf{Participatory oversight where value-laden:} structured public input for contested domains; governance becomes part of safety because it shapes objectives \citep{huang2024collective}. AI-assisted deliberation can separately help groups locate common ground \citep{tessler2024ai}.
 \end{itemize}
 
@@ -462,12 +528,13 @@ For $\rho \ge 0$ let $U_\rho(\beta) := U(\beta) + \rho\, C(\beta)$ and let $\bet
 (ii) Every component of $-C$ is non-decreasing, so $C'(\beta) \le -\pi_L \tfrac{d}{d\beta}\MSE_L(\beta) = -2\pi_L \eta_L h_L(\beta) \le -2\pi_L \eta_L h_L$, using $h_L(\beta) \ge h_L(0) = h_L$ (monotonicity of the bracket, Section~\ref{sec:mg}). Hence $U_\rho'(\beta) \le \sup_{[0,1]} U' - 2\rho\, \pi_L \eta_L h_L < 0$ for the stated $\rho$, and the maximum is attained at $\beta = 0$.
 \end{proof}
 
-Under deployment dynamics the single threshold splits in two: the prevention price is zero --- the calibrated corner is stable for every $\rho \ge 0$ --- while the cure price is strictly positive, $\rho_{\mathrm{cure}} = 2c(1-c) - v\lambda_0/I$ in the companion's reduced coordinates, paid transiently; and under measurement noise, the companion conjectures --- and numerically supports --- Arrhenius-type exponential protection from modest standing civic weights \citep{hofheinz2026drift}. Proposition~\ref{prop:incentive} is the static shadow of that asymmetry. A third companion derives the loop-level form of these levers --- knob-free safety certificates, gain ceilings on content feedback, audit-sensor mandates, and cadence caps on preference updates --- regulating the feedback structure rather than the knob \citep{hofheinz2026loops}.
+Under deployment dynamics the single threshold splits into a price schedule: prevention is free -- the calibrated corner is stable for every $\rho \ge 0$ -- while \emph{releasing} a captured state costs $\rho_{\mathrm{cure}} = 2c(1-c) - v\lambda_0/I$ in the companion's reduced coordinates and \emph{restoring} calibration, rather than merely leaving capture, costs $\rho_{\mathrm{restore}} \ge \rho_{\mathrm{cure}}$, both paid transiently; and under measurement noise, the companion brackets the saddle-crossing barrier in closed form and proves it grows with the standing civic weight across the tested weights, with fixed-horizon crossing probabilities pinned at the barrier scale and the first-crossing Arrhenius law proved -- the crossing rate equals the crossing quasipotential; genuine basin exit never precedes the crossing and every finite exit pays the basin quasipotential, while the mean-exit law and the fixed-rate equality of the two quasipotentials remain open \citep{hofheinz2026drift}. Proposition~\ref{prop:incentive} is the static shadow of that asymmetry. A third companion derives the loop-level form of these levers -- knob-free safety certificates, gain ceilings on content feedback, audit-sensor mandates, and cadence caps on preference updates -- regulating the feedback structure rather than the knob \citep{hofheinz2026loops}. A fourth companion pre-registers the measurement: an audit protocol with estimands, experimental arms, and decision thresholds for locating a deployed system on the pressure--drift--capture ladder \citep{hofheinz2026audit}.
 
 \section{Conclusion}\label{sec:conclusion}
 
-AI alignment has advanced interaction-level safety, but deployment-scale risks emerge from externalities and coupled dynamics that per-turn metrics miss: a system can be strongly interaction-aligned yet civic-misaligned. We introduced civic alignment as an alignment target grounded in collective epistemic capacity and proved one sufficient mechanism --- the model is not a complete account of civic alignment, but one channel by which interaction-level optimization becomes aggregate-level epistemic harm --- showing that satisfaction optimization strictly decreases $C$ in the contested-claim regime, with an audit-ready manipulability gradient, corrected for the error correlation the setup itself forces, quantifying distributional harm rates. The danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime. We proposed an evaluation battery and mitigation agenda that treats AI as civic infrastructure. If alignment is meant to secure humanity's ability to steer its future, it must be measured --- and optimized --- at the scale of deployment.
+AI alignment has advanced interaction-level safety, but deployment-scale risks emerge from externalities and coupled dynamics that per-turn metrics miss: a system can be strongly interaction-aligned yet civic-misaligned. We introduced civic alignment as an alignment target grounded in collective epistemic capacity and proved one sufficient mechanism -- the model is not a complete account of civic alignment, but one channel by which interaction-level optimization becomes aggregate-level epistemic harm -- showing that satisfaction optimization strictly decreases $C$ in the contested-claim regime, with an audit-ready manipulability gradient, corrected for the error correlation the setup itself forces, quantifying distributional harm rates. The danger is not deference as such; it is unmeasured, satisfaction-selected deference in the wrong exposure regime. We proposed an evaluation battery and mitigation agenda that treats AI as civic infrastructure. If alignment is meant to secure humanity's ability to steer its future, it must be measured -- and optimized -- at the scale of deployment.
 
+\markright{References}
 \bibliographystyle{plainnat}
 \bibliography{civic_refs}
 
